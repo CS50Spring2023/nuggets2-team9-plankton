@@ -1,6 +1,6 @@
 # CS50 Nuggets
 ## Implementation Spec
-### Team name, term, year
+### Team 9: Plankton, 23S, 2023
 
 > This **template** includes some gray text meant to explain how to use the template; delete all of them in your document!
 
