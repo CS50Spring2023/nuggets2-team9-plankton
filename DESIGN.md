@@ -91,11 +91,12 @@ The server will run as follows:
 * Grid Struct that contains the following
 	* NR x NC array that contains numeric values for each coordinate, denoting what is located there
 	* -1 = this gridspot can never be accessed by the player (ex: empty space between rooms)
-	* 0 = this gridspot is empty, it can be accessed by the player, but contains nothing
-	* 1 = this gridspot contains gold
-	* 2 = this gridspot is a corner
-	* 3 = this gridspot contains a player
-	* 4 = this gridspot contains a wall, it cannot be accessed
+	* . = this gridspot is empty, it can be accessed by the player, but contains nothing
+	* * = this gridspot contains gold
+	* x = this gridspot is a corner
+	* p = this gridspot contains a player
+	* | = this gridspot contains a vertical wall, it cannot be accessed
+	* - = this gridspot contains a horizontal wall, it cannot be accessed
 
 > Describe each major data structure in this module: what information does it represent, how does it represent the data, and what are its members.
 > This description should be independent of the programming language.
