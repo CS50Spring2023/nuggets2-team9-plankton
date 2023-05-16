@@ -1,6 +1,6 @@
 # CS50 Nuggets
 ## Design Spec
-### Plankton, Spring, 2023
+### Team 9: Plankton, Spring, 2023
 
 > This **template** includes some gray text meant to explain how to use the template; delete all of them in your document!
 
