@@ -1,62 +1,20 @@
 # CS50 Nuggets
 ## Design Spec
-### Team name, term, year
+### Plankton, Spring, 2023
 
 > This **template** includes some gray text meant to explain how to use the template; delete all of them in your document!
 
-According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server.
+According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server. Since our team has 3 people, we will not be describing or completing the client proggram
 Our design also includes x, y, z modules.
 We describe each program and module separately.
 We do not describe the `support` library nor the modules that enable features that go beyond the spec.
 We avoid repeating information that is provided in the requirements spec.
 
-## Player
-
-> Teams of 3 students should delete this section.
-
-The *client* acts in one of two modes:
-
- 1. *spectator*, the passive spectator mode described in the requirements spec.
- 2. *player*, the interactive game-playing mode described in the requirements spec.
-
-### User interface
-
-See the requirements spec for both the command-line and interactive UI.
-
-> You may not need much more.
-
-### Inputs and outputs
-
-> Briefly describe the inputs (keystrokes) and outputs (display).
-> If you write to log files, or log to stderr, describe that here.
-> Command-line arguments are not 'input'.
-
-### Functional decomposition into modules
-
-> List and briefly describe any modules that comprise your client, other than the main module.
- 
-### Pseudo code for logic/algorithmic flow
-
-> For each function write pseudocode indented by a tab, which in Markdown will cause it to be rendered in literal form (like a code block).
-> Much easier than writing as a bulleted list!
-> See the Server section for an example.
-
-> Then briefly describe each of the major functions, perhaps with level-4 #### headers.
-
-### Major data structures
-
-> A language-independent description of the major data structure(s) in this program.
-> Mention, but do not describe, any libcs50 data structures you plan to use.
-
----
-
 ## Server
 ### User interface
 
 See the requirements spec for the command-line interface.
-There is no interaction with the user.
-
-> You may not need much more.
+There is no interaction with the user: the server receives input through messages from the client.
 
 ### Inputs and outputs
 
@@ -81,7 +39,12 @@ The server will run as follows:
 	call initializeGame() to set up data structures
 	initialize the 'message' module
 	print the port number on which we wait
+	load grid 
+	load gold
 	call message_loop(), to await clients
+		load a player for each client
+		for each message after a player has been initialized
+			handle the message by calling handleMove
 	call gameOver() to inform all clients the game has ended
 	clean up
 
@@ -96,20 +59,43 @@ The server will run as follows:
 
 ---
 
-## XYZ module
+## Grid Module
 
-> Repeat this section for each module that is included in either the client or server.
+### The Grid Module will be a collection of helper functions to be utilized in the server, it will not have a unique main or algorithmic flow.
 
 ### Functional decomposition
 
-> List each of the main functions implemented by this module, with a phrase or sentence description of each.
+* loadVisible:
+	For a given player, load what points are currently visible to them
+* loadGold:
+	During the initialization of the game, randomly load the gold into valid coordinates (accessible to players)
+* addPlayer:
+	When a player enters the game, randomly add them into a valid spot (accessible to players, doesn't currently contain gold)
+* handleMove:
+	Given the coordinate a player is attempting to move to, determine if they're allowed to. If so, allow them to move, if there's gold, handle that accordingly (update player struct and global game status). If there's another player there, handle that accordingly. Then, update the game accordingly.
+* updateGame:
+	Has helper functions updateGold, updateVisibility, and updateSeen
 
-### Pseudo code for logic/algorithmic flow
+### Pseudo code for each Function
 
 > For any non-trivial function, add a level-4 #### header and provide tab-indented pseudocode.
 > This pseudocode should be independent of the programming language.
 
 ### Major data structures
+
+* Player Struct that contains the following
+	* What coordinates the player has "seen" [represented as an array of tuples]
+	* What coordinates the player currently can see [represented as an array of tuples]
+	* How much gold the player has [represented as an int]
+
+* Grid Struct that contains the following
+	* NR x NC array that contains numeric values for each coordinate, denoting what is located there
+	* -1 = this gridspot can never be accessed by the player (ex: empty space between rooms)
+	* 0 = this gridspot is empty, it can be accessed by the player, but contains nothing
+	* 1 = this gridspot contains gold
+	* 2 = this gridspot is a corner
+	* 3 = this gridspot contains a player
+	* 4 = this gridspot contains a wall, it cannot be accessed
 
 > Describe each major data structure in this module: what information does it represent, how does it represent the data, and what are its members.
 > This description should be independent of the programming language.
