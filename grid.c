@@ -89,7 +89,7 @@ update_player_grid(char** player_grid, char** global_grind, int r, int c)
 }
 
 bool
-isVisible(int pos_X, int pos_Y, int r, int c)
+isVisible(int pr, int pc, int r, int c)
 {
-    // checks if r, c is visible from position x, y
+    // checks if wr, wc is visible from player position pr, pc
 }
