@@ -71,15 +71,24 @@ The server will run as follows:
 	During the initialization of the game, randomly load the gold into valid coordinates (accessible to players)
 * addPlayer:
 	When a player enters the game, randomly add them into a valid spot (accessible to players, doesn't currently contain gold)
-* handleMove:
-	Given the coordinate a player is attempting to move to, determine if they're allowed to. If so, allow them to move, if there's gold, handle that accordingly (update player struct and global game status). If there's another player there, handle that accordingly. Then, update the game accordingly.
+* handleMessage:
+	Handle the message received from the client accordingly. If it is "Q", quit the game. If it is any other key, k, find the coordinate a player is attempting to move to, and determine if they're allowed to move. If so, call function to move player. If there's gold, handle that accordingly (update player struct and global game status). If there's another player there, handle that accordingly. Then, update the game accordingly.
 * updateGame:
 	Has helper functions updateGold, updateVisibility, and updateSeen
+* isVisibile:
+	Checks the visibility of each point on the grid from a player's location, (pr, pc).
 
 ### Pseudo code for each Function
 
 > For any non-trivial function, add a level-4 #### header and provide tab-indented pseudocode.
 > This pseudocode should be independent of the programming language.
+
+#### isVisible()
+**** Andra is working on this rn ****
+for wall element (wr, wc) in grid array
+	if pr > wr
+		for (int row = pr+1; row < wr; row++)
+			
 
 ### Major data structures
 
@@ -92,11 +101,11 @@ The server will run as follows:
 	* NR x NC array that contains numeric values for each coordinate, denoting what is located there
 	* -1 = this gridspot can never be accessed by the player (ex: empty space between rooms)
 	* . = this gridspot is empty, it can be accessed by the player, but contains nothing
-	* * = this gridspot contains gold
+	* \* = this gridspot contains gold
 	* x = this gridspot is a corner
 	* p = this gridspot contains a player
 	* | = this gridspot contains a vertical wall, it cannot be accessed
-	* - = this gridspot contains a horizontal wall, it cannot be accessed
+	* \- = this gridspot contains a horizontal wall, it cannot be accessed
 
 > Describe each major data structure in this module: what information does it represent, how does it represent the data, and what are its members.
 > This description should be independent of the programming language.
