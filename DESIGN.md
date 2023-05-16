@@ -84,10 +84,30 @@ The server will run as follows:
 > This pseudocode should be independent of the programming language.
 
 #### isVisible()
-**** Andra is working on this rn ****
-for wall element (wr, wc) in grid array
-	if pr > wr
+* // assume (0,0) point in top right corner, as in example presented in REQUIREMENTS.md
+* float slope = (pc-wc)/(pr-wr);
+*
+* for wall element (wr, wc) in grid array
+
+	if pr == wr
+		for (int col = pc+1; col < wc; col++)
+	
+	if pr < wr
 		for (int row = pr+1; row < wr; row++)
+			col = pc + (row - pr)/slope
+			if col is integer  // aka a point on the grid
+				if grid[row][col] is "."
+					player_grid[row][col] = grid[row][col]  // player grid at row, col gets the global grid's value at row, col
+				else
+					// this and all future locations are invisible
+					skip all future rows and columns (they remain invisible)
+			else  // point not on grid
+				
+				
+			else
+				
+	if pr > wr
+		
 			
 
 ### Major data structures
