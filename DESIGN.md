@@ -103,10 +103,24 @@ The server will run as follows:
 > For any non-trivial function, add a level-4 #### header and provide tab-indented pseudocode.
 > This pseudocode should be independent of the programming language.
 
-#### update_player_grid()
+#### update_player_grid
+##### takes in global and player grid and player's coordinates, establishes wall boundaries, and calls isVisible for each wall point
+	initialize player_grid array to global grid
+
+	call helper function check_wall(player coordinates) which will:
+		given player's current row, loop through columns above and below until you hit a boundary ("|", "-", "x")
+			count number of cells until wall
+		given player's current column, loop through rows above and below until you hit a boundary ("|", "-", "x")
+			count number of cells until wall
+	
+	create array of wall points based on max distance to up, down, left, right of player
+
+	loop through wall points array
+		for each wall point, call isVisible to verify whether there is full or obstructed visibility between the player and the specific wall point
 
 
-#### isVisible()
+#### isVisible
+##### takes in player and boundary coordinates and updates player_grid accordingly
 	for wall point (wr, wc) in grid array
 		for each row exclusively between pr and wr
 			compute column coordinates

@@ -96,7 +96,7 @@ update_player_grid(char** player_grid, char** global_grind, int pr, int pc)
     int wc = 0;
 
 	// for wall point (wr, wc) in grid array
-        isVisible (pr, pc, wr, wc);
+        isVisible(pr, pc, wr, wc);
 
 }
 
@@ -273,10 +273,4 @@ bool pcONwc (int row, int col)
     
     return invisible
     */
-}
-
-
-isVisible(int pr, int pc, int r, int c)
-{
-    // checks if wr, wc is visible from player position pr, pc
 }
