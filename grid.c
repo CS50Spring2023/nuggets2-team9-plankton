@@ -101,6 +101,7 @@ update_player_grid(char** player_grid, char** global_grind, int pr, int pc)
 
 }
 
+
 bool
 isVisible(int pr, int pc, int wr, int wc)
 {
@@ -275,5 +276,7 @@ bool pcONwc (int row, int col)
 }
 
 
-
-
+isVisible(int pr, int pc, int r, int c)
+{
+    // checks if wr, wc is visible from player position pr, pc
+}
