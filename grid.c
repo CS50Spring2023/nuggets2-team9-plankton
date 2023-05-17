@@ -93,3 +93,19 @@ isVisible(int pr, int pc, int r, int c)
 {
     // checks if wr, wc is visible from player position pr, pc
 }
+
+char
+get_value(int x, int y, char** grid)
+{
+    return value in the grid
+}
+
+
+void
+update_grids()
+{
+    loop thru player structs in list
+        call update player grid
+}
+
+
