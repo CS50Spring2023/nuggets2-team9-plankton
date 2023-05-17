@@ -21,10 +21,22 @@ There is no interaction with the user: the server receives input through message
 > Briefly describe the inputs (map file) and outputs (to terminal).
 > If you write to log files, or log to stderr, describe that here.
 > Command-line arguments are not 'input'.
+Inputs:
+
+	* map file: an array of strings representing the layout of the grid players can play on;
+	the map is converted to a 2D array for manipulation and back to a string for passing messages between client and server
+
+Outputs:
+
+	* TODO
+
 
 ### Functional decomposition into modules
 
-> List and briefly describe any modules that comprise your server, other than the main module.
+> List and description of the main modules that comprise our server, other than the main module:
+`server.c` - main module
+`grid.c` - module for handling the global and player grids
+`game.c` - module for handling player structures and movement
 
 ### Pseudo code for logic/algorithmic flow
 
@@ -57,31 +69,42 @@ The server will run as follows:
 > This description should be independent of the programming language.
 > Mention, but do not describe, data structures implemented by other modules (such as the new modules you detail below, or any libcs50 data structures you plan to use).
 
----
+* TODO: Any SERVER level structs???????
+
 
 ## Grid Module
 
-### The Grid Module will be a collection of helper functions to be utilized in the server, it will not have a unique main or algorithmic flow.
+### The Grid Module will be a collection of helper functions handling grid manipulation to be utilized in the server, it will not have a unique main or algorithmic flow.
 
 ### Functional decomposition
 
-* loadVisible:
-	For a given player, load what points are currently visible to them
-* loadGold:
-	During the initialization of the game, randomly load the gold into valid coordinates (accessible to players)
-* addPlayer:
-	When a player enters the game, randomly add them into a valid spot (accessible to players, doesn't currently contain gold)
-* handleMessage:
-	Handle the message received from the client accordingly. If it is "Q", quit the game. If it is any other key, k, find the coordinate a player is attempting to move to, and determine if they're allowed to move. If so, call function to move player. If there's gold, handle that accordingly (update player struct and global game status). If there's another player there, handle that accordingly. Then, update the game accordingly.
-* updateGame:
-	Has helper functions updateGold, updateVisibility, and updateSeen
-* isVisibile:
-	Checks the visibility of each point on the grid from a player's location, (pr, pc). For each wall/corner point (wr, wc), the function loops over the grid rows strictly between pr and wr, and over the columns strictly betwen pc and wc. We split this function in cases covering N-S, E-W of the player and all the areas in between. If these points are grid elements (integers) and don't include a boundary (wall or corner) as their value, then the player's grid gets updated to the value of the global grid. If these points are in between grid elements, we check the grid points above/below and to the left/right of the points. If at least one of each doesn't include a boundary, then the player's grid gets updated to the value of the global grid. Otherwise, the point and all points following it (in the direction examined) remain invisible to the player. 
+* load_grid:
+	Create an array of strings, each string is one row of the map. Return the grid.
+* grid_toStr:
+	Create string version of grid map, containing rows*columns characters and new line characters at the end of every line
+* assign_random_spot
+	Assign players and gold to random locations (row, column) on the grid
+* update_player_grid
+	Update the player's grid array 
+* isVisible:
+	For a given player, update player_grid to contain points which are currently visible to them
+
+#### Helper functions
+	 
+* visCol:
+	Check columns between player column and boundary column locations for visibility
+* visRow
+	Check rows between player row and boundary row locations for visibility
+* pcONwc
+	Handle case when the player's column is equal to the boundary's column
 	
 ### Pseudo code for each Function
 
 > For any non-trivial function, add a level-4 #### header and provide tab-indented pseudocode.
 > This pseudocode should be independent of the programming language.
+
+#### update_player_grid()
+
 
 #### isVisible()
 	for wall point (wr, wc) in grid array
@@ -100,25 +123,44 @@ The server will run as follows:
 		for each column exclusively between pc and wc
 			compute row
 			repeat row logic above for columns
-		
-			
 
 ### Major data structures
 
-* Player Struct that contains the following
-	* What coordinates the player has "seen" [represented as an array of tuples]
-	* What coordinates the player currently can see [represented as an array of tuples]
-	* How much gold the player has [represented as an int]
+> Describe each major data structure in this module: what information does it represent, how does it represent the data, and what are its members.
+> This description should be independent of the programming language.
 
-* Grid Struct that contains the following
-	* NR x NC array that contains numeric values for each coordinate, denoting what is located there
-	* -1 = this gridspot can never be accessed by the player (ex: empty space between rooms)
-	* . = this gridspot is empty, it can be accessed by the player, but contains nothing
-	* \* = this gridspot contains gold
-	* x = this gridspot is a corner
-	* p = this gridspot contains a player
-	* | = this gridspot contains a vertical wall, it cannot be accessed
-	* \- = this gridspot contains a horizontal wall, it cannot be accessed
+Both global and player-specific grids are manipulated as arrays of strings. When passing messages between server and clients, grids are converted to strings.
+
+
+## Game Module
+
+### The Game Module will be a collection of helper functions handling movement and player structure manipulation to be utilized in the server, it will not have a unique main or algorithmic flow.
+
+### Functional decomposition
+
+* handleMovement:
+	Handle the movement prompted by a valid key, k. Find the coordinate a player is attempting to move to, and determine if they're allowed to move. If so, call function to move player. If there's gold, handle that accordingly (update player struct and global game status). If there's another player there, handle that accordingly. Then, update the game accordingly.
+
+* updateGame: NOT SURE IF WE WANT TO KEEP THIS HERE!!!
+	Has helper functions updateGold, updateVisibility, and updateSeen
+
+
+### Pseudo code for each Function
+
+> For any non-trivial function, add a level-4 #### header and provide tab-indented pseudocode.
+> This pseudocode should be independent of the programming language.
+
+### Major data structures
 
 > Describe each major data structure in this module: what information does it represent, how does it represent the data, and what are its members.
 > This description should be independent of the programming language.
+
+* Player Struct points to the following elements:
+	* player's ID (a letter between A-Z based on when player joined the game) [char array]
+	* player's real name [char array]
+	* player's amount of gold [integer value]
+	* player's map [array of strings]
+	
+---
+		
+
