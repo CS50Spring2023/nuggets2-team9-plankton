@@ -88,7 +88,6 @@ update_player_grid(char** player_grid, char** global_grind, int pr, int pc)
     calls helper method on all points to check if visible-- if so, sets to global value within helper method
     otherwise update points present in player_grid but now invisible to the player to the empty spot, with no item (player/gold) */
 
-    // assume (0,0) point in top right corner, as in example presented in REQUIREMENTS.md
 	// TODO: figure out how to keep track of boundary/wall elements; maybe make array of boundary/wall elements? !!!!
     // NOTE: i left things out of player view blank assuming each time player moves their visibility map starts blank - maybe not the best - might have to change
 
@@ -106,6 +105,7 @@ bool
 isVisible(int pr, int pc, int wr, int wc)
 {
     // checks if wr, wc is visible from position player position pr, pc
+    // assume (0,0) point in top right corner, as in example presented in REQUIREMENTS.md
     
     /*
     for wall element (wr, wc) in grid array{
