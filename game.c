@@ -16,23 +16,37 @@ typedef struct playernode {
 
 
 /**************** global types ****************/
-typedef struct player {
-  char player[26];  // array of players from 0-25
+typedef struct players {
+  char players[26];  // array of players from 0-25
   // each player slot points to: id, real_name, gold, and the player's personal grid array;
 
-} player_t;
+} players_t;
 
+
+/**************** local functions ****************/
+/* not visible outside this file */
+static playernode_t*  
+playernode_new(int players_array_index)
+{
+    // add playernode elements to specific players_array index
+}
+
+static playernode_t*  
+playernode_delete(int players_array_index)
+{
+    // delete playernode at specific index when server receives QUIT message
+}
 
 
 /**************** global player functions ****************/
-player_t*
-player_new(void){
+players_t*
+players_new(void){
     // create a new player; use every time a new client wants to join, if player limit unreached
 }
 
-player_t*
-player_delete(player_t* player){  // do we also need: void (*itemdelete)(void *item)
-    // delete player; when server receives QUIT message OR when all nuggests have been collected
+players_t*
+players_delete(players_t* players_array){  // do we also need: void (*itemdelete)(void *item)
+    // delete players array; when all nuggests have been collected OR if all players have quit the game
 }
 
 // updating player handled in handle_movement function
