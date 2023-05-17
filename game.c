@@ -6,6 +6,8 @@ Team 9: Plankton, April 2023
 */
 
 /**************** local types ****************/
+
+// a single player's struct
 typedef struct playernode {
     char* id;
     char* real_name;
@@ -16,11 +18,18 @@ typedef struct playernode {
 
 
 /**************** global types ****************/
+
+// array of players from 0-25
 typedef struct players {
-  char players[26];  // array of players from 0-25
+  char players[26];  
   // each player slot points to: id, real_name, gold, and the player's personal grid array;
 
 } players_t;
+
+// spectator (up to 1)
+typedef struct spectator {
+    char** grid;
+} spectator_t;
 
 
 /**************** local functions ****************/
