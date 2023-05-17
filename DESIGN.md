@@ -100,15 +100,37 @@ The server will run as follows:
 		for each column exclusively between pc and wc
 			compute row
 			repeat row logic above for columns
-		
+
+#### handle movement
+	Check whats is in the spot we want to move to
+	If boundary
+      Do nothing
+	If gold
+	  increment player’s purse gold count
+      change grid representation at location to “.”
+      decrement count of unclaimed gold
+      Call update gold to send message from serve
+    If player
+   	  Update global grid to reflect swap
+	  Update grids of the players changed
+
+    Call update grid, which updates all player grids to reflect new global grid
+
 			
 
 ### Major data structures
 
+**** add is spectator boolean
 * Player Struct that contains the following
 	* What coordinates the player has "seen" [represented as an array of tuples]
 	* What coordinates the player currently can see [represented as an array of tuples]
 	* How much gold the player has [represented as an int]
+
+* Game Struct that contains the follow
+	* array of player structs
+	* the total amount of gold remaining
+
+Change this to just be an array not a struct:
 
 * Grid Struct that contains the following
 	* NR x NC array that contains numeric values for each coordinate, denoting what is located there

@@ -249,7 +249,8 @@ visRow(int pr, int wr)
     */
 }
 
-bool pcONwc (int row, int col)
+bool 
+pcONwc (int row, int col)
 {
     /*
     bool invisible = false;
@@ -275,8 +276,8 @@ bool pcONwc (int row, int col)
     */
 }
 
-
-isVisible(int pr, int pc, int r, int c)
+void
+update_grids()
 {
-    // checks if wr, wc is visible from player position pr, pc
+    //check for spectator
 }
