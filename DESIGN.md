@@ -23,9 +23,9 @@ Outputs:
 
 
 ### Functional decomposition into modules
-`server.c` - main module, communicates with clients
-`grid.c` - module for handling the global and player grids
-`game.c` - module for handling player and game structures 
+* `server.c` - main module, communicates with clients
+* `grid.c` - module for handling the global and player grids
+* `game.c` - module for handling player and game structures 
 
 ### Pseudo code for logic/algorithmic flow
 
