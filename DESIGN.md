@@ -2,7 +2,7 @@
 ## Design Spec
 ### Team 9: Plankton, Spring, 2023
 
-According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server. Since our team has 3 people, we will not be describing or completing the client program
+According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server. Since our team has 3 people, we will not be describing or completing the client program.
 Our design includes game, grid, server modules, and we make use of certain CS50 libraries including `mem` and `file`.
 We describe each program and module separately.
 We do not describe the `support` library nor the modules that enable features that go beyond the spec.
