@@ -207,9 +207,6 @@ The Game Module will be a collection of helper functions handling client + game 
 * update_gold
 	Updates the amount of gold remaining
 
-
-### Pseudo code for each Function
-
 ### Major data structures
 
 * Client Struct points to the following elements:
@@ -229,6 +226,8 @@ The Game Module will be a collection of helper functions handling client + game 
 	* an int number of rows in the global grid
 	* an int number of columns in the global grid
 	
----
+## Testing Plan
+
+We plan to create a unit test for the grid module, testing loading in a map file and the functions in the grid module. Additionally we will integration test server, testing that it works with grid and game properly. Game is too small to require a unit test, but a unit test could be beneficial on server to ensure that it can send and receive messages/strings to clients properly. Due to the nature of the program and the graphical user output, regression testing can easily be performed by observing output.
 		
 
