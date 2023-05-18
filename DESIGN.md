@@ -69,9 +69,7 @@ The server will run as follows:
 		if new spectator
 			call new_spectator()
 		if key
-			call handle_keystroke()
-
-		
+			call handle_keystroke()	
 
 * handle_keystroke:
 
