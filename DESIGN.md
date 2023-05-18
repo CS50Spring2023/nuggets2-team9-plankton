@@ -76,6 +76,7 @@ The server will run as follows:
 * handle_keystroke:
 
 Handle the movement or quitting prompted by a valid key, k. Find the coordinate a player is attempting to move to, and determine if they're allowed to move. If so, call function to move player. If there's gold, handle that accordingly (update player struct and global game status). If there's another player there, handle that accordingly. Then, update the game accordingly.
+
 	Check key
 	If quit
 	  remove player from map
