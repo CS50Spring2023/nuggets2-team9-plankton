@@ -53,32 +53,34 @@ The server will run as follows:
 	clean up
 
 ### Function breakdown
-* main
+* main:
 	handle the parsing of parameters and initializing other modules, including messsage
 
 * handleMessage:
-Callback function to be called in message_loop() when a message from a client in received
-	parse and validate message string
-	if new player
-	  if under max players
-	     call new_player()
-		 call update_grids()
-	  else
-	    send quit message
-	if new spectator
-	    call new_spectator()
-	if key
-	  call handle_keystroke()
+
+	Callback function to be called in message_loop() when a message from a client in received
+		parse and validate message string
+		if new player
+			if under max players
+				call new_player()
+				call update_grids()
+		else
+			send quit message
+		if new spectator
+			call new_spectator()
+		if key
+			call handle_keystroke()
 
 		
 
 * handle_keystroke:
+
 Handle the movement or quitting prompted by a valid key, k. Find the coordinate a player is attempting to move to, and determine if they're allowed to move. If so, call function to move player. If there's gold, handle that accordingly (update player struct and global game status). If there's another player there, handle that accordingly. Then, update the game accordingly.
 	Check key
 	If quit
 	  remove player from map
 	  delete_client()
-	Check whats is in the spot we want to move to
+	Check what is in the spot we want to move to
 	If boundary
 	  Do nothing
 	If gold
@@ -88,7 +90,7 @@ Handle the movement or quitting prompted by a valid key, k. Find the coordinate 
 	If player
 	  Update global grid to reflect swap
 
-	Call update grid, which updates all player grids to reflect new global grid
+	Call update_grids, which updates all player grids to reflect new global grid
 
 * gameOver:
 	Ends the game and informs all of the clients
@@ -114,13 +116,13 @@ No major data structures implemented in server specifically, however it relies h
 	Create an array of strings, each string is one row of the map. Return the grid.
 * grid_toStr:
 	Create string version of grid map, containing rows*columns characters and new line characters at the end of every line
-* assign_random_spot
+* assign_random_spot:
 	Assign players and gold to random (open) locations (row, column) on the grid
 * update_player_grid:
 	Update the player's grid array 
 * isVisible:
 	For a given player, helps update player_grid to contain points which are currently visible to them
-* update_grids
+* update_grids:
 	Updates all client grids to reflect changes in the server's global grid
 * delete_grid
 	Frees all memory associated with a grid
@@ -129,15 +131,16 @@ No major data structures implemented in server specifically, however it relies h
 	 
 * visCol:
 	Check columns between player column and boundary column locations for visibility
-* visRow
+* visRow:
 	Check rows between player row and boundary row locations for visibility
-* pcONwc
+* pcONwc:
 	Handle case when the player's column is equal to the boundary's column
 	
 ### Pseudo code for each Function
 
 #### update_player_grid
 takes in global and player grids and player's coordinates, establishes wall boundaries, and calls isVisible for each wall point
+
 	initialize player_grid array to global grid
 
 	call helper function check_wall(player coordinates) which will:
@@ -154,6 +157,7 @@ takes in global and player grids and player's coordinates, establishes wall boun
 
 #### isVisible
 takes in player and boundary coordinates and updates player_grid accordingly
+
 	for wall point (wr, wc) in grid array
 		for each row exclusively between pr and wr
 			compute column coordinates
@@ -173,6 +177,7 @@ takes in player and boundary coordinates and updates player_grid accordingly
 
 #### grid_toStr
 converts a grid to a string that can be sent to and displayed by the client, takes in player and global grid
+
 	Create string for string version of grid map, must have rows*columns characters plus new lines
 	loop thru points in grid
 	   sets characters in string to match global grid, unless there is a player grid passed in, who's characters will be matched instead
@@ -180,6 +185,7 @@ converts a grid to a string that can be sent to and displayed by the client, tak
 
 #### load_grid
 takes in a map file and returns a "grid" or an array of strings representing the map
+
 	read map file line by line into array of strings
 	return the created grid
 
@@ -195,17 +201,17 @@ The Game Module will be a collection of helper functions handling client + game 
 
 ### Functional decomposition
 
-* new_player
+* new_player:
 	Adds a new client struct for a player
-* new_spectator
+* new_spectator:
 	Adds a new client sturct for a spectator
-* delete_client
+* delete_client:
 	frees memory associated with a client struct, removes it from game struct list of clients
-* new_game
+* new_game:
 	Initializes game module data structures
-* end_game
+* end_game:
 	Frees memory associated with game module data structures
-* update_gold
+* update_gold:
 	Updates the amount of gold remaining
 
 ### Major data structures
