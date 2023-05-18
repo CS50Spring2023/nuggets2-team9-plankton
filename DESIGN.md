@@ -100,7 +100,7 @@ No major data structures implemented in server specifically, however it relies h
 
 ## Grid Module
 
-### The Grid Module will be a collection of helper functions handling grid manipulation to be utilized in the server, it will not have a unique main or algorithmic flow.
+#### The Grid Module will be a collection of helper functions handling grid manipulation to be utilized in the server, it will not have a unique main or algorithmic flow.
 
 ### Functional decomposition
 
