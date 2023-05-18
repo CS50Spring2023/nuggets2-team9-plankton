@@ -124,7 +124,7 @@ No major data structures implemented in server specifically, however it relies h
 	For a given player, helps update player_grid to contain points which are currently visible to them
 * update_grids:
 	Updates all client grids to reflect changes in the server's global grid
-* delete_grid
+* delete_grid:
 	Frees all memory associated with a grid
 
 #### Helper functions
