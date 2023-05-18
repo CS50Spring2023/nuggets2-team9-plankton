@@ -23,8 +23,6 @@ Outputs:
 
 
 ### Functional decomposition into modules
-
-> List and description of the main modules that comprise our server, other than the main module:
 `server.c` - main module, communicates with clients
 `grid.c` - module for handling the global and player grids
 `game.c` - module for handling player and game structures 
