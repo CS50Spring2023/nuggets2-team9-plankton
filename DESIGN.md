@@ -53,10 +53,10 @@ The server will run as follows:
 	clean up
 
 ### Function breakdown
-* main
+#### main
 	handle the parsing of parameters and initializing other modules, including messsage
 
-* handleMessage:
+#### handleMessage:
 Callback function to be called in message_loop() when a message from a client in received
 
 	parse and validate message string
@@ -73,7 +73,7 @@ Callback function to be called in message_loop() when a message from a client in
 
 		
 
-* handle_keystroke:
+#### handle_keystroke:
 Handle the movement or quitting prompted by a valid key, k. Find the coordinate a player is attempting to move to, and determine if they're allowed to move. If so, call function to move player. If there's gold, handle that accordingly (update player struct and global game status). If there's another player there, handle that accordingly. Then, update the game accordingly.
 
 	Check key
@@ -92,13 +92,13 @@ Handle the movement or quitting prompted by a valid key, k. Find the coordinate 
 
 	Call update grid, which updates all player grids to reflect new global grid
 
-* gameOver:
+#### gameOver:
 	Ends the game and informs all of the clients
 
-* update_clients:
+#### update_clients:
 	Sends a message to all clients with the updated state of the game
 
-* spectator_quit:
+#### spectator_quit:
 	Sends quit message to spectator
 
 
