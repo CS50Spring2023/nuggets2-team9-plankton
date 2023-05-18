@@ -2,11 +2,17 @@
 ## Design Spec
 ### Team 9: Plankton, Spring, 2023
 
-According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server. Since our team has 3 people, we will not be describing or completing the client program
+According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server. Since our team has 3 people, we will not be describing or completing the client program.
 Our design includes game, grid, server modules, and we make use of certain CS50 libraries including `mem` and `file`.
 We describe each program and module separately.
 We do not describe the `support` library nor the modules that enable features that go beyond the spec.
 We avoid repeating information that is provided in the requirements spec.
+
+### Division of Work
+Broadly, we plan to use the scrum framework of work, and work in organized sprints. We will subdivide tasks more specifically in the implementation doc, but we will generally each take charge of:
+* Andra: main server functionality and visibility
+* Jackson: grid module
+* Sanjana: game module
 
 ## Server
 ### User interface
@@ -15,19 +21,17 @@ See the requirements spec for the command-line interface.
 There is no interaction with the user: the server receives input through messages from the client.
 
 ### Inputs and outputs
-Inputs:--- map file
-Map file gets passed to grid module to be loaded in as a grid map.
+Inputs:
+* Map file: gets passed to grid module to be loaded in as a grid map.
 
 Outputs:
-Outputs logging messages to stderr, which can be redirected to a log file. Outputs useful messages, errors as described in the requirements.
+* Messages logged to stderr, which can be redirected to a log file. This includes useful messages, errors as described in the requirements.
 
 
 ### Functional decomposition into modules
-
-> List and description of the main modules that comprise our server, other than the main module:
-`server.c` - main module, communicates with clients
-`grid.c` - module for handling the global and player grids
-`game.c` - module for handling player and game structures 
+* `server.c` - main module, communicates with clients
+* `grid.c` - module for handling the global and player grids
+* `game.c` - module for handling player and game structures 
 
 ### Pseudo code for logic/algorithmic flow
 
@@ -98,16 +102,13 @@ Handle the movement or quitting prompted by a valid key, k. Find the coordinate 
 	Sends quit message to spectator
 
 
-
-> Then briefly describe each of the major functions, perhaps with level-4 #### headers.
-
 ### Major data structures
 
 No major data structures implemented in server specifically, however it relies heavily on the client and game structs implemented in game.c.
 
 ## Grid Module
 
-### The Grid Module will be a collection of helper functions handling grid manipulation to be utilized in the server, it will not have a unique main or algorithmic flow.
+#### The Grid Module will be a collection of helper functions handling grid manipulation to be utilized in the server, it will not have a unique main or algorithmic flow.
 
 ### Functional decomposition
 
