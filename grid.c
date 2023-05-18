@@ -40,6 +40,22 @@ load_grid(FILE* fp)
 
 }
 
+// idk if i need this
+// char**
+// empty_player_grid(int rows, int columns)
+// {
+//     char** grid = mem_malloc_assert(rows * sizeof(char*), "Error allocating memory in empty_player_grid.\n");
+
+//     for (int r = 0; r < rows; r++){
+
+//         for(int c = 0; c < columns; c++){
+
+//         }
+//     }
+
+
+// }
+
 
 /*
 * grid_toStr: converts a grid to a string that can be sent to and displayed by the client
@@ -81,14 +97,13 @@ assign_random_spot(char** grid, int rows, int columns, char thing)
 }
 
 void
-update_player_grid(char** player_grid, char** global_grind, int pr, int pc)
+update_player_grid(char** player_grid, char** global_grid, int pr, int pc)
 {
     /* LOGIC OUTLINE:
     updates player_grid to reflect all visible points
     calls helper method on all points to check if visible-- if so, sets to global value within helper method
     otherwise update points present in player_grid but now invisible to the player to the empty spot, with no item (player/gold) */
 
-    // assume (0,0) point in top right corner, as in example presented in REQUIREMENTS.md
 	// TODO: figure out how to keep track of boundary/wall elements; maybe make array of boundary/wall elements? !!!!
     // NOTE: i left things out of player view blank assuming each time player moves their visibility map starts blank - maybe not the best - might have to change
 
@@ -97,8 +112,15 @@ update_player_grid(char** player_grid, char** global_grind, int pr, int pc)
     int wc = 0;
 
 	// for wall point (wr, wc) in grid array
-        isVisible (pr, pc, wr, wc);
+        isVisible(pr, pc, wr, wc);
 
+}
+
+void
+update_grids(char** global_grid, game struct)
+{
+    loops thru all players
+    calls update player grid 
 }
 
 
@@ -106,6 +128,7 @@ bool
 isVisible(int pr, int pc, int wr, int wc)
 {
     // checks if wr, wc is visible from position player position pr, pc
+    // assume (0,0) point in top right corner, as in example presented in REQUIREMENTS.md
     
     /*
     for wall element (wr, wc) in grid array{
@@ -274,10 +297,4 @@ pcONwc (int row, int col)
     
     return invisible
     */
-}
-
-void
-update_grids()
-{
-    //check for spectator
 }
