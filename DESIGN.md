@@ -21,7 +21,7 @@ There is no interaction with the user: the server receives input through message
 > Briefly describe the inputs (map file) and outputs (to terminal).
 > If you write to log files, or log to stderr, describe that here.
 > Command-line arguments are not 'input'.
-Inputs:
+Inputs:--- HAVEN'T DONE THIS
 	* map file: an array of strings representing the layout of the grid players can play on;
 	the map is converted to a 2D array for manipulation and back to a string for passing messages between client and server
 
@@ -33,7 +33,7 @@ Outputs:
 ### Functional decomposition into modules
 
 > List and description of the main modules that comprise our server, other than the main module:
-`server.c` - main module
+`server.c` - main module, communicates with clients
 `grid.c` - module for handling the global and player grids
 `game.c` - module for handling player and game structures 
 
@@ -60,6 +60,9 @@ The server will run as follows:
 	call gameOver() to inform all clients the game has ended
 	clean up
 
+### Function breakdown
+* main
+	handle the parsing of parameters and initializing other modules, including messsage
 
 * handleMessage:
 Callback function to be called in message_loop() when a message from a client in received
@@ -73,12 +76,16 @@ Callback function to be called in message_loop() when a message from a client in
 	if new spectator
 	    call new_spectator()
 	if key
-	  call handle_movement()
+	  call handle_keystroke()
 
 		
 
-* handleMovement:
-Handle the movement prompted by a valid key, k. Find the coordinate a player is attempting to move to, and determine if they're allowed to move. If so, call function to move player. If there's gold, handle that accordingly (update player struct and global game status). If there's another player there, handle that accordingly. Then, update the game accordingly.
+* handle_keystroke:
+Handle the movement or quitting prompted by a valid key, k. Find the coordinate a player is attempting to move to, and determine if they're allowed to move. If so, call function to move player. If there's gold, handle that accordingly (update player struct and global game status). If there's another player there, handle that accordingly. Then, update the game accordingly.
+	Check key
+	If quit
+	  remove player from map
+	  delete_client()
 	Check whats is in the spot we want to move to
 	If boundary
 	  Do nothing
@@ -96,6 +103,9 @@ Handle the movement prompted by a valid key, k. Find the coordinate a player is 
 
 * update_clients:
 	Sends a message to all clients with the updated state of the game
+
+* spectator_quit:
+	Sends quit message to spectator
 
 
 
@@ -212,6 +222,7 @@ The Game Module will be a collection of helper functions handling client + game 
 * new_spectator
 	Adds a new client sturct for a spectator
 * delete_client
+	frees memory associated with a client struct, removes it from game struct list of clients
 * new_game
 	Initializes game module data structures
 * end_game
@@ -245,7 +256,7 @@ The Game Module will be a collection of helper functions handling client + game 
 	* an integer keeping track of the amount of players that have joined
 	* a boolean spectator_active keeping track of whether there is a spectator
 	* an int number of rows in the global grid
-	* an int number fo columns in the global grid
+	* an int number of columns in the global grid
 	
 ---
 		

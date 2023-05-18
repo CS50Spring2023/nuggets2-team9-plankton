@@ -40,6 +40,22 @@ load_grid(FILE* fp)
 
 }
 
+// idk if i need this
+// char**
+// empty_player_grid(int rows, int columns)
+// {
+//     char** grid = mem_malloc_assert(rows * sizeof(char*), "Error allocating memory in empty_player_grid.\n");
+
+//     for (int r = 0; r < rows; r++){
+
+//         for(int c = 0; c < columns; c++){
+
+//         }
+//     }
+
+
+// }
+
 
 /*
 * grid_toStr: converts a grid to a string that can be sent to and displayed by the client
@@ -81,7 +97,7 @@ assign_random_spot(char** grid, int rows, int columns, char thing)
 }
 
 void
-update_player_grid(char** player_grid, char** global_grind, int pr, int pc)
+update_player_grid(char** player_grid, char** global_grid, int pr, int pc)
 {
     /* LOGIC OUTLINE:
     updates player_grid to reflect all visible points
@@ -98,6 +114,13 @@ update_player_grid(char** player_grid, char** global_grind, int pr, int pc)
 	// for wall point (wr, wc) in grid array
         isVisible(pr, pc, wr, wc);
 
+}
+
+void
+update_grids(char** global_grid, game struct)
+{
+    loops thru all players
+    calls update player grid 
 }
 
 
