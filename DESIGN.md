@@ -116,24 +116,24 @@ No major data structures implemented in server specifically, however it relies h
 	Create an array of strings, each string is one row of the map. Return the grid.
 * grid_toStr:
 	Create string version of grid map, containing rows*columns characters and new line characters at the end of every line
-* assign_random_spot
+* assign_random_spot:
 	Assign players and gold to random (open) locations (row, column) on the grid
 * update_player_grid:
 	Update the player's grid array 
 * isVisible:
 	For a given player, helps update player_grid to contain points which are currently visible to them
-* update_grids
+* update_grids:
 	Updates all client grids to reflect changes in the server's global grid
-* delete_grid
+* delete_grid:
 	Frees all memory associated with a grid
 
 #### Helper functions
 	 
 * visCol:
 	Check columns between player column and boundary column locations for visibility
-* visRow
+* visRow:
 	Check rows between player row and boundary row locations for visibility
-* pcONwc
+* pcONwc:
 	Handle case when the player's column is equal to the boundary's column
 	
 ### Pseudo code for each Function
@@ -200,17 +200,17 @@ The Game Module will be a collection of helper functions handling client + game 
 
 ### Functional decomposition
 
-* new_player
+* new_player:
 	Adds a new client struct for a player
-* new_spectator
+* new_spectator:
 	Adds a new client sturct for a spectator
-* delete_client
+* delete_client:
 	frees memory associated with a client struct, removes it from game struct list of clients
-* new_game
+* new_game:
 	Initializes game module data structures
-* end_game
+* end_game:
 	Frees memory associated with game module data structures
-* update_gold
+* update_gold:
 	Updates the amount of gold remaining
 
 ### Major data structures
