@@ -15,11 +15,11 @@ See the requirements spec for the command-line interface.
 There is no interaction with the user: the server receives input through messages from the client.
 
 ### Inputs and outputs
-Inputs:--- map file
-Map file gets passed to grid module to be loaded in as a grid map.
+Inputs:
+* Map file: gets passed to grid module to be loaded in as a grid map.
 
 Outputs:
-Outputs logging messages to stderr, which can be redirected to a log file. Outputs useful messages, errors as described in the requirements.
+* Messages logged to stderr, which can be redirected to a log file. This includes useful messages, errors as described in the requirements.
 
 
 ### Functional decomposition into modules
