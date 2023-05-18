@@ -2,8 +2,6 @@
 ## Design Spec
 ### Team 9: Plankton, Spring, 2023
 
-> This **template** includes some gray text meant to explain how to use the template; delete all of them in your document!
-
 According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server. Since our team has 3 people, we will not be describing or completing the client program
 Our design includes game, grid, server modules, and we make use of certain CS50 libraries including `mem` and `file`.
 We describe each program and module separately.
@@ -17,17 +15,11 @@ See the requirements spec for the command-line interface.
 There is no interaction with the user: the server receives input through messages from the client.
 
 ### Inputs and outputs
-
-> Briefly describe the inputs (map file) and outputs (to terminal).
-> If you write to log files, or log to stderr, describe that here.
-> Command-line arguments are not 'input'.
-Inputs:--- HAVEN'T DONE THIS
-	* map file: an array of strings representing the layout of the grid players can play on;
-	the map is converted to a 2D array for manipulation and back to a string for passing messages between client and server
+Inputs:--- map file
+Map file gets passed to grid module to be loaded in as a grid map.
 
 Outputs:
-
-	* TODO
+Outputs logging messages to stderr, which can be redirected to a log file. Outputs useful messages, errors as described in the requirements.
 
 
 ### Functional decomposition into modules
@@ -38,10 +30,6 @@ Outputs:
 `game.c` - module for handling player and game structures 
 
 ### Pseudo code for logic/algorithmic flow
-
-> For each function write pseudocode indented by a tab, which in Markdown will cause it to be rendered in literal form (like a code block).
-> Much easier than writing as a bulleted list!
-> For example:
 
 The server will run as follows:
 
@@ -113,12 +101,7 @@ Handle the movement or quitting prompted by a valid key, k. Find the coordinate 
 
 ### Major data structures
 
-> Describe each major data structure in this program: what information does it represent, how does it represent the data, and what are its members.
-> This description should be independent of the programming language.
-> Mention, but do not describe, data structures implemented by other modules (such as the new modules you detail below, or any libcs50 data structures you plan to use).
-
-* TODO: Any SERVER level structs???????
-
+No major data structures implemented in server specifically, however it relies heavily on the client and game structs implemented in game.c.
 
 ## Grid Module
 
@@ -151,9 +134,6 @@ Handle the movement or quitting prompted by a valid key, k. Find the coordinate 
 	Handle case when the player's column is equal to the boundary's column
 	
 ### Pseudo code for each Function
-
-> For any non-trivial function, add a level-4 #### header and provide tab-indented pseudocode.
-> This pseudocode should be independent of the programming language.
 
 #### update_player_grid
 takes in global and player grids and player's coordinates, establishes wall boundaries, and calls isVisible for each wall point
@@ -205,9 +185,6 @@ takes in a map file and returns a "grid" or an array of strings representing the
 
 ### Major data structures
 
-> Describe each major data structure in this module: what information does it represent, how does it represent the data, and what are its members.
-> This description should be independent of the programming language.
-
 Both global and player-specific grids are created as char** arrays of strings. When passing messages between server and clients, grids are converted to strings.
 
 
@@ -233,13 +210,7 @@ The Game Module will be a collection of helper functions handling client + game 
 
 ### Pseudo code for each Function
 
-> For any non-trivial function, add a level-4 #### header and provide tab-indented pseudocode.
-> This pseudocode should be independent of the programming language.
-
 ### Major data structures
-
-> Describe each major data structure in this module: what information does it represent, how does it represent the data, and what are its members.
-> This description should be independent of the programming language.
 
 * Client Struct points to the following elements:
 	* `const addr_t client` holds the address we can send messages to the client at
