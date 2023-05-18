@@ -54,6 +54,7 @@ The server will run as follows:
 
 * handleMessage:
 Callback function to be called in message_loop() when a message from a client in received
+
 	parse and validate message string
 	if new player
 	  if under max players
@@ -70,6 +71,7 @@ Callback function to be called in message_loop() when a message from a client in
 
 * handle_keystroke:
 Handle the movement or quitting prompted by a valid key, k. Find the coordinate a player is attempting to move to, and determine if they're allowed to move. If so, call function to move player. If there's gold, handle that accordingly (update player struct and global game status). If there's another player there, handle that accordingly. Then, update the game accordingly.
+
 	Check key
 	If quit
 	  remove player from map
@@ -153,6 +155,7 @@ takes in global and player grids and player's coordinates, establishes wall boun
 
 #### isVisible
 takes in player and boundary coordinates and updates player_grid accordingly
+
 	for wall point (wr, wc) in grid array
 		for each row exclusively between pr and wr
 			compute column coordinates
@@ -172,6 +175,7 @@ takes in player and boundary coordinates and updates player_grid accordingly
 
 #### grid_toStr
 converts a grid to a string that can be sent to and displayed by the client, takes in player and global grid
+
 	Create string for string version of grid map, must have rows*columns characters plus new lines
 	loop thru points in grid
 	   sets characters in string to match global grid, unless there is a player grid passed in, who's characters will be matched instead
@@ -179,6 +183,7 @@ converts a grid to a string that can be sent to and displayed by the client, tak
 
 #### load_grid
 takes in a map file and returns a "grid" or an array of strings representing the map
+
 	read map file line by line into array of strings
 	return the created grid
 
