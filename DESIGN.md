@@ -94,9 +94,6 @@ Handle the movement or quitting prompted by a valid key, k. Find the coordinate 
 	Sends quit message to spectator
 
 
-
-> Then briefly describe each of the major functions, perhaps with level-4 #### headers.
-
 ### Major data structures
 
 No major data structures implemented in server specifically, however it relies heavily on the client and game structs implemented in game.c.
