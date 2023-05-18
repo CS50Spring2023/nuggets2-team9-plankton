@@ -8,6 +8,12 @@ We describe each program and module separately.
 We do not describe the `support` library nor the modules that enable features that go beyond the spec.
 We avoid repeating information that is provided in the requirements spec.
 
+### Division of Work
+Broadly, we plan to use the scrum framework of work, and work in organized sprints. We will subdivide tasks more specifically in the implementation doc, but we will generally each take charge of:
+* Andra: main server functionality and visibility
+* Jackson: grid module
+* Sanjana: game module
+
 ## Server
 ### User interface
 
