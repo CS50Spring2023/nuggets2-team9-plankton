@@ -105,91 +105,88 @@ char* load_grid(FILE* fp)
 
 //         }
 //     }
-
-
 // }
 
 
-// /*
-// * grid_toStr: converts a grid to a string that can be sent to and displayed by the client
-// * Takes in a char** global_grid and optionally a char** player_grid (which can be null) as well as the number of rows and columns in the grid
-// * If a player_grid is NULL the output string will just be the global_grid
-// *
-// */
-// char*
-// grid_toStr(char** global_grid, char** player_grid, int rows, int columns)
-// {
-//     // Create string for string version of grid map, must have rows*columns characters plus new lines
-//    char* display = mem_malloc_assert((row*columns) + rows - 1, "Error allocating memory in grid_toStr.\n");
+/*
+* grid_toStr: converts a grid to a string that can be sent to and displayed by the client
+* Takes in a char** global_grid and optionally a char** player_grid (which can be null) as well as the number of rows and columns in the grid
+* If a player_grid is NULL the output string will just be the global_grid
+*
+*/
+char*
+grid_toStr(char** global_grid, char** player_grid, int rows, int columns)
+{
+    // Create string for string version of grid map, must have rows*columns characters plus new lines
+   char* display = mem_malloc_assert((row*columns) + rows - 1, "Error allocating memory in grid_toStr.\n");
 
-//    for (int r = 0; r < rows; r++){
-//         for (int c = 0; c < columns; c++){
-//             // adding 1 because null terminator isn't included in column count
-//             display[(r* (columns + 1)) + c] = global_grid[r][c];
+   for (int r = 0; r < rows; r++){
+        for (int c = 0; c < columns; c++){
+            // adding 1 because null terminator isn't included in column count
+            display[(r* (columns + 1)) + c] = global_grid[r][c];
            
-//             if (player_grid != NULL){
-//                 // if a player grid was passed in, set to player_grid value
-//                 display[(r* (columns + 1)) + c] = player_grid[r][c];
-//             }
-//         }
-//         // don't add a new line after the last row
-//         if (r < rows - 1){
-//             display[(r* (columns + 1)) + columns + 1] = '\n'; // add new line to the end of each row
-//         }
-//     }
+            if (player_grid != NULL){
+                // if a player grid was passed in, set to player_grid value
+                display[(r* (columns + 1)) + c] = player_grid[r][c];
+            }
+        }
+        // don't add a new line after the last row
+        if (r < rows - 1){
+            display[(r* (columns + 1)) + columns + 1] = '\n'; // add new line to the end of each row
+        }
+    }
 
-//    return display;
+   return display;
 
-// }
+}
 
-// void
-// assign_random_spot(char** grid, int rows, int columns, char thing)
-// {
-//     // assigns a "thing" to a random open spot, can be used to place either gold or a player
+void
+assign_random_spot(char** grid, int rows, int columns, char thing)
+{
+    // assigns a "thing" to a random open spot, can be used to place either gold or a player
 
-// }
+}
 
-// void
-// update_player_grid(char** player_grid, char** global_grid, int pr, int pc)
-// {
-//     /* LOGIC OUTLINE:
-//     updates player_grid to reflect all visible points
-//     calls helper method on all points to check if visible-- if so, sets to global value within helper method
-//     otherwise update points present in player_grid but now invisible to the player to the empty spot, with no item (player/gold) */
+void
+update_player_grid(char** player_grid, char** global_grid, int pr, int pc)
+{
+    /* LOGIC OUTLINE:
+    updates player_grid to reflect all visible points
+    calls helper method on all points to check if visible-- if so, sets to global value within helper method
+    otherwise update points present in player_grid but now invisible to the player to the empty spot, with no item (player/gold) */
 
-// 	// TODO: figure out how to keep track of boundary/wall elements; maybe make array of boundary/wall elements? !!!!
-//     // NOTE: i left things out of player view blank assuming each time player moves their visibility map starts blank - maybe not the best - might have to change
+	// TODO: figure out how to keep track of boundary/wall elements; maybe make array of boundary/wall elements? !!!!
+    // NOTE: i left things out of player view blank assuming each time player moves their visibility map starts blank - maybe not the best - might have to change
 
-//     // placeholders: need to figure out how to find wr, wc of current room!!
-//     int wr = 0;
-//     int wc = 0;
+    // placeholders: need to figure out how to find wr, wc of current room!!
+    int wr = 0;
+    int wc = 0;
 
-// 	// for wall point (wr, wc) in grid array
-//         isVisible(pr, pc, wr, wc);
+	// for wall point (wr, wc) in grid array
+        isVisible(pr, pc, wr, wc);
 
-// }
+}
 
-// void
-// update_grids(char** global_grid, game struct)
-// {
-//     loops thru all players
-//     calls update player grid 
-// }
+void
+update_grids(char** global_grid, game struct)
+{
+    loops thru all players
+    calls update player grid 
+}
 
 
-// bool
-// isVisible(int pr, int pc, int wr, int wc)
-// {
-//     // checks if wr, wc is visible from position player position pr, pc
-//     // assume (0,0) point in top right corner, as in example presented in REQUIREMENTS.md
-    
-//     /*
-//     for wall element (wr, wc) in grid array{
-// 		invisible = 0;  // switch for determining visibility
+bool
+isVisible(int pr, int pc, int wr, int wc)
+{
+    // checks if wr, wc is visible from position player position pr, pc
+    // assume (0,0) point in top right corner, as in example presented in REQUIREMENTS.md
+
+    // for wall element (wr, wc) in grid array{
+	// 	invisible = 0;  // switch for determining visibility
 		
-// 		if (pc != wc) {
-//             slope = (wr-pr)/(wc-pc);
-//         }
+	// 	if (pc != wc) {
+    //         slope = (wr-pr)/(wc-pc);
+    //     }
         
 
 // 		if (pr == wr){
@@ -205,25 +202,25 @@ char* load_grid(FILE* fp)
 //                 visCol(pc, wc);  // visCol handles pc < wc AND pc > wc cases
 //             }
 
-//             else{  // pc == wc
-//             if (pr < wr){
-//                 // check each row between and not including pr and wr
-// 	            for (int row = pr+1; row < wr; row++){
-//                     pcOnwc(); 
-//                 }
-//             }
-//             else if (pr > wr){
-//                 // check each row between and not including pr and wr
-// 	            for (int row = pr+1; row < wr; row++){
-//                     pcOnwc();
-//                 }
-//             }
-//         }
+    //         else{  // pc == wc
+    //         if (pr < wr){
+    //             // check each row between and not including pr and wr
+	//             for (int row = pr+1; row < wr; row++){
+    //                 pcOnwc(); 
+    //             }
+    //         }
+    //         else if (pr > wr){
+    //             // check each row between and not including pr and wr
+	//             for (int row = pr+1; row < wr; row++){
+    //                 pcOnwc();
+    //             }
+    //         }
+    //     }
 		
-//     }
-//     */
+    // }
+
    
-// }
+}
 
 // bool
 // visCol(int pc, int wc)
