@@ -31,8 +31,11 @@ int main()
 *
 */
 
-char* load_grid(FILE* fp)
+char* load_grid(FILE* fp, int* rowp, int* columnp)
 {
+
+    // FILL THOSE POINTERS******
+
     if (fp == NULL){
         fprintf(stderr, "Error. NULL file pointer passed to load_map.\n");
         exit(1);
@@ -40,6 +43,7 @@ char* load_grid(FILE* fp)
 
     // get rows and columns
     int rows = file_numLines(fp);               // number of lines in the file signifies the number of rows
+    // Note to self--- this is bad and wont work!!!!! its gonna read in here and miss a line
     int columns = strlen(file_readLine(fp));    // the length of every line (just use the first) signifies the number of columns
 
     // Create string for to hold the grid, must have rows*columns characters plus memory for new lines
@@ -68,7 +72,7 @@ char* load_grid(FILE* fp)
 
 
 void
-assign_random_spot(char** grid, int rows, int columns, char thing)
+assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, int* spot_y)
 {
     // assigns a "thing" to a random open spot, can be used to place either gold or a player
     bool placed = false;
@@ -81,6 +85,7 @@ assign_random_spot(char** grid, int rows, int columns, char thing)
         if (strcmp(grid[r], '.')==0){
             grid[r]=='*';
             placed = true;
+            // assign spot x and y
         }
         // try again with another random spot if it didn't work
     }

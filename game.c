@@ -22,13 +22,20 @@ typedef struct client {
 // game struct
 typedef struct game {
     char** grid;
-    client_t** clients;
+    client_t* clients;
     int goldRemaining;
     int playersJoined;
     bool spectatorActive;
     int rows;
     int columns;
+
 } game_t;
+
+typedef struct gold_location {
+    int x;
+    int y;
+    int nuggetCount;
+} gold_location_t;
 
 
 
@@ -73,20 +80,34 @@ new_spectator(game_t* game, const addr_t client)
 }
 
 void
-delete_client()
+delete_client(client_t* client)
 {
+    if (player->real_name != NULL){
+        mem_free(player->real_name);
+    }
+    if (player->grid != NULL){
+        // loop thru and free strings, don't know how grid will be represented yet
+    }
 
 }
 
 game_t*
-new_game()
+new_game(FILE* map_file, const int maxPlayers)
 {
+    game_t* new_game = mem_malloc_assert(sizeof(game_t), "Error allocating memory in new_game.\n");
+    new_game->clients =  mem_malloc_assert((maxPlayers + 1) * sizeof(client_t), "Error allocating memory in new_game.\n");
+    new_game->goldRemaining = 0;
+    new_game->playersJoined = 0;
+    new_game->spectatorActive = false;
+    new_game->grid = load_grid(map_file, &(new_game->rows), &(new_game->columns));
+
 
 }
 
 void
 end_game()
 {
+    // free all memory
 
 }
 
@@ -95,3 +116,18 @@ update_gold()
 {
 
 }
+
+void
+load_gold(game_t* game, const int goldTotal)
+{
+    int gold_x;
+    int gold_y;
+
+    // go thru and assign gold randomnly somehow
+    while (game->goldRemaining < goldTotal){
+        assign_random_spot(game->grid, game->rows; game->columns, '*', &gold_x, &gold_y);
+    }
+    
+
+}
+
