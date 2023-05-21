@@ -34,23 +34,28 @@ int main()
 char* load_grid(FILE* fp, int* rowp, int* columnp)
 {
 
-    // FILL THOSE POINTERS******
-
     if (fp == NULL){
         fprintf(stderr, "Error. NULL file pointer passed to load_map.\n");
         exit(1);
     }
 
     // get rows and columns
-    int rows = file_numLines(fp);               // number of lines in the file signifies the number of rows
-    // Note to self--- this is bad and wont work!!!!! its gonna read in here and miss a line
-    int columns = strlen(file_readLine(fp));    // the length of every line (just use the first) signifies the number of columns
+    rowp = file_numLines(fp);               // number of lines in the file signifies the number of rows
+    // store first line in a string
+    char* firstLine = file_readLine(fp);
+    columnp = strlen(firstLine);    // the length of every line (just use the first) signifies the number of columns
 
     // Create string for to hold the grid, must have rows*columns characters plus memory for new lines
     char* grid = mem_malloc_assert((rows*columns) + rows - 1, "Error allocating memory in load_grid.\n");
+	
+    // add the first line to the map, so that it isn't skipped
+	for (int i = 0; i < columns; i++){
+	    // calculate the appropriate index and store the char in the grid string
+	    grid[strPos]=firstLine[i];
+	}
 
     char* line = NULL;
-    int rowIndex = 1; // what "row" of the map are we currently adding to the grid
+    int rowIndex = 2; // what "row" of the map are we currently adding to the grid
 
     // loop through every row in the map
     while ((line = file_readLine(fp)) != NULL){
