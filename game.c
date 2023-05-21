@@ -14,6 +14,8 @@ typedef struct client {
     char id;
     char* real_name;
     int gold;
+    int x;
+    int y;
     char** grid;
     
 } client_t;
@@ -55,6 +57,9 @@ new_player(game_t* game, const addr_t client, char* name)
 
     game->clients[playersJoined + 1];
     (game->playersJoined)++;
+    
+    // assign player to a random spot
+    assign_random_spot(game->grid, game->rows, game->columns, player);
     
 }
 
