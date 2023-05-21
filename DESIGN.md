@@ -53,24 +53,9 @@ The server will run as follows:
 	clean up
 
 ### Function breakdown
-* main:
 #### main
 	handle the parsing of parameters and initializing other modules, including messsage
 
-* handleMessage:
-
-	Callback function to be called in message_loop() when a message from a client in received
-		parse and validate message string
-		if new player
-			if under max players
-				call new_player()
-				call update_grids()
-		else
-			send quit message
-		if new spectator
-			call new_spectator()
-		if key
-			call handle_keystroke()	
 #### handleMessage:
 Callback function to be called in message_loop() when a message from a client in received
 
@@ -85,8 +70,6 @@ Callback function to be called in message_loop() when a message from a client in
 	    call new_spectator()
 	if key
 	  call handle_keystroke()
-
-* handle_keystroke:
 
 		
 
