@@ -124,7 +124,7 @@ update_grids(char** global_grid, game struct)
 }
 
 
-bool
+void
 isVisible(int pr, int pc, int wr, int wc)
 {
     // checks if wr, wc is visible from position player position pr, pc
