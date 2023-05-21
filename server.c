@@ -11,6 +11,7 @@
 #include "libs/file.h"
 #include "support/log.h"
 #include "support/message.h"
+#include <ctype.h>
 
 
 int
@@ -24,26 +25,44 @@ main(const int argc, char* argv[])
 }
 
 void
-handle_movement(player struct, key, global grid, game struct)
+handle_movement(client_t* player, char key, game_t* game)
 {
-//    check whats is in the spot we want to move to
-//    If boundary
-//      Don’t move
+
+    int newPos_x = player->x;
+    int newPos_y = player->y;
 
 
-//    If gold
-// increment player’s purse gold count
-// change grid representation at location to “.”
-// decrement count of unclaimed gold
-// Call update gold to send message from server
+    switch (key) {
+        // update new Pos based on the case
+        case 'h': ... code for letter=='B'; break;
+        case 'l': ... code for letter=='C'; break;
+        case 'j': ... code for letter=='A'; break;
+        case 'k': ... code for letter=='B'; break;
+        case 'y': ... code for letter=='C'; break;
+        case 'u': ... code for letter=='A'; break;
+        case 'b': ... code for letter=='B'; break;
+        case 'n': ... code for letter=='C'; break;
+        default:  ... code for letter not matching any case above.
+
+    }
+
+    char grid_val = get_grid_value(newPos_x, newPos_y);
+    if (grid_val == '+' || grid_val == '-' || grid_val == '|' || grid_val == ' '){
+        return;
+    }
+    else if (grid_val == '.' || grid_val == '#'){
+
+    }
+    else if (isalpha(grid_val)){
+        //
+    }
+    else if (grid_val == '*'){
+        update_gold(game, player, newPos_x, newPos_y, goldMaxPiles);
+        // send notify message
+        
+    }
 
 
-//    If player
-//    	Update global grid to reflect swap
-// 	Update grids of the players changed
-
-
-//     Call update grid
      
    
 }
