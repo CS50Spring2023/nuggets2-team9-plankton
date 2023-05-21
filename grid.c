@@ -60,7 +60,7 @@ char* load_grid(FILE* fp, int* rowp, int* columnp)
         // loop through every point in the row
         for (int i = 0; i < columns; i++){
             // calculate the appropriate index and store the char in the grid string
-            int strPos = rowIndex * i;
+            int strPos = (rowIndex * columnp) + i;
             grid[strPos]=line[i];
         }
         // add null char if this isn't the last row
@@ -72,6 +72,7 @@ char* load_grid(FILE* fp, int* rowp, int* columnp)
     }
     return grid;
 }
+
 
 
 void
@@ -89,15 +90,46 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, 
             grid[r]=='*';
             placed = true;
             // assign spot x and y
-            player->x = r/columns;
-            player->y = r%rows;
+            spot_x = r/columns;
+            spot_y = r%rows;
         }
         // try again with another random spot if it didn't work
     }
 }
 
-// add a function to compute x and y value based on index
+/*
+* coord_to_index: takes in an x value, y value, number of rows, number of columns
+* outputs an index in the string
+*
+*/
+int coord_to_index(int rows, int columns, int* spot_x, int* spot_y)
+{
+    // index is number of columns times x position, plus y position
+    return (columns*spot_x+spot_y);
+}
 
+/*
+* get_symbol: takes in a grid object, x value, y value, number of rows, number of columns
+* outputs whatever symbol is at that point in the grid
+*
+*/
+char* get_symbol(char** grid, int rows, int columns, int* spot_x, int* spot_y)
+{
+    int r = coord_to_index(rows, columns, spot_x, spot_y);
+    return grid[r];
+}
+
+
+/*
+* change_spot: takes in grid, number of rows and columns, coordinate values, and a symbol
+* changes whatever is at that spot to the new symbol
+*/
+void
+change_spot(char** grid, int rows, int columns, int spot_x, int spot_y, char* symbol)
+{
+    int r = coord_to_index(rows, columns, spot_x, spot_y);
+    grid[r]==symbol;
+}
 
 void
 update_player_grid(char** player_grid, char** global_grid, int pr, int pc)
