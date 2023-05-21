@@ -20,8 +20,6 @@ int main()
     return 1;
 }
 
-
-
 /**************** functions  ****************/
 // rewritten for the new grid format: original code is below/commented out
 
@@ -91,11 +89,14 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, 
             grid[r]=='*';
             placed = true;
             // assign spot x and y
+            player->x = r/columns;
+            player->y = r%rows;
         }
         // try again with another random spot if it didn't work
     }
 }
 
+// add a function to compute x and y value based on index
 
 
 void
