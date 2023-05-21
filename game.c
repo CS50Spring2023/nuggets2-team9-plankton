@@ -28,6 +28,7 @@ typedef struct game {
     bool spectatorActive;
     int rows;
     int columns;
+    gold_location_t* locations;
 
 } game_t;
 
@@ -112,22 +113,100 @@ end_game()
 }
 
 void
-update_gold()
+update_gold(game_t* game, client_t* player, int x_pos, int y_pos, int goldMaxPiles)
 {
+    for (int i = 0; i < goldMaxPiles; i++){
+        gold_location_t* location = (game->locations)[i];
+        if (location->nuggetCount < 0){
+            exit(1);
+            // error
+        }
 
+        if (location->x == x_pos && location->y == y_pos){
+            game->goldRemaining -= location->nuggetCount;
+            player->gold -= location->nuggetCount;
+            // call grid function to allow for grid to be changed
+
+            return;
+        }
+
+    }
 }
 
 void
-load_gold(game_t* game, const int goldTotal)
+load_gold(game_t* game, const int goldTotal, const int goldMinPiles, const int goldMaxPiles)
+{
+    int gold_amt;
+
+    game->locations =  mem_malloc_assert((goldMaxPiles) * sizeof(gold_location_t), "Error allocating memory in load_gold.\n");
+
+    int* nugget_counts = nugget_count_array(goldMinPiles, goldMaxPiles, goldTotal);
+
+    for (int i = 0; i < goldMaxPiles; i++){
+        gold_amt = nugget_counts[i]
+
+        if (gold_amt < 0){
+            break;
+        }
+
+        add_gold_pile(game, gold_amt, i);
+    }
+
+    mem_free(nugget_counts);
+    
+}
+
+void 
+add_gold_pile(game_t* game, int gold_amt, int piles)
 {
     int gold_x;
     int gold_y;
 
-    // go thru and assign gold randomnly somehow
-    while (game->goldRemaining < goldTotal){
-        assign_random_spot(game->grid, game->rows; game->columns, '*', &gold_x, &gold_y);
+    gold_location_t* gold_spot = mem_malloc_assert(sizeof(gold_location_t));
+    assign_random_spot(game->grid, game->rows; game->columns, '*', &gold_x, &gold_y);
+    gold_spot->x = gold_x;
+    gold_spot->y = gold_y;
+    gold_spot->nuggetCount = gold_amt;
+
+    game->goldRemaining += gold_amt;
+    (game->locations)[piles] = gold_spot;
+
+}
+
+int*
+nugget_count_array(const int goldMinPiles, const int goldMaxPiles, int goldTotal)
+{
+    const int lower_bound = 5;
+    const int upper_bound = 30;
+
+    while (true){
+        int piles = 0;
+        int* arr = mem_malloc_assert(goldMaxPiles * sizeof(int));
+        int gold_amt;
+        int total_gold_added = 0;
+
+        while (piles < goldMaxPiles && total_gold_added < goldTotal){
+            gold_amt = (rand() % (upper_bound - lower_bound + 1)) + lower_bound;
+
+            if (gold_amt + total_gold_added > goldTotal || piles = goldMaxPiles - 1){
+                gold_amt = goldTotal - total_gold_added;
+            }
+            
+            arr[piles] = gold_amt;
+            total_gold_added += gold_amt;
+
+            piles++;
+        }
+
+        if(piles >= goldMinPiles){
+            if (piles < goldMaxPiles - 1){
+                arr[piles + 1] = -1;
+            }
+            return arr;
+        }
+
+        mem_free(arr);
     }
-    
 
 }
 
