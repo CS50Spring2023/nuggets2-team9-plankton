@@ -31,22 +31,31 @@ int main()
 *
 */
 
-char* load_grid(FILE* fp)
+char* load_grid(FILE* fp, int* rowp, int* columnp)
 {
+
     if (fp == NULL){
         fprintf(stderr, "Error. NULL file pointer passed to load_map.\n");
         exit(1);
     }
 
     // get rows and columns
-    int rows = file_numLines(fp);               // number of lines in the file signifies the number of rows
-    int columns = strlen(file_readLine(fp));    // the length of every line (just use the first) signifies the number of columns
+    rowp = file_numLines(fp);               // number of lines in the file signifies the number of rows
+    // store first line in a string
+    char* firstLine = file_readLine(fp);
+    columnp = strlen(firstLine);    // the length of every line (just use the first) signifies the number of columns
 
     // Create string for to hold the grid, must have rows*columns characters plus memory for new lines
     char* grid = mem_malloc_assert((rows*columns) + rows - 1, "Error allocating memory in load_grid.\n");
+	
+    // add the first line to the map, so that it isn't skipped
+	for (int i = 0; i < columns; i++){
+	    // calculate the appropriate index and store the char in the grid string
+	    grid[strPos]=firstLine[i];
+	}
 
     char* line = NULL;
-    int rowIndex = 1; // what "row" of the map are we currently adding to the grid
+    int rowIndex = 2; // what "row" of the map are we currently adding to the grid
 
     // loop through every row in the map
     while ((line = file_readLine(fp)) != NULL){
@@ -68,7 +77,7 @@ char* load_grid(FILE* fp)
 
 
 void
-assign_random_spot(char** grid, int rows, int columns, char thing)
+assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, int* spot_y)
 {
     // assigns a "thing" to a random open spot, can be used to place either gold or a player
     bool placed = false;
@@ -81,6 +90,7 @@ assign_random_spot(char** grid, int rows, int columns, char thing)
         if (strcmp(grid[r], '.')==0){
             grid[r]=='*';
             placed = true;
+            // assign spot x and y
         }
         // try again with another random spot if it didn't work
     }
