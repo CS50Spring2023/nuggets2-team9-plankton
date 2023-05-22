@@ -17,6 +17,7 @@ typedef struct client {
     int x;
     int y;
     char** grid;
+    bool onTunnel;
     
 } client_t;
 
@@ -54,6 +55,7 @@ new_player(game_t* game, const addr_t client, char* name)
     strcpy(player->real_name, name);
     player->gold = 0;
     player->grid = mem_malloc_assert(game->rows * sizeof(char*), "Error allocating memory in new_player.\n");
+    player->onTunnel = false;
 
     game->clients[playersJoined + 1];
     (game->playersJoined)++;
@@ -61,6 +63,14 @@ new_player(game_t* game, const addr_t client, char* name)
     // assign player to a random spot
     assign_random_spot(game->grid, game->rows, game->columns, player);
     
+}
+
+// add update position function
+void
+update_position(player_t* player, int x, int y)
+{
+    player->x = x;
+    player->y = y;
 }
 
 void
