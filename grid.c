@@ -488,9 +488,9 @@ bool pcONwc (int row, int col)
 // }
 
 
-bool
-isVisible(int pr, int pc, int wr, int wc)
-{
+// bool
+// isVisible(int pr, int pc, int wr, int wc)
+// {
     // checks if wr, wc is visible from position player position pr, pc
     // assume (0,0) point in top right corner, as in example presented in REQUIREMENTS.md
 
