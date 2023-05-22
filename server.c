@@ -13,6 +13,12 @@
 #include "support/message.h"
 #include <ctype.h>
 
+static const int MaxNameLength = 50;   // max number of chars in playerName
+static const int MaxPlayers = 26;      // maximum number of players
+static const int GoldTotal = 250;      // amount of gold in the game
+static const int GoldMinNumPiles = 10; // minimum number of gold piles
+static const int GoldMaxNumPiles = 30; // maximum number of gold piles
+
 
 int
 main(const int argc, char* argv[])
@@ -24,9 +30,31 @@ main(const int argc, char* argv[])
     return(0);
 }
 
+bool
+handleMessage(void* arg, const addr_t from, const char* message)
+{
+
+}
+
+
 void
 handle_movement(client_t* player, char key, game_t* game)
 {
+    if(key == 'q'){
+        send_quitMsg(player);
+        
+        if (!player->isSpectator){
+            // reset spot
+            if (player->onTunnel){
+                change_spot(game, player->x, player->y, '#');
+            }
+            else{
+                change_spot(game, player->x, player->y, '.');
+            }
+        }
+
+        delete_client(player, game);
+    }
 
     int newPos_x = player->x;
     int newPos_y = player->y;

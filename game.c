@@ -18,6 +18,7 @@ typedef struct client {
     int y;
     char** grid;
     bool onTunnel;
+    int clientsArr_Idx;
     
 } client_t;
 
@@ -57,7 +58,8 @@ new_player(game_t* game, const addr_t client, char* name)
     player->grid = mem_malloc_assert(game->rows * sizeof(char*), "Error allocating memory in new_player.\n");
     player->onTunnel = false;
 
-    game->clients[playersJoined + 1];
+    game->clients[playersJoined + 1] = player;
+    player->clientsArr_Idx = playersJoined + 1;
     (game->playersJoined)++;
     
     // assign player to a random spot
@@ -72,6 +74,9 @@ update_position(player_t* player, int x, int y)
     player->x = x;
     player->y = y;
 }
+
+// add find player
+
 
 void
 new_spectator(game_t* game, const addr_t client)
@@ -89,6 +94,8 @@ new_spectator(game_t* game, const addr_t client)
     spectator->grid = NULL;
     spectator->gold = 0;
     spectator->real_name = NULL;
+    spectator->onTunnel = false;
+    spectator->clientsArr_Idx = 0;
 
     (game->clients)[0] = spectator;
     game->spectatorActive = true;
@@ -96,14 +103,17 @@ new_spectator(game_t* game, const addr_t client)
 }
 
 void
-delete_client(client_t* client)
+delete_client(client_t* client, game_t* game)
 {
     if (player->real_name != NULL){
         mem_free(player->real_name);
     }
-    if (player->grid != NULL){
-        // loop thru and free strings, don't know how grid will be represented yet
-    }
+    
+    // grid delete function call
+
+    (game->clients)[client->clientsArr_Idx] = NULL;
+
+    mem_free(client);
 
 }
 
@@ -112,6 +122,12 @@ new_game(FILE* map_file, const int maxPlayers)
 {
     game_t* new_game = mem_malloc_assert(sizeof(game_t), "Error allocating memory in new_game.\n");
     new_game->clients =  mem_malloc_assert((maxPlayers + 1) * sizeof(client_t), "Error allocating memory in new_game.\n");
+
+    // initialize array of client to be all NULL
+    for (int i = 0; i < maxPlayers + 1; i++){
+        new_game->clients = NULL;
+    }
+
     new_game->goldRemaining = 0;
     new_game->playersJoined = 0;
     new_game->spectatorActive = false;
