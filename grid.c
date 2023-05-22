@@ -27,8 +27,7 @@ int main()
 * Reads the file into an array of strings, each string in the array represents a row of the map
 */
 
-char**
-load_grid(FILE* fp)
+char** load_grid(FILE* fp, int* rowp, int* columnp)
 {
     // defensive check: file isn't null
     if (fp == NULL){
@@ -36,20 +35,25 @@ load_grid(FILE* fp)
         exit(1);
     }
 
+    // fill pointers with number of rows and columns
+    *rowp = file_numLines(fp);               // number of lines in the file signifies the number of rowsv
+    char* firstLine = file_readLine(fp);
+    *columnp = strlen(firstLine);    // the length of every line (just use the first) signifies the number of columns
+
     // Create an array of strings, each string is one row of the map
-    char** grid = mem_malloc_assert(file_numLines(fp) * sizeof(char*), "Error allocating memory in load_grid.\n");
+    char** grid = mem_malloc_assert(*rowp * sizeof(char*), "Error allocating memory in load_grid.\n");
     char* newRow = NULL;
     int row = 0; // keeps track of our position while filling in grid array
 
     // reset pointer to beginning of the file
     rewind(fp);
 
+    // fill in the grid
     while ((newRow = file_readLine(fp)) != NULL){
         grid[row] = newRow;
         row++;
     }
     return grid;
-
 }
 
 /*
@@ -350,8 +354,8 @@ isVisible(int pr, int pc, int wr, int wc)
 
 
 
-/**************** functions  ****************/
-// rewritten for the new grid format: commented out
+/**************** OLD FUNCTIONS  ****************/
+// rewritten for the new grid format: commented out, everything should be above this line
 
 /*
 * load_grid: takes in a FILE* fp to a map file which is assumed to be valid
