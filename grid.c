@@ -465,9 +465,9 @@ isVisible(int pr, int pc, int wr, int wc)
 // }
 
 
-bool
-isVisible(int pr, int pc, int wr, int wc)
-{
+// bool
+// isVisible(int pr, int pc, int wr, int wc)
+// {
     // checks if wr, wc is visible from position player position pr, pc
     // assume (0,0) point in top right corner, as in example presented in REQUIREMENTS.md
 
@@ -636,81 +636,4 @@ isVisible(int pr, int pc, int wr, int wc)
     
 //     return invisible
 //     */
-// }
-
-/**************** old functions  ****************/
-
-// /*
-// * load_grid: takes in a FILE* fp to a map file which is assumed to be valid
-// * Reads the file into an array of strings, each string in the array represents a row of the map
-// *
-// */
-// char**
-// load_grid(FILE* fp)
-// {
-//     if (fp == NULL){
-//         fprintf(stderr, "Error. NULL file pointer passed to load_map.\n");
-//         exit(1);
-//     }
-
-//     // Create an array of strings, each string is one row of the map
-//     char** grid = mem_malloc_assert(file_numLines(fp) * sizeof(char*), "Error allocating memory in load_grid.\n");
-
-//     char* newRow = NULL;
-//     int row = 0; // keeps track of our position while filling in grid array
-
-//     while ((newRow = file_readLine(fp)) != NULL){
-//         grid[row] = newRow;
-//         row++;
-//     }
-
-//     return grid;
-
-// }
-
-
-// idk if i need this
-// char**
-// empty_player_grid(int rows, int columns)
-// {
-//     char** grid = mem_malloc_assert(rows * sizeof(char*), "Error allocating memory in empty_player_grid.\n");
-
-//     for (int r = 0; r < rows; r++){
-
-//         for(int c = 0; c < columns; c++){
-
-//         }
-//     }
-// }
-
-/*
-* grid_toStr: converts a grid to a string that can be sent to and displayed by the client
-* Takes in a char** global_grid and optionally a char** player_grid (which can be null) as well as the number of rows and columns in the grid
-* If a player_grid is NULL the output string will just be the global_grid
-*
-*/
-// char*
-// grid_toStr(char** global_grid, char** player_grid, int rows, int columns)
-// {
-//     // Create string for string version of grid map, must have rows*columns characters plus new lines
-//    char* display = mem_malloc_assert((row*columns) + rows - 1, "Error allocating memory in grid_toStr.\n");
-
-//    for (int r = 0; r < rows; r++){
-//         for (int c = 0; c < columns; c++){
-//             // adding 1 because null terminator isn't included in column count
-//             display[(r* (columns + 1)) + c] = global_grid[r][c];
-           
-//             if (player_grid != NULL){
-//                 // if a player grid was passed in, set to player_grid value
-//                 display[(r* (columns + 1)) + c] = player_grid[r][c];
-//             }
-//         }
-//         // don't add a new line after the last row
-//         if (r < rows - 1){
-//             display[(r* (columns + 1)) + columns + 1] = '\n'; // add new line to the end of each row
-//         }
-//     }
-
-//    return display;
-
 // }
