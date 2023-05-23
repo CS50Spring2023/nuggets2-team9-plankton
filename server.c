@@ -39,11 +39,21 @@ main(const int argc, char* argv[])
         fprintf(stderr, "Too many arguments were provided. Call using the format ./server map.txt [seed]\n");
 		exit(1);
 	}
+    
+    // parse the command line, open the file
+    char* mapFilename = argv[1];
+    FILE* map_file;
+    map_file = fopen(mapFilename, "r");
+
+    // defensive check: file could be opened
+    if (map_file == NULL){
+        fprintf(stderr, "file could not be opened" );
+		exit(1);
+    }
 
     // TODO IF NOT HANDLED ELSEWHERE (SR): If the optional seed is provided, the server shall pass it to srand(seed). 
     // If no seed is provided, the server shall use srand(getpid()) to produce random behavior.
-
-    // add a function here or in grid to validate het map file before we continue: 
+        // int seed = argv[2];
 
     // create a new game first
     game_t* game = new_game(map_file, MaxPlayers);
@@ -55,6 +65,9 @@ main(const int argc, char* argv[])
     message_loop(game, timeout, handleTimeout, NULL, handleMessage);
     // end the loop once the game ends
     message_done();
+
+    // close the file
+    fclose(map_file);
 
     return(0);
 }
@@ -113,7 +126,7 @@ handleMessage(void* arg, const addr_t from, const char* message)
 }
 
 
-// the server immediateely sends a GRID, GOLD and DISPLAY message to all new clients
+// the server immediately sends a GRID, GOLD and DISPLAY message to all new clients
 void
 inform_newClient(client_t* client, game_t* game)
 {
