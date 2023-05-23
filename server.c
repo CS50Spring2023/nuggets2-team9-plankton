@@ -11,6 +11,7 @@
 #include "libs/file.h"
 #include "support/log.h"
 #include "support/message.h"
+
 #include "game.h"
 #include "grid.h"
 #include <ctype.h>
@@ -20,6 +21,9 @@ static const int MaxPlayers = 26;      // maximum number of players
 static const int GoldTotal = 250;      // amount of gold in the game
 static const int GoldMinNumPiles = 10; // minimum number of gold piles
 static const int GoldMaxNumPiles = 30; // maximum number of gold piles
+
+#include <ctype.h>
+
 
 
 int
@@ -90,6 +94,7 @@ handleMessage(void* arg, const addr_t from, const char* message)
 }
 
 void
+
 inform_newClient(client_t* client, game_t* game)
 {
     // send grid message
@@ -123,6 +128,44 @@ send_displayMsg(game_t* game, client_t* client){
     char* map;
     char* display;
 
+handle_movement(client_t* player, char key, game_t* game)
+{
+
+    int newPos_x = player->x;
+    int newPos_y = player->y;
+
+
+    switch (key) {
+        // update new Pos based on the case
+        case 'h': ... code for letter=='B'; break;
+        case 'l': ... code for letter=='C'; break;
+        case 'j': ... code for letter=='A'; break;
+        case 'k': ... code for letter=='B'; break;
+        case 'y': ... code for letter=='C'; break;
+        case 'u': ... code for letter=='A'; break;
+        case 'b': ... code for letter=='B'; break;
+        case 'n': ... code for letter=='C'; break;
+        default:  ... code for letter not matching any case above.
+
+    }
+
+    char grid_val = get_grid_value(newPos_x, newPos_y);
+    if (grid_val == '+' || grid_val == '-' || grid_val == '|' || grid_val == ' '){
+        return;
+    }
+    else if (grid_val == '.' || grid_val == '#'){
+
+    }
+    else if (isalpha(grid_val)){
+        //
+    }
+    else if (grid_val == '*'){
+        update_gold(game, player, newPos_x, newPos_y, goldMaxPiles);
+        // send notify message
+        
+    }
+
+
     if (client->isSpectator){
         map = grid_toStr(game->grid, NULL, game->rows, game->columns);
     }
@@ -152,6 +195,7 @@ extractRequest(const char* input)
         // Handle empty input string or null pointer
         return NULL;
     }
+
 
     int length = strlen(input);
     int wordEndIndex = -1;
@@ -268,6 +312,9 @@ handle_movement(client_t* player, char key, game_t* game)
         // change the global grid on the spot they are now on to be their letter
         update_position(player, newPos_x, newPos_y);
     }
+
+     
+
    
 }
 
