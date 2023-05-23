@@ -23,7 +23,7 @@ Team 9: Plankton, May 2023
 * load_grid: takes in a FILE* fp to a map file which is assumed to be valid
 * Reads the file into an array of strings, each string in the array represents a row of the map
 */
-char** load_grid(FILE* fp, int* rowp, int* columnp)
+char** load_grid(FILE* fp, int* rowp, int* columnp);
 
 
 /*
@@ -45,7 +45,7 @@ void assign_random_spot(char** grid, int rows, int columns, char thing, int* spo
 * update_player_grid: 
 * Takes in a char** player_grid, char** global_grid, int representing player rows, and int representing player columns
 */
-void update_player_grid(char** player_grid, char** global_grid, int pr, int pc, int globalGrid_rows, int globalGrid_columns);
+void update_player_grid(char** player_grid, game_t* game, int pr, int pc);
 
 
 /*
@@ -60,21 +60,21 @@ void update_grids(char** global_grid, game_t* game);
 * outputs whatever symbol is at that point in the grid
 *
 */
-char* get_symbol(char** grid, int rows, int columns, int x, int y);
+char* get_grid_value(game_t* game, int x, int y);
 
 
 /*
 * change_spot: takes in grid, number of rows and columns, coordinate values, and a symbol
 * changes whatever is at that spot to the new symbol
 */
-void change_spot(char** grid, int rows, int columns, int x, int y, char* symbol);
+void change_spot(game_t* game, int x, int y, char* symbol);
 
 
 /*
 * getWalls: takes in player row & col
 * outputs array with room boundaries necessary to determine visibility
 */
-char** getWalls(int pr, int pc);
+char** getWalls(game_t* game, char** grid, int pr, int pc);
 
 
 /*

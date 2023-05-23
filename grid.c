@@ -115,17 +115,13 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, 
 /*
 * update_player_grid: 
 * Takes in a char** player_grid, char** global_grid, int representing player rows, and int representing player columns
-* 
+* outputs nothing 
+* calls getWalls to find room boundaries
+* for each boundary, calls isVisible to update player's grid
 */
 void
 update_player_grid(char** player_grid, game_t* game, int pr, int pc)
 {
-
-    /* LOGIC OUTLINE:
-    updates player_grid to reflect all visible points
-    calls helper method on all points to check if visible-- if so, sets to global value within helper method
-    otherwise update points present in player_grid but now invisible to the player to the empty spot, with no item (player/gold) */
-
     // get walls
     char** walls = mem_malloc_assert(sizeof(game->rows * sizeof(char*)), "Error allocating memory in getWalls.\n");
     walls = getWalls(game, game->grid, pr, pc);
@@ -157,7 +153,7 @@ update_grids(char** global_grid, game_t* game)
 
 
 /*
-* get_symbol: takes in a grid object, x value, y value, number of rows, number of columns
+* get_grid_value: takes in a grid object, x value, y value, number of rows, number of columns
 * outputs whatever symbol is at that point in the grid
 *
 */
