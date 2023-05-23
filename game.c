@@ -2,9 +2,17 @@
 game.c 
 TODO: add details here
 
-Team 9: Plankton, April 2023
+Team 9: Plankton, May 2023
 */
 
+#include <stdlib.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include "libs/file.h"
+#include "grid.h"
+#include "support/message.h"
 
 
 // a single player's struct
@@ -71,7 +79,7 @@ new_player(game_t* game, const addr_t client, char* name)
 
 // add update position function
 void
-update_position(player_t* player, int x, int y)
+update_position(client_t* player, int x, int y)
 {
     player->x = x;
     player->y = y;
