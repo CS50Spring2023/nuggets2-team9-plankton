@@ -102,30 +102,28 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, 
 /*
 * update_player_grid: 
 * Takes in a char** player_grid, char** global_grid, int representing player rows, and int representing player columns
-* 
+* outputs nothing 
+* calls getWalls to find room boundaries
+* for each boundary, calls isVisible to update player's grid
 */
 void
-update_player_grid(char** player_grid, char** global_grid, int pr, int pc, int globalGrid_rows, int globalGrid_columns)
+update_player_grid(char** player_grid, game_t* game, int pr, int pc)
 {
     // change the player's '@' symbol to their new position.
     player_grid[pr][pc]='@';
 
     // then, change their local grid display in reference to where they are and what they can see
 
-    /* LOGIC OUTLINE:
-    updates player_grid to reflect all visible points
-    calls helper method on all points to check if visible-- if so, sets to global value within helper method
-    otherwise update points present in player_grid but now invisible to the player to the empty spot, with no item (player/gold) */
+    // get walls
+    char** walls = mem_malloc_assert(sizeof(game->rows * sizeof(char*)), "Error allocating memory in getWalls.\n");
+    walls = getWalls(game, game->grid, pr, pc);
 
-	// TODO: figure out how to keep track of boundary/wall elements; maybe make array of boundary/wall elements? !!!!
-    // NOTE: i left things out of player view blank assuming each time player moves their visibility map starts blank - maybe not the best - might have to change
-
-    // placeholders: need to figure out how to find wr, wc of current room!!
-    int wr = 0;
-    int wc = 0;
-
-	// for wall point (wr, wc) in grid array
-        isVisible(global_grid, player_grid, globalGrid_rows, globalGrid_columns, pr, pc, wr, wc);
+	// for each wall point (wr, wc) in walls array
+    for(int wr = 0; wr < ; wr++) {
+        for(int wc = 0; wc < ; wc++) {
+            isVisible(game, player_grid, pr, pc, wr, wc);
+        }
+    }
 
 }
 
@@ -144,14 +142,14 @@ update_grids(game_t* game)
 }
 
 /*
-* get_symbol: takes in a grid object, x value, y value, number of rows, number of columns
-* outputs whatever symbol is located at that point in the grid
+* get_grid_value: takes in a grid object, x value, y value, number of rows, number of columns
+* outputs whatever symbol is at that point in the grid
 *
 */
 char* 
 get_grid_value(game_t* game, int x, int y)
 {
-    return game->grid[x,y];
+    return game->grid[x][y];
 }
 
 
@@ -162,7 +160,7 @@ get_grid_value(game_t* game, int x, int y)
 void 
 change_spot(game_t* game, int x, int y, char* symbol)
 {
-    game->grid[x,y]=symbol;
+    game->grid[x][y]=symbol;
 }
 
 
@@ -171,9 +169,71 @@ change_spot(game_t* game, int x, int y, char* symbol)
 * outputs array with room boundaries necessary to determine visibility
 */
 char**
-getWalls(int pr, int pc)
+getWalls(game_t* game, char** grid, int pr, int pc)
 {
-    // coming soon!
+
+    // assuming coord (0,0) is in the top left corner
+
+    // get walls
+    char** walls = mem_malloc_assert(sizeof(game->rows * sizeof(char*)), "Error allocating memory in getWalls.\n");
+
+
+    while ( (grid[pr][pc] != "-") || (grid[pr][pc] != "#") || (grid[pr][pc] != "x") ){
+        // while inside playing field, go down
+        pr++;
+    }
+
+    // save element in walls array
+    walls[pc][pr] = grid[pr][pc];
+
+    // save coordinates as first coords
+    int pr1 = pr;
+    int pc1 = pc;
+
+
+    while ((pr != pr1) && (pc != pc1)){
+        
+        // if wall type to the right
+        if ( (grid[pr][pc+1] == "-") || (grid[pr][pc+1] == "#") || (grid[pr][pc+1] == "x") ){
+            // if curr element not also a tunel, don't move
+            if (grid[pr][pc] != "#"){
+                // move one step in that direction
+                pc++;
+            }  
+        }
+
+        // if wall type up
+        else if ( (grid[pr-1][pc] == "-") || (grid[pr-1][pc] == "#") || (grid[pr-1][pc] == "x") ){
+            // if curr element not also a tunel, don't move
+            if (grid[pr][pc] != "#"){
+                // move one step in that direction
+                pr--;
+            }  
+        }  
+
+        // if wall type to the left
+        else if ( (grid[pr][pc-1] == "-") || (grid[pr][pc-1] == "#") || (grid[pr][pc-1] == "x") ){
+            // if curr element not also a tunel, don't move
+            if (grid[pr][pc] != "#"){
+                // move one step in that direction
+                pc--;
+            }  
+        }
+
+        // if wall type down
+        else if ( (grid[pr+1][pc] == "-") || (grid[pr+1][pc] == "#") || (grid[pr+1][pc] == "x") ){
+            // if curr element not also a tunel, don't move
+            if (grid[pr][pc] != "#"){
+                // move one step in that direction
+                pr++;
+            }  
+        }
+
+        // save element into wall 2d array
+        walls[pr][pc] = grid[pr][pc];
+
+    } 
+
 }
 
 /*
@@ -183,11 +243,14 @@ getWalls(int pr, int pc)
 * outputs a boolean which is true if the visibility on the player's grid changes (e.g. new points visible, less points visible, new gold seen etc.)
 */
 bool
-isVisible(char** global_grid, char** player_grid, int globalGrid_rows, int globalGrid_columns, int pr, int pc, int wr, int wc)
+isVisible(game_t* game, char** player_grid, int pr, int pc, int wr, int wc)
 {
     // assume (0,0) point in top left corner, as in example presented in REQUIREMENTS.md
     
-	bool gridChanged;  // switch for determining if visibility changed for this player
+	bool gridChanged;  // switch for determining if visibility changed
+    char** global_grid = game->grid;
+    int globalGrid_rows = game->rows;
+    int globalGrid_columns = game->columns;
 
     // set up another grid to player's grid before updates for latter comparison
     char** oldGrid = mem_malloc_assert(globalGrid_rows * sizeof(char*), "Error allocating memory in isVisible.\n");

@@ -25,7 +25,30 @@ static const int GoldMaxNumPiles = 30; // maximum number of gold piles
 int
 main(const int argc, char* argv[])
 {
-    // parse args
+
+    // parse args: first argument should be the pathname for a map file, the second is an optional seed for the random-number generator, which must be a positive int if provided
+    
+    // make sure there are no more than 2 arguments
+    if (argc > 3){
+        fprintf(stderr, "Too many arguments were provided. Call using the format ./server map.txt [seed]\n");
+	exit(1);
+    }
+    
+    // parse the command line, open the file
+    char* mapFilename = argv[1];
+    FILE* map_file;
+    map_file = fopen(mapFilename, "r");
+
+    // defensive check: file could be opened
+    if (map_file == NULL){
+        fprintf(stderr, "file could not be opened" );
+	exit(1);
+    }
+
+    // TODO IF NOT HANDLED ELSEWHERE (SR): If the optional seed is provided, the server shall pass it to srand(seed). 
+    // If no seed is provided, the server shall use srand(getpid()) to produce random behavior.
+        // int seed = argv[2];
+
 
     // create a new game first
     game_t* game = new_game(map_file, MaxPlayers);
@@ -35,6 +58,9 @@ main(const int argc, char* argv[])
     message_init(stderr);
     message_loop(game, timeout, handleTimeout, NULL, handleMessage);
     message_done();
+
+    // close the file
+    fclose(map_file);
 
     return(0);
 }
@@ -87,7 +113,11 @@ handleMessage(void* arg, const addr_t from, const char* message)
 
 
 
+
+// the server immediately sends a GRID, GOLD and DISPLAY message to all new clients
+
 }
+
 
 void
 inform_newClient(client_t* client, game_t* game)
