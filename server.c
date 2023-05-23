@@ -238,7 +238,7 @@ handle_movement(client_t* player, char key, game_t* game)
     }
     else if (isalpha(grid_val)){
         // find the player there using a game function
-        player_t* other_player = find_player(grid_val, game);
+        client_t* other_player = find_player(grid_val, game);
 
         // switch the positions of the two players
         update_position(other_player, player->x, player->y);
@@ -287,7 +287,7 @@ handle_movement(client_t* player, char key, game_t* game)
 }
 
 static void
-update_previous_spot(player_t* player, game_t* game, char grid_val)
+update_previous_spot(client_t* player, game_t* game, char grid_val)
 {
     //change the global grid on the spot they came from back to what it was
     if (player->onTunnel){
