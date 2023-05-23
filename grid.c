@@ -15,20 +15,13 @@ Team 9: Plankton, May 2023
 #include "libs/mem.h"
 #include "game.h"
 
-// just to deal with executable compilation error, delete later
-int main()
-{
-    return 1;
-}
-
 /**************** functions: grid as a 2D array  ****************/
 
 /*
 * load_grid: takes in a FILE* fp to a map file which is assumed to be valid
 * Reads the file into an array of strings, each string in the array represents a row of the map
 */
-
-char**
+char** 
 load_grid(FILE* fp)
 {
     // defensive check: file isn't null
@@ -41,16 +34,14 @@ load_grid(FILE* fp)
     char** grid = mem_malloc_assert(file_numLines(fp) * sizeof(char*), "Error allocating memory in load_grid.\n");
     char* newRow = NULL;
     int row = 0; // keeps track of our position while filling in grid array
-
-    // reset pointer to beginning of the file
-    rewind(fp);
+    rewind(fp);  // reset pointer to beginning of the file
 
     while ((newRow = file_readLine(fp)) != NULL){
         grid[row] = newRow;
         row++;
     }
+    // this is a 2D character array
     return grid;
-
 }
 
 /*
@@ -58,11 +49,10 @@ load_grid(FILE* fp)
 * Takes in a char** global_grid and optionally a char** player_grid (which can be null) as well as the number of rows and columns in the grid
 * If a player_grid is NULL the output string will just be the global_grid
 */
-
 char*
 grid_toStr(char** global_grid, char** player_grid, int rows, int columns)
 {
-    // Create string for string version of grid map, must have rows*columns characters plus new lines
+   // Create string for string version of grid map, must have rows*columns characters plus new lines
    char* display = mem_malloc_assert((rows*columns) + rows - 1, "Error allocating memory in grid_toStr.\n");
 
    for (int r = 0; r < rows; r++){
@@ -80,21 +70,19 @@ grid_toStr(char** global_grid, char** player_grid, int rows, int columns)
             display[(r* (columns + 1)) + columns + 1] = '\n'; // add new line to the end of each row
         }
     }
-
+    // this is a string, in a format that can be sent directly to the client 
    return display;
-
 }
 
 /*
-* assign_random_spot: 
-* Takes in a char** global_grid, number of rows, number of columns, a "thing" to be placed, as well as x and y ptrs to be filled
+* assign_random_spot: assigns a "thing" to a random place on the grid where it's allowed
+* Takes in a char** global_grid, number of rows, number of columns, a "thing" to be placed, as well as x and y pointers to be filled
 */
 void
 assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, int* spot_y)
 {
     // assigns a "thing" to a random open spot, can be used to place either gold or a player
     bool placed = false;
-    int max = columns*rows;
     while (placed == false){
         // get a pseudo-random x coordinate and y coordinate from stdlib
         int x = rand() % columns;
@@ -111,7 +99,6 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, 
     }
 }
 
-
 /*
 * update_player_grid: 
 * Takes in a char** player_grid, char** global_grid, int representing player rows, and int representing player columns
@@ -120,6 +107,10 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, 
 void
 update_player_grid(char** player_grid, char** global_grid, int pr, int pc, int globalGrid_rows, int globalGrid_columns)
 {
+    // change the player's '@' symbol to their new position.
+    player_grid[pr][pc]='@';
+
+    // then, change their local grid display in reference to where they are and what they can see
 
     /* LOGIC OUTLINE:
     updates player_grid to reflect all visible points
@@ -138,13 +129,11 @@ update_player_grid(char** player_grid, char** global_grid, int pr, int pc, int g
 
 }
 
-
 /*
-* update_grids: 
-* loops through all clients and updates their grids
+* update_grids: given a game object, loops through all clients and update their grids
 */
 void
-update_grids(char** global_grid, game_t* game)
+update_grids(game_t* game)
 {
     char** clients = game->clients;
     // loops thru all players
@@ -154,13 +143,13 @@ update_grids(char** global_grid, game_t* game)
     }
 }
 
-
 /*
 * get_symbol: takes in a grid object, x value, y value, number of rows, number of columns
-* outputs whatever symbol is at that point in the grid
+* outputs whatever symbol is located at that point in the grid
 *
 */
-char* get_grid_value(game_t* game, int x, int y)
+char* 
+get_grid_value(game_t* game, int x, int y)
 {
     return game->grid[x,y];
 }
@@ -170,7 +159,8 @@ char* get_grid_value(game_t* game, int x, int y)
 * change_spot: takes in grid, coordinate values, and a symbol
 * changes whatever is at that spot to the new symbol
 */
-void change_spot(game_t* game, int x, int y, char* symbol)
+void 
+change_spot(game_t* game, int x, int y, char* symbol)
 {
     game->grid[x,y]=symbol;
 }
@@ -186,7 +176,6 @@ getWalls(int pr, int pc)
     // coming soon!
 }
 
-
 /*
 * isVisible: takes in player, player row & col, wall (boundary) row & column and game
 * checks if wr, wc is visible from position player position pr, pc
@@ -198,25 +187,23 @@ isVisible(char** global_grid, char** player_grid, int globalGrid_rows, int globa
 {
     // assume (0,0) point in top left corner, as in example presented in REQUIREMENTS.md
     
-	bool gridChanged;  // switch for determining if visibility changed
+	bool gridChanged;  // switch for determining if visibility changed for this player
 
-    // set up another grid to player's grid before updates for latter comparisson
+    // set up another grid to player's grid before updates for latter comparison
     char** oldGrid = mem_malloc_assert(globalGrid_rows * sizeof(char*), "Error allocating memory in isVisible.\n");
     oldGrid = player_grid;
-	
 
     // update player grid
     visCol(global_grid, player_grid, pc, pr, wc, wr);  // visCol handles pc < wc AND pc > wc cases
     visRow(global_grid, player_grid, pr, pc, wr, wc);  // visRow handles pr < wr AND pr > wr cases
 
-
     // check if new player map has changed from previous version
     gridChanged = compareGrids(globalGrid_rows, globalGrid_columns, player_grid, oldGrid);
 
+    // boolean, will be used to determine whether a messsage should be sent to this player
     return gridChanged;
 
 }
-
 
 /* compareGrids: takes in global grid rows & columns, the new player grid, and their former grid
 * helper for isVisble to compare current to previous player grids for changes in visibility 
@@ -224,19 +211,19 @@ isVisible(char** global_grid, char** player_grid, int globalGrid_rows, int globa
 bool 
 compareGrids(int rows, int columns, char** playerGrid, char** oldGrid)
 {
-
+    // for every gridspot
     for (int i = 0; i < rows; i++){
         for (int j; j < columns; j++){
+            // if there has been a change
             if (playerGrid[i][j] != oldGrid[i][j]){
+                // return true, a new message needs to be sent to this player
                 return true;
             }
         }
     }
-
+    // if nothing has changed, then no message needs to be sent
     return false;
-
 }
-
    
 /* visCol: takes in the player, the player's current column and the column of a wall being investigated
 * helper to compute visibility across columns
@@ -245,13 +232,15 @@ compareGrids(int rows, int columns, char** playerGrid, char** oldGrid)
 void
 visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr)
 {
+
     float slope;
 
-    // set slope
+    // calculate and set slope based on the player in reference to the wall being investigated
 	if (pc != wc) {
         slope = (wr-pr)/(wc-pc);
     }
 
+    // if the player is to the left of the wall
     if (pc < wc){
 		// check point on each column between and not including pc and wc
 	    for (int col = pc+1; col < wc; col++){
@@ -277,10 +266,8 @@ visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr)
                     // this and all future locations are invisible to player: make them " "
                     player_grid[(int)row][col] = " ";
                 }
-            }
-            
-        }
-						
+            } 
+        }			
     }
 
     else if (pc > wc){
