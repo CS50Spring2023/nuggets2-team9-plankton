@@ -141,7 +141,8 @@ send_displayMsg(game_t* game, client_t* client){
 }
 
 char*
-extract_playerName(){
+extract_playerName()
+{
     
 }
 
@@ -219,21 +220,14 @@ handle_movement(client_t* player, char key, game_t* game)
 
     }
 
-    char grid_val = get_grid_value(newPos_x, newPos_y);
+    char grid_val = get_grid_value(game, newPos_x, newPos_y);
 
     if (grid_val == '+' || grid_val == '-' || grid_val == '|' || grid_val == ' '){
         return;
     }
     else if (grid_val == '.' || grid_val == '#'){
-        //change the global grid on the spot they came from back to what it was
-        if (player->onTunnel){
-            change_spot(game, player->x, player->y, '#');
-        }
-        else{
-            change_spot(game, player->x, player->y, '.');
-        }
-
-        player->onTunnel = (grid_val == '#');
+        // change the spot the player came from back
+        update_previous_spot(player, game, grid_val);
         
         // change the global grid on the spot they are now on to be their letter
         change_spot(game, newPos_x, newPos_y, player->id);
@@ -262,13 +256,44 @@ handle_movement(client_t* player, char key, game_t* game)
 
     }
     else if (grid_val == '*'){
-        update_gold(game, player, newPos_x, newPos_y, goldMaxPiles);
-        // send gold notify message
-        //change the global grid on the spot they came from back to what it was
+        int nuggetsFound = update_gold(game, player, newPos_x, newPos_y, goldMaxPiles);
+        
+        // update the client that just picked up gold
+        send_goldMsg(game, player, nuggetsFound);
+
+        // update the other clients about the gold counts
+        for (int i = 0; i < game->playersJoined + 1; i++){
+            if (game->clients[i] != NULL && ((game->clients)[i])->id != player->id){
+                send_goldMsg(game, (game->clients)[i], 0);
+            }
+        }
+
+        // update the grids
+                
+        // change the spot the player came from back
+        update_previous_spot(player, game, grid_val);
+        
         // change the global grid on the spot they are now on to be their letter
+        change_spot(game, newPos_x, newPos_y, player->id);
+
+        // update the player's position in the player struct
         update_position(player, newPos_x, newPos_y);
+
     }
    
+}
+
+static void
+update_previous_spot(player_t* player, game_t* game, char grid_val)
+{
+    //change the global grid on the spot they came from back to what it was
+    if (player->onTunnel){
+        change_spot(game, player->x, player->y, '#');
+    }
+    else{
+        change_spot(game, player->x, player->y, '.');
+    }
+    player->onTunnel = (grid_val == '#');
 }
 
 
