@@ -23,7 +23,7 @@ Team 9: Plankton, May 2023
 * load_grid: takes in a FILE* fp to a map file which is assumed to be valid
 * Reads the file into an array of strings, each string in the array represents a row of the map
 */
-char** load_grid(FILE* fp, int* rowp, int* columnp);
+char** load_grid(FILE* fp);
 
 
 /*

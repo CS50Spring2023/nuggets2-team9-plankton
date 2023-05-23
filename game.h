@@ -35,6 +35,15 @@ typedef struct client {
     
 } client_t;
 
+
+// typedef struct gold_location gold_location_t;
+typedef struct gold_location {
+    int x;
+    int y;
+    int nuggetCount;
+} gold_location_t;
+
+
 // typedef struct game game_t;
 typedef struct game {
     char** grid;
@@ -47,13 +56,6 @@ typedef struct game {
     gold_location_t* locations;
 
 } game_t;
-
-// typedef struct gold_location gold_location_t;
-typedef struct gold_location {
-    int x;
-    int y;
-    int nuggetCount;
-} gold_location_t;
 
 
 /**************** Functions ****************/

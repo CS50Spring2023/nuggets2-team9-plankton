@@ -44,6 +44,7 @@ load_grid(FILE* fp)
     return grid;
 }
 
+
 /*
 * grid_toStr: converts a grid to a string that can be sent to and displayed by the client
 * Takes in a char** global_grid and optionally a char** player_grid (which can be null) as well as the number of rows and columns in the grid
@@ -101,60 +102,6 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, 
 
 
 /*
-* update_player_grid: 
-* Takes in a char** player_grid, char** global_grid, int representing player rows, and int representing player columns
-* outputs nothing 
-* calls getWalls to find room boundaries
-* for each boundary, calls isVisible to update player's grid
-*/
-void
-update_player_grid(char** player_grid, game_t* game, int pr, int pc)
-{
-    // change the player's '@' symbol to their new position.
-    player_grid[pr][pc]='@';
-
-    // then, change their local grid display in reference to where they are and what they can see
-
-    // get walls
-    char** walls = mem_malloc_assert(sizeof(game->rows * sizeof(char*)), "Error allocating memory in getWalls.\n");
-    walls = getWalls(game, game->grid, pr, pc);
-
-    int numRows = sizeof(walls)/sizeof(walls[0]);
-    int numCols = sizeof(walls[0])/sizeof(walls[0][0]);
-
-	// for each wall point (wr, wc) in walls array
-    for(int wr = 0; wr < numRows; wr++) {
-        for(int wc = 0; wc < numCols; wc++) {
-            isVisible(game, player_grid, pr, pc, wr, wc);
-        }
-    }
-
-}
-
-
-/*
-* update_grids: given a game object, loops through all clients and update their grids
-*/
-void
-update_grids(game_t* game)
-{
-    char* clients = malloc(sizeof(char*)*26);
-    clients = game->clients;
-
-    // loops thru all players
-    for (int i=1; i < game->playersJoined; i++){
-
-        client_t* client = clients[i];
-
-        if (client != NULL){
-            update_player_grid(client->grid, game, client->x, client->y);
-        }
-        
-    }
-}
-
-
-/*
 * get_grid_value: takes in a grid object, x value, y value, number of rows, number of columns
 * outputs whatever symbol is at that point in the grid
 *
@@ -171,7 +118,7 @@ get_grid_value(game_t* game, int x, int y)
 * changes whatever is at that spot to the new symbol
 */
 void 
-change_spot(game_t* game, int x, int y, char* symbol)
+change_spot(game_t* game, int x, int y, char symbol)
 {
     game->grid[x][y] = symbol;
 }
@@ -250,67 +197,17 @@ getWalls(game_t* game, char** grid, int pr, int pc)
 
 }
 
-/*
-* isVisible: takes in player, player row & col, wall (boundary) row & column and game
-* checks if wr, wc is visible from position player position pr, pc
-* calls helpers which update the player->grid accordingly
-* outputs a boolean which is true if the visibility on the player's grid changes (e.g. new points visible, less points visible, new gold seen etc.)
-*/
-bool
-isVisible(game_t* game, char** player_grid, int pr, int pc, int wr, int wc)
-{
-    // assume (0,0) point in top left corner, as in example presented in REQUIREMENTS.md
-    
-	bool gridChanged;  // switch for determining if visibility changed
-    char** global_grid = game->grid;
-    int globalGrid_rows = game->rows;
-    int globalGrid_columns = game->columns;
 
-    // set up another grid to player's grid before updates for latter comparison
-    char** oldGrid = mem_malloc_assert(globalGrid_rows * sizeof(char*), "Error allocating memory in isVisible.\n");
-    oldGrid = player_grid;
-
-    // update player grid
-    visCol(global_grid, player_grid, pc, pr, wc, wr);  // visCol handles pc < wc AND pc > wc cases
-    visRow(global_grid, player_grid, pr, pc, wr, wc);  // visRow handles pr < wr AND pr > wr cases
-
-    // check if new player map has changed from previous version
-    gridChanged = compareGrids(globalGrid_rows, globalGrid_columns, player_grid, oldGrid);
-
-    // boolean, will be used to determine whether a messsage should be sent to this player
-    return gridChanged;
-
-}
-
-/* compareGrids: takes in global grid rows & columns, the new player grid, and their former grid
-* helper for isVisble to compare current to previous player grids for changes in visibility 
-*/
-bool 
-compareGrids(int rows, int columns, char** playerGrid, char** oldGrid)
-{
-    // for every gridspot
-    for (int i = 0; i < rows; i++){
-        for (int j; j < columns; j++){
-            // if there has been a change
-            if (playerGrid[i][j] != oldGrid[i][j]){
-                // return true, a new message needs to be sent to this player
-                return true;
-            }
-        }
-    }
-    // if nothing has changed, then no message needs to be sent
-    return false;
-}
-   
 /* visCol: takes in the player, the player's current column and the column of a wall being investigated
 * helper to compute visibility across columns
 * outputs nothing, but updates the player->grid to either the global grid if point is visible or to " " otherwise
 */ 
-void
+bool
 visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr)
 {
 
     float slope;
+    bool changed = false;
 
     // calculate and set slope based on the player in reference to the wall being investigated
 	if (pc != wc) {
@@ -330,21 +227,30 @@ visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr)
                     player_grid[(int)row][col] == " ";
                 }
                 else{
+                    // check if player grid already equal to global grid 
+                    if (player_grid[(int)row][col] != global_grid[(int)row][col]){
+                        changed == true;
+                    }
+                    // update player grid to reflect global grid
                     player_grid[(int)row][col] = global_grid[(int)row][col];
                 }
             }
 
 			else{  // point not on grid
 				if ( (player_grid[(int)row-1][col] == ".") || (player_grid[(int)row-1][col] == "*") || (player_grid[(int)row+1][col] == ".") || (player_grid[(int)row+1][col] == "*") ){
-					// player grid at row, col gets the global grid's value at row, col
-			        player_grid[(int)row][col] = global_grid[(int)row][col];
+					// check if player grid already equal to global grid 
+                    if (player_grid[(int)row][col] != global_grid[(int)row][col]){
+                        changed == true;
+                    }
+                    // update player grid to reflect global grid
+                    player_grid[(int)row][col] = global_grid[(int)row][col];
                 }
 				else{
                     // this and all future locations are invisible to player: make them " "
                     player_grid[(int)row][col] = " ";
                 }
             } 
-        }			
+        }		
     }
 
     else if (pc > wc){
@@ -359,12 +265,22 @@ visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr)
                     player_grid[(int)row][col] = " ";
                 }
                 else{
+                    // check if player grid already equal to global grid 
+                    if (player_grid[(int)row][col] != global_grid[(int)row][col]){
+                        changed == true;
+                    }
+                    // update player grid to reflect global grid
                     player_grid[(int)row][col] = global_grid[(int)row][col];
                 }
             }
 
             else{  // point not on grid
                 if ( (player_grid[(int)row-1][col] == ".") || (player_grid[(int)row-1][col] == "*") || (player_grid[(int)row+1][col] == ".") || (player_grid[(int)row+1][col] == "*") ){
+                    // check if player grid already equal to global grid 
+                    if (player_grid[(int)row][col] != global_grid[(int)row][col]){
+                        changed == true;
+                    }
+                    // update player grid to reflect global grid
                     player_grid[(int)row][col] = global_grid[(int)row][col];
                 }
                 else{
@@ -374,7 +290,8 @@ visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr)
             }
         }
     }
-    
+
+    return changed;	
 }
 
 
@@ -382,11 +299,12 @@ visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr)
 * helper to compute visibility across rows
 * outputs nothing, but updates the player->grid to either the global grid if point is visible or to " " otherwise
 */ 
-void
+bool
 visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc)
 {
 
     float slope;
+    bool changed;
 
     // set slope
 	if (pc != wc) {
@@ -404,8 +322,12 @@ visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc)
                     // this and all future locations are invisible: set to " "
                     player_grid[row][(int)col] = " ";
                 }
-                else{
-                    // player grid at row, col gets the global grid's value at row, col
+                else{  // player grid at row, col gets the global grid's value at row, col
+
+                    // check if player grid already equal to global grid 
+                    if (player_grid[row][(int)col] != global_grid[row][(int)col]){
+                        changed == true;
+                    }
                     player_grid[row][(int)col] = global_grid[row][(int)col];
                 }
             }
@@ -413,6 +335,11 @@ visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc)
             else{  // point not on grid
                 if( (player_grid[row][(int)col-1] == ".") || (player_grid[row][(int)col-1] =="*") || (player_grid[row][(int)col+1] == ".") || (player_grid[row][(int)col+1] == "*") ){
                     // player grid at row, col gets the global grid's value at row, col
+                    
+                    // check if player grid already equal to global grid 
+                    if (player_grid[row][(int)col] != global_grid[row][(int)col]){
+                        changed == true;
+                    }
                     player_grid[row][(int)col] = global_grid[row][(int)col];
                 }
 
@@ -437,6 +364,10 @@ visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc)
                     player_grid[row][(int)col] = " ";
                 }
                 else{
+                    // check if player grid already equal to global grid 
+                    if (player_grid[row][(int)col] != global_grid[row][(int)col]){
+                        changed == true;
+                    }
                     player_grid[row][(int)col] = global_grid[row][(int)col];
                 }
             }
@@ -444,6 +375,11 @@ visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc)
             else{  // point not on grid
                 if ( (player_grid[row][(int)col-1] == ".") || (player_grid[row][(int)col-1] =="*") || (player_grid[row][(int)col+1] == ".") || (player_grid[row][(int)col+1] == "*") ){
                     // player grid at row, col gets the global grid's value at row, col
+                    
+                    // check if player grid already equal to global grid 
+                    if (player_grid[row][(int)col] != global_grid[row][(int)col]){
+                        changed == true;
+                    }
                     player_grid[row][(int)col] = global_grid[row][(int)col];
                 }
                 else{
@@ -455,5 +391,124 @@ visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc)
             
     }
     
+    return changed;
 }
 
+
+/*
+* isVisible: takes in player, player row & col, wall (boundary) row & column and game
+* checks if wr, wc is visible from position player position pr, pc
+* calls helpers which update the player->grid accordingly
+* outputs a boolean which is true if the visibility on the player's grid changes (e.g. new points visible, less points visible, new gold seen etc.)
+*/
+bool
+isVisible(game_t* game, char** player_grid, int pr, int pc, int wr, int wc)
+{
+    // assume (0,0) point in top left corner, as in example presented in REQUIREMENTS.md
+    
+	bool cols;  // switch for determining if visibility changed
+    bool rows;  // switch for determining if visibility changed
+    char** global_grid = game->grid;
+    int globalGrid_rows = game->rows;
+    int globalGrid_columns = game->columns;
+
+    // set up another grid to player's grid before updates for latter comparison
+    char** oldGrid = mem_malloc_assert(globalGrid_rows * sizeof(char*), "Error allocating memory in isVisible.\n");
+    oldGrid = player_grid;
+
+    // update player grid
+    cols = visCol(global_grid, player_grid, pc, pr, wc, wr);  // visCol handles pc < wc AND pc > wc cases
+    rows = visRow(global_grid, player_grid, pr, pc, wr, wc);  // visRow handles pr < wr AND pr > wr cases
+
+    // check if new player map has changed from previous version
+    // gridChanged = compareGrids(globalGrid_rows, globalGrid_columns, player_grid, oldGrid);
+    
+    if (cols || rows){  // if either cols or rows changed
+        return true;
+    }
+
+    return false;
+
+}
+
+
+/*
+* update_player_grid: 
+* Takes in a char** player_grid, char** global_grid, int representing player rows, and int representing player columns
+* outputs nothing 
+* calls getWalls to find room boundaries
+* for each boundary, calls isVisible to update player's grid
+*/
+void
+update_player_grid(char** player_grid, game_t* game, int pr, int pc)
+{
+    // change the player's '@' symbol to their new position.
+    player_grid[pr][pc]='@';
+
+    // then, change their local grid display in reference to where they are and what they can see
+
+    // get walls
+    char** walls = mem_malloc_assert(sizeof(game->rows * sizeof(char*)), "Error allocating memory in getWalls.\n");
+    walls = getWalls(game, game->grid, pr, pc);
+
+    int numRows = sizeof(walls)/sizeof(walls[0]);
+    int numCols = sizeof(walls[0])/sizeof(walls[0][0]);
+
+	// for each wall point (wr, wc) in walls array
+    for(int wr = 0; wr < numRows; wr++) {
+        for(int wc = 0; wc < numCols; wc++) {
+            isVisible(game, player_grid, pr, pc, wr, wc);
+        }
+    }
+
+}
+
+
+/*
+* update_grids: given a game object, loops through all clients and update their grids
+*/
+void
+update_grids(game_t* game)
+{
+    char* clients = malloc(sizeof(char*)*26);
+    clients = game->clients;
+
+    // loops thru all players
+    for (int i=1; i < game->playersJoined; i++){
+
+        client_t* client = clients[i];
+
+        if (client != NULL){
+            update_player_grid(client->grid, game, client->x, client->y);
+        }
+        
+    }
+}
+
+
+
+
+
+
+
+
+/*********** OLD FUNCTIONS ************/
+// /* compareGrids: takes in global grid rows & columns, the new player grid, and their former grid
+// * helper for isVisble to compare current to previous player grids for changes in visibility 
+// */
+// bool 
+// compareGrids(int rows, int columns, char** playerGrid, char** oldGrid)
+// {
+//     // for every gridspot
+//     for (int i = 0; i < rows; i++){
+//         for (int j; j < columns; j++){
+//             // if there has been a change
+//             if (playerGrid[i][j] != oldGrid[i][j]){
+//                 // return true, a new message needs to be sent to this player
+//                 return true;
+//             }
+//         }
+//     }
+//     // if nothing has changed, then no message needs to be sent
+//     return false;
+// }
