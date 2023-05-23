@@ -103,8 +103,8 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, 
         int x = rand() % columns;
         int y = rand() % rows;
         // try to place the "thing" there
-        if (strcmp(grid[x, y], '.')==0){
-            grid[x, y]=thing;
+        if (strcmp(grid[x][y], '.')==0){
+            grid[x][y]=thing;
             placed = true;
             // assign spot x and y
             spot_x = x;
@@ -162,7 +162,7 @@ update_grids(char** global_grid, game_t* game)
 */
 char* get_symbol(char** grid, int rows, int columns, int x, int y)
 {
-    return grid[x,y];
+    return grid[x][y];
 }
 
 
@@ -172,7 +172,7 @@ char* get_symbol(char** grid, int rows, int columns, int x, int y)
 */
 void change_spot(char** grid, int rows, int columns, int x, int y, char* symbol)
 {
-    grid[x,y] = symbol;
+    grid[x][y] = symbol;
 }
 
 
