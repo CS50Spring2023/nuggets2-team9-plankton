@@ -80,7 +80,7 @@ Handle the movement or quitting prompted by a valid key, k. Find the coordinate 
 	If quit
 	  remove player from map
 	  delete_client()
-	Check whats is in the spot we want to move to
+	Check what is in the spot we want to move to
 	If boundary
 	  Do nothing
 	If gold
@@ -90,7 +90,7 @@ Handle the movement or quitting prompted by a valid key, k. Find the coordinate 
 	If player
 	  Update global grid to reflect swap
 
-	Call update grid, which updates all player grids to reflect new global grid
+	Call update_grids, which updates all player grids to reflect new global grid
 
 #### gameOver:
 	Ends the game and informs all of the clients
@@ -140,6 +140,7 @@ No major data structures implemented in server specifically, however it relies h
 
 #### update_player_grid
 takes in global and player grids and player's coordinates, establishes wall boundaries, and calls isVisible for each wall point
+
 	initialize player_grid array to global grid
 
 	call helper function check_wall(player coordinates) which will:
