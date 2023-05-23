@@ -172,54 +172,6 @@ void change_spot(game_t* game, int x, int y, char* symbol)
 }
 
 
-bool
-isVisible(int pr, int pc, int wr, int wc)
-{
-    // checks if wr, wc is visible from position player position pr, pc
-    // assume (0,0) point in top right corner, as in example presented in REQUIREMENTS.md
-
-    // for wall element (wr, wc) in grid array{
-	// 	invisible = 0;  // switch for determining visibility
-		
-	// 	if (pc != wc) {
-    //         slope = (wr-pr)/(wc-pc);
-    //     }
-        
-
-// 		if (pr == wr){
-//             if (pc != wc){
-//                 visCol(pc, wc);  // visCol handles pc < wc AND pc > wc cases
-//             }
-//         }	
-        
-//         else {  // pr > wr OR pr < wr
-//             if (pc != wc){
-//             visRow(pr, wr);  // visRow handles pr < wr AND pr > wr cases
-//             if (invisible == false){
-//                 visCol(pc, wc);  // visCol handles pc < wc AND pc > wc cases
-//             }
-
-    //         else{  // pc == wc
-    //         if (pr < wr){
-    //             // check each row between and not including pr and wr
-	//             for (int row = pr+1; row < wr; row++){
-    //                 pcOnwc(); 
-    //             }
-    //         }
-    //         else if (pr > wr){
-    //             // check each row between and not including pr and wr
-	//             for (int row = pr+1; row < wr; row++){
-    //                 pcOnwc();
-    //             }
-    //         }
-    //     }
-		
-    // }
-
-   
-}
-
-
 /*
 * isVisible: takes in player, player row & col, wall (boundary) row & column and game
 * checks if wr, wc is visible from position player position pr, pc
