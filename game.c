@@ -71,9 +71,10 @@ new_player(game_t* game, const addr_t client, char* name)
     (game->playersJoined)++;
     
     // assign player to a random spot
-    assign_random_spot(game->grid, game->rows, game->columns, player);
+    assign_random_spot(game->grid, game->rows, game->columns, player->id, &player->x, &player->y);
     
     // update visibility here
+    update_player_grid(player->grid, game, player->x, player->y);
     
 }
 
@@ -201,10 +202,7 @@ update_gold(game_t* game, client_t* player, int x_pos, int y_pos, int goldMaxPil
 
         if (location->x == x_pos && location->y == y_pos){
             game->goldRemaining -= location->nuggetCount;
-            player->gold -= location->nuggetCount;
-
-            // call grid function to allow for grid to be changed
-            
+            player->gold -= location->nuggetCount;            
 
             return location->nuggetCount;
         }
@@ -244,7 +242,7 @@ add_gold_pile(game_t* game, int gold_amt, int piles)
     int gold_y;
 
     gold_location_t* gold_spot = mem_malloc_assert(sizeof(gold_location_t));
-    assign_random_spot(game->grid, game->rows; game->columns, '*', &gold_x, &gold_y);
+    assign_random_spot(game->grid, game->rows, game->columns, '*', &gold_x, &gold_y);
     gold_spot->x = gold_x;
     gold_spot->y = gold_y;
     gold_spot->nuggetCount = gold_amt;

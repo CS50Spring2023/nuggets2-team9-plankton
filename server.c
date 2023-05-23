@@ -352,9 +352,13 @@ handle_movement(client_t* player, char key, game_t* game)
     }
 
     // call update grids
+    update_grids(game);
 
    
 }
+
+
+// loop over clients, update their grid, check if it changed, send message if so
 
 static void
 update_previous_spot(client_t* player, game_t* game, char grid_val)
