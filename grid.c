@@ -119,9 +119,12 @@ update_player_grid(char** player_grid, game_t* game, int pr, int pc)
     char** walls = mem_malloc_assert(sizeof(game->rows * sizeof(char*)), "Error allocating memory in getWalls.\n");
     walls = getWalls(game, game->grid, pr, pc);
 
+    int numRows = sizeof(walls)/sizeof(walls[0]);
+    int numCols = sizeof(walls[0])/sizeof(walls[0][0]);
+
 	// for each wall point (wr, wc) in walls array
-    for(int wr = 0; wr < ; wr++) {
-        for(int wc = 0; wc < ; wc++) {
+    for(int wr = 0; wr < numRows; wr++) {
+        for(int wc = 0; wc < numCols; wc++) {
             isVisible(game, player_grid, pr, pc, wr, wc);
         }
     }
@@ -135,13 +138,21 @@ update_player_grid(char** player_grid, game_t* game, int pr, int pc)
 void
 update_grids(game_t* game)
 {
-    char** clients = game->clients;
+    char* clients = malloc(sizeof(char*)*26);
+    clients = game->clients;
+
     // loops thru all players
-    for (int i=0; i<game->playersJoined; i++){
-        // calls update player grid 
-        update_player_grid();
+    for (int i=1; i < game->playersJoined; i++){
+
+        client_t* client = clients[i];
+
+        if (client != NULL){
+            update_player_grid(client->grid, game, client->x, client->y);
+        }
+        
     }
 }
+
 
 /*
 * get_grid_value: takes in a grid object, x value, y value, number of rows, number of columns
@@ -162,7 +173,7 @@ get_grid_value(game_t* game, int x, int y)
 void 
 change_spot(game_t* game, int x, int y, char* symbol)
 {
-    game->grid[x][y]=symbol;
+    game->grid[x][y] = symbol;
 }
 
 
@@ -181,7 +192,7 @@ getWalls(game_t* game, char** grid, int pr, int pc)
 
 
     while ( (grid[pr][pc] != "-") || (grid[pr][pc] != "#") || (grid[pr][pc] != "x") ){
-        // while inside playing field, go down
+        // while inside playing field, go down until wall reached
         pr++;
     }
 
@@ -197,7 +208,7 @@ getWalls(game_t* game, char** grid, int pr, int pc)
         
         // if wall type to the right
         if ( (grid[pr][pc+1] == "-") || (grid[pr][pc+1] == "#") || (grid[pr][pc+1] == "x") ){
-            // if curr element not also a tunel, don't move
+            // if curr element not also a tunel, move
             if (grid[pr][pc] != "#"){
                 // move one step in that direction
                 pc++;
@@ -206,7 +217,7 @@ getWalls(game_t* game, char** grid, int pr, int pc)
 
         // if wall type up
         else if ( (grid[pr-1][pc] == "-") || (grid[pr-1][pc] == "#") || (grid[pr-1][pc] == "x") ){
-            // if curr element not also a tunel, don't move
+            // if curr element not also a tunel, move
             if (grid[pr][pc] != "#"){
                 // move one step in that direction
                 pr--;
@@ -215,7 +226,7 @@ getWalls(game_t* game, char** grid, int pr, int pc)
 
         // if wall type to the left
         else if ( (grid[pr][pc-1] == "-") || (grid[pr][pc-1] == "#") || (grid[pr][pc-1] == "x") ){
-            // if curr element not also a tunel, don't move
+            // if curr element not also a tunel, move
             if (grid[pr][pc] != "#"){
                 // move one step in that direction
                 pc--;
@@ -224,7 +235,7 @@ getWalls(game_t* game, char** grid, int pr, int pc)
 
         // if wall type down
         else if ( (grid[pr+1][pc] == "-") || (grid[pr+1][pc] == "#") || (grid[pr+1][pc] == "x") ){
-            // if curr element not also a tunel, don't move
+            // if curr element not also a tunel, move
             if (grid[pr][pc] != "#"){
                 // move one step in that direction
                 pr++;
@@ -235,6 +246,7 @@ getWalls(game_t* game, char** grid, int pr, int pc)
         walls[pr][pc] = grid[pr][pc];
 
     } 
+    return walls;
 
 }
 
