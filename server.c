@@ -11,6 +11,8 @@
 #include "libs/file.h"
 #include "support/log.h"
 #include "support/message.h"
+#include "game.h"
+#include "grid.h"
 #include <ctype.h>
 
 static const int MaxNameLength = 50;   // max number of chars in playerName

@@ -176,6 +176,17 @@ void change_spot(char** grid, int rows, int columns, int x, int y, char* symbol)
 }
 
 
+
+/*
+* getWalls: takes in player row & col
+* outputs array with room boundaries necessary to determine visibility
+*/
+char**
+getWalls(int pr, int pc){
+    // coming soon!
+}
+
+
 /*
 * isVisible: takes in player, player row & col, wall (boundary) row & column and game
 * checks if wr, wc is visible from position player position pr, pc
