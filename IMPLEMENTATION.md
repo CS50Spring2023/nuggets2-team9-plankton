@@ -89,6 +89,11 @@ static int parseArgs(const int argc, char* argv[]);
 
 > For each module, repeat the same framework above.
 
+## Grid module
+
+### `isVisible` 
+Checks the visibility of each point on the grid from a player's location, (pr, pc). For each wall/corner point (wr, wc), the function loops over the grid rows strictly between pr and wr, and over the columns strictly betwen pc and wc. We split this function in cases covering N-S, E-W of the player and all the areas in between. If these points are grid elements (integers) and don't include a boundary (wall or corner) as their value, then the player's grid gets updated to the value of the global grid. If these points are in between grid elements, we check the grid points above/below and to the left/right of the points. If at least one of each doesn't include a boundary, then the player's grid gets updated to the value of the global grid. Otherwise, the point and all points following it (in the direction examined) remain invisible to the player.
+
 ### Data structures
 
 ### Definition of function prototypes
