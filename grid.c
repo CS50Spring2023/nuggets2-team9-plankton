@@ -117,11 +117,13 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, 
 /*
 * update_player_grid: 
 * Takes in a char** player_grid, char** global_grid, int representing player rows, and int representing player columns
-* 
+* modify the player's grid based on what of the global grid is currently visible to them, based on thir current position
 */
 void
 update_player_grid(char** player_grid, char** global_grid, int pr, int pc)
 {
+	// set the spot the player is currently at to an @ sign
+	player_grid[pr][pc]='@';
 
     /* LOGIC OUTLINE:
     updates player_grid to reflect all visible points
