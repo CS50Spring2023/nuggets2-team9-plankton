@@ -29,9 +29,9 @@ main(const int argc, char* argv[])
     // parse args: first argument should be the pathname for a map file, the second is an optional seed for the random-number generator, which must be a positive int if provided
     
     // make sure there are no more than 2 arguments
-    if (argc > 3){
-        fprintf(stderr, "Too many arguments were provided. Call using the format ./server map.txt [seed]\n");
-	exit(1);
+    if (argc != 3){
+        fprintf(stderr, "Invalid number of arguments provided. Call using the format ./server map.txt [seed]\n");
+	    exit(1);
     }
     
     // parse the command line, open the file
@@ -41,8 +41,8 @@ main(const int argc, char* argv[])
 
     // defensive check: file could be opened
     if (map_file == NULL){
-        fprintf(stderr, "file could not be opened" );
-	exit(1);
+        fprintf(stderr, "file could not be opened\n");
+	    exit(1);
     }
 
     // TODO IF NOT HANDLED ELSEWHERE (SR): If the optional seed is provided, the server shall pass it to srand(seed). 
@@ -76,7 +76,11 @@ handleMessage(void* arg, const addr_t from, const char* message)
         if (game->playersJoined < MaxPlayers){
 
             // put this into helper
-            char* name = extract_playerName(message); // DO THIS FUNCTION
+            char* name = extract_playerName(message, from); // DO THIS FUNCTION
+            if (name == NULL){
+                return false;
+            }
+
             client_t* player = new_player(game, from, name);
             mem_free(name);
 
@@ -171,9 +175,45 @@ send_displayMsg(game_t* game, client_t* client){
 }
 
 char*
-extract_playerName()
+extract_playerName(char* message, addr_t clientAddr)
 {
+    bool reachedNameStart = false;
+    bool emptyName = true;
+    char* name = mem_malloc_assert(MaxNameLength + 1, "Error allocating memory in extract_playerName.\n");
+    int curr_nameLength = 0;
+
+    for (int i = 0; i < strlen(message); i++){
+        if (isspace(message[i]) && !reachedNameStart){
+            reachedNameStart = true;
+            continue;
+        }
+        else if (reachedNameStart && !isspace(message[i]) && emptyName){
+            emptyName = false;
+        }
+        if (reachedNameStart){
+            if (curr_nameLength < MaxNameLength){
+                if(!isgraph(message[i]) && !isblank(message[i])){
+                    name[curr_nameLength] = '_';
+                }
+                else{
+                    name[curr_nameLength] = message[i];
+                }
+                curr_nameLength++;
+            }
+            else{
+                break;
+            }
+        }
+    }
+    name[MaxNameLength] = '\0';
     
+    if(emptyName){
+        send_quitMsg(clientAddr, 3, false);
+        mem_free(name);
+        return NULL;
+    }
+
+    return name;
 }
 
 char* 
