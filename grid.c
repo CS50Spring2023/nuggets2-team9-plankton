@@ -113,6 +113,7 @@ update_player_grid(char** player_grid, game_t* game, int pr, int pc)
     player_grid[pr][pc]='@';
 
     // then, change their local grid display in reference to where they are and what they can see
+
     // get walls
     char** walls = mem_malloc_assert(sizeof(game->rows * sizeof(char*)), "Error allocating memory in getWalls.\n");
     walls = getWalls(game, game->grid, pr, pc);
