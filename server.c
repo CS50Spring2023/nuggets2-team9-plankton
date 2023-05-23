@@ -31,8 +31,8 @@ main(const int argc, char* argv[])
     // make sure there are no more than 2 arguments
     if (argc > 3){
         fprintf(stderr, "Too many arguments were provided. Call using the format ./server map.txt [seed]\n");
-		exit(1);
-	}
+	exit(1);
+    }
     
     // parse the command line, open the file
     char* mapFilename = argv[1];
