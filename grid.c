@@ -23,7 +23,6 @@ int main()
 
 // /**************** functions: grid as a 2D array  ****************/
 
-
 /*
 * load_grid: takes in a FILE* fp to a map file which is assumed to be valid
 * Reads the file into an array of strings, each string in the array represents a row of the map
@@ -203,8 +202,6 @@ getWalls(int pr, int pc){
     // coming soon!
 }
 
-    grid[x,y]=symbol;
-}
 
 
 bool
