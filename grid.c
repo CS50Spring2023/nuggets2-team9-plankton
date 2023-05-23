@@ -156,19 +156,19 @@ update_grids(char** global_grid, game_t* game)
 * outputs whatever symbol is at that point in the grid
 *
 */
-char* get_symbol(char** grid, int rows, int columns, int x, int y)
+char* get_grid_value(game_t* game, int x, int y)
 {
-    return grid[x,y];
+    return game->grid[x,y];
 }
 
 
 /*
-* change_spot: takes in grid, number of rows and columns, coordinate values, and a symbol
+* change_spot: takes in grid, coordinate values, and a symbol
 * changes whatever is at that spot to the new symbol
 */
-void change_spot(char** grid, int rows, int columns, int x, int y, char* symbol)
+void change_spot(game_t* game, int x, int y, char* symbol)
 {
-    grid[x,y]=symbol;
+    game->grid[x,y]=symbol;
 }
 
 
