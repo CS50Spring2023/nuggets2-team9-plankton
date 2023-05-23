@@ -3,6 +3,11 @@ grid.c
 module for handling the global and player grids
 
 Team 9: Plankton, May 2023
+
+TODOs: 
+-handle visibility inside tunnels - within visibility?
+-handle player visibility once they leave a room - they no longer see gold and other players anymore
+
 */
 
 #include <stdlib.h>
@@ -439,9 +444,11 @@ isVisible(game_t* game, char** player_grid, int pr, int pc, int wr, int wc)
 * calls getWalls to find room boundaries
 * for each boundary, calls isVisible to update player's grid
 */
-void
+bool
 update_player_grid(char** player_grid, game_t* game, int pr, int pc)
 {
+    bool changed;  // did a change in player's visibility ocur?
+
     // change the player's '@' symbol to their new position.
     player_grid[pr][pc]='@';
 
@@ -461,6 +468,7 @@ update_player_grid(char** player_grid, game_t* game, int pr, int pc)
         }
     }
 
+    return changed;
 }
 
 
@@ -484,9 +492,6 @@ update_grids(game_t* game)
         
     }
 }
-
-
-
 
 
 
