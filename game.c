@@ -189,25 +189,29 @@ end_game()
 
 }
 
-void
+int
 update_gold(game_t* game, client_t* player, int x_pos, int y_pos, int goldMaxPiles)
 {
     for (int i = 0; i < goldMaxPiles; i++){
         gold_location_t* location = (game->locations)[i];
         if (location->nuggetCount < 0){
             exit(1);
-            // error
+            // error, reached the end of the gold piles without finding pile
         }
 
         if (location->x == x_pos && location->y == y_pos){
             game->goldRemaining -= location->nuggetCount;
             player->gold -= location->nuggetCount;
-            // call grid function to allow for grid to be changed
 
-            return;
+            // call grid function to allow for grid to be changed
+            
+
+            return location->nuggetCount;
         }
 
     }
+
+    return -1;
 }
 
 void

@@ -16,6 +16,7 @@
 #include <ctype.h>
 #include "libs/file.h"
 #include "grid.h"
+#include "support/message.h"
 
 /**************** global types ****************/
 typedef struct client client_t;

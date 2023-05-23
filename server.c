@@ -1,10 +1,7 @@
-/*
-server.c 
-server module for nuggets game- maintains all game state and sends updated displays to clients
-usage: ./server map.txt [seed]
-
-Team 9: Plankton, April 2023
-*/
+//
+//
+//
+//
 
 
 #include <stdlib.h>
@@ -14,7 +11,6 @@ Team 9: Plankton, April 2023
 #include "libs/file.h"
 #include "support/log.h"
 #include "support/message.h"
-
 #include "game.h"
 #include "grid.h"
 #include <ctype.h>
@@ -26,12 +22,10 @@ static const int GoldMinNumPiles = 10; // minimum number of gold piles
 static const int GoldMaxNumPiles = 30; // maximum number of gold piles
 
 
-/*
-* main: takes 1-2 commandline arguments, verifies them, then creates a new game and starts receiving/handling messages
-*/
 int
 main(const int argc, char* argv[])
 {
+
     // parse args: first argument should be the pathname for a map file, the second is an optional seed for the random-number generator, which must be a positive int if provided
     
     // make sure there are no more than 2 arguments
@@ -55,15 +49,14 @@ main(const int argc, char* argv[])
     // If no seed is provided, the server shall use srand(getpid()) to produce random behavior.
         // int seed = argv[2];
 
+
     // create a new game first
     game_t* game = new_game(map_file, MaxPlayers);
     load_gold(game, GoldTotal, GoldMinNumPiles, GoldMaxNumPiles);
 
     // start up message module
     message_init(stderr);
-    // wait for messages from clients
     message_loop(game, timeout, handleTimeout, NULL, handleMessage);
-    // end the loop once the game ends
     message_done();
 
     // close the file
@@ -78,9 +71,7 @@ handleMessage(void* arg, const addr_t from, const char* message)
 {
     game_t* game = arg;
     char* request = extractRequest(message);
-    // there are three categories of messages: adding a new player, new spectator, or a keystroke request from a client that is already in the game. 
 
-    // if the message is to "PLAY" and the game is not at max capacity, then add this new player to the game 
     if (strcmp(request, "PLAY") == 0){
         if (game->playersJoined < MaxPlayers){
 
@@ -99,12 +90,10 @@ handleMessage(void* arg, const addr_t from, const char* message)
             inform_newClient(client, game);
 
         }
-        // if the game is at max capacity, inform the client
         else {
             send_quitMsg(from, 2, false);
         }
     }
-    // if the message is to "SPECTATE", then add a new spectator
     else if (strcmp(request, "SPECTATE") == 0){
         client_t* spectator = new_spectator(game, from);
 
@@ -112,7 +101,6 @@ handleMessage(void* arg, const addr_t from, const char* message)
         inform_newClient(spectator, game);
 
     }
-    // if the message is a keystroke from an existing player, find the client it belongs to, and handle their request
     else if (strcmp(request, "KEY") == 0){
         client_t* player = find_client(from, game);
         handle_movement(player, request[4], game);
@@ -123,10 +111,14 @@ handleMessage(void* arg, const addr_t from, const char* message)
 
     return false;
 
-}
+
 
 
 // the server immediately sends a GRID, GOLD and DISPLAY message to all new clients
+
+}
+
+
 void
 inform_newClient(client_t* client, game_t* game)
 {
@@ -144,7 +136,6 @@ inform_newClient(client_t* client, game_t* game)
 
 }
 
-// send a gold message to an existing client
 void
 send_goldMsg(game_t* game, client_t* client, int goldPickedUp)
 {
@@ -156,61 +147,11 @@ send_goldMsg(game_t* game, client_t* client, int goldPickedUp)
 
 }
 
-// send a display message to an existing client
 void
 send_displayMsg(game_t* game, client_t* client){
     int msgSize;
     char* map;
     char* display;
-}
-
-// handle a "keystroke", based on where a player is and where they are trying to move
-handle_movement(client_t* player, char key, game_t* game)
-{
-
-    // store the current location of the player
-    int newPos_x = player->x;
-    int newPos_y = player->y;
-
-
-    switch (key) {
-        // update new Pos based on the case
-        case 'h': ... code for letter=='B'; break;
-        case 'l': ... code for letter=='C'; break;
-        case 'j': ... code for letter=='A'; break;
-        case 'k': ... code for letter=='B'; break;
-        case 'y': ... code for letter=='C'; break;
-        case 'u': ... code for letter=='A'; break;
-        case 'b': ... code for letter=='B'; break;
-        case 'n': ... code for letter=='C'; break;
-        default:  ... code for letter not matching any case above.
-
-    }
-
-    // grab whatever is stored where the player is attempting to move to
-    char grid_val = get_grid_value(newPos_x, newPos_y);
-
-    // if it is a corner boundary, horizontal boundary, vertical boundary, or solid rock, don't let them move
-    if (grid_val == '+' || grid_val == '-' || grid_val == '|' || grid_val == ' '){
-        return;
-    }
-
-    // if it's an empty room or passsage spot, ...
-    else if (grid_val == '.' || grid_val == '#'){
-
-    }
-
-    // if there's another occupant there, ...
-    else if (isalpha(grid_val)){
-        //
-    }
-
-    // if there's gold there, update the amount of gold in the game, and send them a notificcation message
-    else if (grid_val == '*'){
-        update_gold(game, player, newPos_x, newPos_y, goldMaxPiles);
-        // send notify message
-        
-    }
 
     if (client->isSpectator){
         map = grid_toStr(game->grid, NULL, game->rows, game->columns);
@@ -230,7 +171,8 @@ handle_movement(client_t* player, char key, game_t* game)
 }
 
 char*
-extract_playerName(){
+extract_playerName()
+{
     
 }
 
@@ -241,7 +183,6 @@ extractRequest(const char* input)
         // Handle empty input string or null pointer
         return NULL;
     }
-
 
     int length = strlen(input);
     int wordEndIndex = -1;
@@ -309,21 +250,14 @@ handle_movement(client_t* player, char key, game_t* game)
 
     }
 
-    char grid_val = get_grid_value(newPos_x, newPos_y);
+    char grid_val = get_grid_value(game, newPos_x, newPos_y);
 
     if (grid_val == '+' || grid_val == '-' || grid_val == '|' || grid_val == ' '){
         return;
     }
     else if (grid_val == '.' || grid_val == '#'){
-        //change the global grid on the spot they came from back to what it was
-        if (player->onTunnel){
-            change_spot(game, player->x, player->y, '#');
-        }
-        else{
-            change_spot(game, player->x, player->y, '.');
-        }
-
-        player->onTunnel = (grid_val == '#');
+        // change the spot the player came from back
+        update_previous_spot(player, game, grid_val);
         
         // change the global grid on the spot they are now on to be their letter
         change_spot(game, newPos_x, newPos_y, player->id);
@@ -352,16 +286,44 @@ handle_movement(client_t* player, char key, game_t* game)
 
     }
     else if (grid_val == '*'){
-        update_gold(game, player, newPos_x, newPos_y, goldMaxPiles);
-        // send gold notify message
-        //change the global grid on the spot they came from back to what it was
+        int nuggetsFound = update_gold(game, player, newPos_x, newPos_y, goldMaxPiles);
+        
+        // update the client that just picked up gold
+        send_goldMsg(game, player, nuggetsFound);
+
+        // update the other clients about the gold counts
+        for (int i = 0; i < game->playersJoined + 1; i++){
+            if (game->clients[i] != NULL && ((game->clients)[i])->id != player->id){
+                send_goldMsg(game, (game->clients)[i], 0);
+            }
+        }
+
+        // update the grids
+                
+        // change the spot the player came from back
+        update_previous_spot(player, game, grid_val);
+        
         // change the global grid on the spot they are now on to be their letter
+        change_spot(game, newPos_x, newPos_y, player->id);
+
+        // update the player's position in the player struct
         update_position(player, newPos_x, newPos_y);
+
     }
-
-     
-
    
+}
+
+static void
+update_previous_spot(player_t* player, game_t* game, char grid_val)
+{
+    //change the global grid on the spot they came from back to what it was
+    if (player->onTunnel){
+        change_spot(game, player->x, player->y, '#');
+    }
+    else{
+        change_spot(game, player->x, player->y, '.');
+    }
+    player->onTunnel = (grid_val == '#');
 }
 
 
