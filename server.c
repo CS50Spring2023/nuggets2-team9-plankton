@@ -280,6 +280,9 @@ handle_movement(client_t* player, char key, game_t* game)
         update_position(player, newPos_x, newPos_y);
 
     }
+
+    // call update grids
+
    
 }
 
