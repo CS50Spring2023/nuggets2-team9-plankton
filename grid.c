@@ -10,7 +10,7 @@ Team 9: Plankton, May 2023
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-
+#include "support/message.h"
 #include "libs/file.h"
 #include "libs/mem.h"
 #include "game.h"
@@ -100,8 +100,8 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, 
         int x = rand() % columns;
         int y = rand() % rows;
         // try to place the "thing" there
-        if (strcmp(grid[x, y], '.')==0){
-            grid[x, y]=thing;
+        if (strcmp(grid[x][y], '.')==0){
+            grid[x][y]=thing;
             placed = true;
             // assign spot x and y
             spot_x = x;
@@ -118,7 +118,7 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, 
 * 
 */
 void
-update_player_grid(char** player_grid, char** global_grid, int pr, int pc)
+update_player_grid(char** player_grid, char** global_grid, int pr, int pc, int globalGrid_rows, int globalGrid_columns)
 {
 
     /* LOGIC OUTLINE:
@@ -134,7 +134,7 @@ update_player_grid(char** player_grid, char** global_grid, int pr, int pc)
     int wc = 0;
 
 	// for wall point (wr, wc) in grid array
-        isVisible(pr, pc, wr, wc);
+        isVisible(global_grid, player_grid, globalGrid_rows, globalGrid_columns, pr, pc, wr, wc);
 
 }
 
@@ -275,7 +275,7 @@ visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr)
                 }
 				else{
                     // this and all future locations are invisible to player: make them " "
-                    player_grid[(int)row][col] == " ";
+                    player_grid[(int)row][col] = " ";
                 }
             }
             
@@ -292,7 +292,7 @@ visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr)
             if (is_integer(row)){  // aka point on grid
                 if ( (player_grid[(int)row][col] == "|") || (player_grid[(int)row][col] == "-" ) || (player_grid[(int)row][col] == "x") || (player_grid[(int)row][col] == "#") ){
                     // this and all future locations are invisible to player: make them " "
-                    player_grid[(int)row][col] == " ";
+                    player_grid[(int)row][col] = " ";
                 }
                 else{
                     player_grid[(int)row][col] = global_grid[(int)row][col];
@@ -305,7 +305,7 @@ visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr)
                 }
                 else{
                     // this and all future locations are invisible to player: make them " "
-                    player_grid[(int)row][col] == " ";
+                    player_grid[(int)row][col] = " ";
                 }
             }
         }
@@ -338,7 +338,7 @@ visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc)
             if (is_integer(col)){  // aka a point on the grid - also takes care of pc == wc case
                 if ( (player_grid[row][(int)col] == "|") || (player_grid[row][(int)col] == "-" ) || (player_grid[row][(int)col] == "x") || (player_grid[row][(int)col] == "#") ){
                     // this and all future locations are invisible: set to " "
-                    player_grid[row][(int)col] == " ";
+                    player_grid[row][(int)col] = " ";
                 }
                 else{
                     // player grid at row, col gets the global grid's value at row, col
@@ -354,7 +354,7 @@ visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc)
 
                 else{
                     // this and all future locations are invisible: set to " "
-                    player_grid[row][(int)col] == " ";
+                    player_grid[row][(int)col] = " ";
                 }
             }
         }
@@ -370,7 +370,7 @@ visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc)
             if (is_integer(col)){  // aka a point on the grid
                 if ( (player_grid[row][(int)col] == "|") || (player_grid[row][(int)col] == "-" ) || (player_grid[row][(int)col] == "x") || (player_grid[row][(int)col] == "#") ){
                     // this and all future locations are invisible: skip all future rows and columns
-                    player_grid[row][(int)col] == " ";
+                    player_grid[row][(int)col] = " ";
                 }
                 else{
                     player_grid[row][(int)col] = global_grid[row][(int)col];
@@ -384,7 +384,7 @@ visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc)
                 }
                 else{
                     // this and all future locations are invisible: set to " "
-                    player_grid[row][(int)col] == " ";
+                    player_grid[row][(int)col] = " ";
                 }
             }
         }
