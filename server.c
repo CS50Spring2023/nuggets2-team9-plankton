@@ -23,18 +23,155 @@ static const int GoldMaxNumPiles = 30; // maximum number of gold piles
 int
 main(const int argc, char* argv[])
 {
+    // create  a new game first
+
+    // start of message module
     message_init(stderr);
-    message_loop(arg, timeout, handleTimeout, handleStdin, handleMessage);
+    message_loop(arg, timeout, handleTimeout, NULL, handleMessage);
     message_done();
 
     return(0);
 }
 
+// lots of error proofing needed
 bool
 handleMessage(void* arg, const addr_t from, const char* message)
 {
+    game_t* game = arg;
+    char* request = extractRequest(message);
+
+    if (strcmp(request, "PLAY") == 0){
+        if (game->playersJoined < MaxPlayers){
+
+            // put this into helper
+            char* name = extract_playerName(message);
+            client_t* player = new_player(game, from, name);
+            mem_free(name);
+
+            char* response = mem_malloc_assert(5, "Error allocating memory in handleMessage.\n");
+            sprintf(response, "OK %c", player->id);
+
+            message_send(from, response);
+            mem_free(response); // is this losing the string for whoever receives message?????
+
+            // send new client messages: grid, gold, display
+            inform_newClient(client, game);
+
+        }
+    }
+    else if (strcmp(request, "SPECTATE") == 0){
+        client_t* spectator = new_spectator(game, from);
+        // send new client messages: grid, gold, display
+
+    }
+    else if (strcmp(request, "KEY") == 0){
+        client_t* player = find_player(from);
+        handle_movement(player, request[4], game);
+        
+    }
+
+    mem_free(request);
+
+    return false;
+
+
 
 }
+
+void
+inform_newClient(client_t* client, game_t* game)
+{
+    // send grid message
+    char* gridMsg = mem_malloc_assert(13, "Error allocating memory in inform_newClient.\n"); // allows for max 3 digit row, columns numbers
+    sprintf(gridMsg, "GRID %d %d", game->rows, game->columns);
+    message_send(client->clientAddr, gridMsg);
+    mem_free(gridMsg);
+
+    // send gold message
+    send_goldMsg(game, client, 0);
+
+    // send display message
+    send_displayMsg(game, client);
+
+
+
+
+}
+
+void
+send_goldMsg(game_t* game, client_t* client, int goldPickedUp)
+{
+    // send gold message
+    char* goldMsg = mem_malloc_assert(17, "Error allocating memory in inform_newClient.\n"); // allows for max 3 digit gold count numbers
+    sprintf(gridMsg, "GOLD %d %d %d", goldPickedUp, client->gold, game->goldRemaining); //initial gold message always 0 just picked up
+    message_send(client->clientAddr, goldMsg);
+    mem_free(goldMsg);
+
+}
+
+void
+send_displayMsg(game_t* game, client_t* client){
+    int msgSize;
+    char* map;
+    char* display;
+
+    if (client->isSpectator){
+        map = grid_toStr(game->grid, NULL, game->rows, game->columns);
+    }
+    else{ // assmumes that grid is already up to date
+        map = grid_toStr(game->grid, client->grid, game->rows, game->columns);
+    }
+
+    msgSize = 10 + strlen(map);
+    display = mem_malloc_assert(msgSize, "Error allocating memory in sendDisplayMsg.\n");
+    sprintf(display, "DISPLAY\n%s", map);
+    mem_free(map);
+
+    message_send(client->clientAddr, display);
+    mem_free(display);
+
+}
+
+char*
+extract_playerName(){
+    
+}
+
+char* 
+extractRequest(const char* input) 
+{
+    if (input == NULL || input[0] == '\0') {
+        // Handle empty input string or null pointer
+        return NULL;
+    }
+
+    int length = strlen(input);
+    int wordEndIndex = -1;
+
+    // Find the end index of the first word
+    for (int i = 0; i < length; i++) {
+        if (input[i] == ' ') {
+            wordEndIndex = i;
+            break;
+        }
+    }
+
+    if (wordEndIndex == -1) {
+        // If no space is found, the entire input is considered as the first word
+        wordEndIndex = length;
+    }
+
+    // Allocate memory for the new string
+    char* firstWord = mem_malloc_assert((wordEndIndex + 1) * sizeof(char), "Error allocating memory in extractFirstWord.\n");
+
+
+    // Copy the first word into the new string
+    strncpy(firstWord, input, wordEndIndex);
+    firstWord[wordEndIndex] = '\0';  // Null-terminate the string
+
+    return firstWord;
+}
+
 
 
 void
@@ -128,4 +265,21 @@ handle_movement(client_t* player, char key, game_t* game)
 
 // make spectator quit
 
-// gold notification
+void
+send_quitMsg(client_t* client, bool replacingSpectator)
+{
+    char* quitMsg = mem_malloc_assert(55, "Error allocating memory in send_quitMsg.\n"); 
+    char* quitReason = mem_malloc_assert(45, "Error allocating memory in send_quitMsg.\n");
+    quitReason = "hello";
+
+    if (client->isSpectator){
+        if (replacingSpectator){
+            quitReason = ""
+        }
+    }
+
+    sprintf(quitMsg, "QUIT %s", quitReason);
+    message_send(client->clientAddr, quitMsg);
+    mem_free(quitMsg);
+
+}

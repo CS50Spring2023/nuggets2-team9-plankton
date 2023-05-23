@@ -65,6 +65,8 @@ new_player(game_t* game, const addr_t client, char* name)
     // assign player to a random spot
     assign_random_spot(game->grid, game->rows, game->columns, player);
     
+    // update visibility here
+    
 }
 
 // add update position function
@@ -78,7 +80,7 @@ update_position(player_t* player, int x, int y)
 // add find player
 
 
-void
+client_t*
 new_spectator(game_t* game, const addr_t client)
 {
     if (game->spectatorActive){
@@ -99,6 +101,8 @@ new_spectator(game_t* game, const addr_t client)
 
     (game->clients)[0] = spectator;
     game->spectatorActive = true;
+
+    return spectator;
 
 }
 
