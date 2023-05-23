@@ -77,22 +77,54 @@ update_position(player_t* player, int x, int y)
     player->y = y;
 }
 
-// add find player
+// add find client
+client_t*
+find_client(const addr_t clientAddr, game_t* game)
+{
+    for (int i = 0; i < game->playersJoined + 1; i++){
+        if ((game->clients)[i] != NULL){
+            // can addresses be compared like this?
+            if (((game->clients)[i])->clientAddr == clientAddr){
+                return (game->clients)[i];
+                break;
+            }   
+        } 
+    }
+
+    return NULL;
+
+}
+
+// only for finding a player
+client_t*
+find_player(char id, game_t* game)
+{
+    // find the player with the passed ID
+    for (int i = 1; i < game->playersJoined + 1; i++){
+        if ((game->clients)[i] != NULL){
+            if (((game->clients)[i])->id == id){
+                return (game->clients)[i];
+                break;
+            }
+        }
+    }
+    return NULL;
+}
 
 
 client_t*
 new_spectator(game_t* game, const addr_t client)
 {
     if (game->spectatorActive){
-        spectator_quit((game->clients)[0]);
-        client_delete((game->clients)[0]);
+        send_quitMsg(game->clients[0], 0, true);
+        delete_client((game->clients)[0], game);
         game->spectatorActive = false;
     }
 
     client_t* spectator = mem_malloc_assert(sizeof(client_t), "Error allocating memory in new_spectator.\n");
     spectator->isSpectator = true;
     spectator->clientAddr = client;
-    spectator->id = '\0';
+    spectator->id = '$';
     spectator->grid = NULL;
     spectator->gold = 0;
     spectator->real_name = NULL;
@@ -106,6 +138,8 @@ new_spectator(game_t* game, const addr_t client)
 
 }
 
+
+// not done
 void
 delete_client(client_t* client, game_t* game)
 {

@@ -23,11 +23,15 @@ static const int GoldMaxNumPiles = 30; // maximum number of gold piles
 int
 main(const int argc, char* argv[])
 {
-    // create  a new game first
+    // parse args
 
-    // start of message module
+    // create a new game first
+    game_t* game = new_game(map_file, MaxPlayers);
+    load_gold(game, GoldTotal, GoldMinNumPiles, GoldMaxNumPiles);
+
+    // start up message module
     message_init(stderr);
-    message_loop(arg, timeout, handleTimeout, NULL, handleMessage);
+    message_loop(game, timeout, handleTimeout, NULL, handleMessage);
     message_done();
 
     return(0);
@@ -44,7 +48,7 @@ handleMessage(void* arg, const addr_t from, const char* message)
         if (game->playersJoined < MaxPlayers){
 
             // put this into helper
-            char* name = extract_playerName(message);
+            char* name = extract_playerName(message); // DO THIS FUNCTION
             client_t* player = new_player(game, from, name);
             mem_free(name);
 
@@ -58,14 +62,19 @@ handleMessage(void* arg, const addr_t from, const char* message)
             inform_newClient(client, game);
 
         }
+        else {
+            send_quitMsg(from, 2, false);
+        }
     }
     else if (strcmp(request, "SPECTATE") == 0){
         client_t* spectator = new_spectator(game, from);
+
         // send new client messages: grid, gold, display
+        inform_newClient(spectator, game);
 
     }
     else if (strcmp(request, "KEY") == 0){
-        client_t* player = find_player(from);
+        client_t* player = find_client(from, game);
         handle_movement(player, request[4], game);
         
     }
@@ -92,9 +101,6 @@ inform_newClient(client_t* client, game_t* game)
 
     // send display message
     send_displayMsg(game, client);
-
-
-
 
 }
 
@@ -178,7 +184,7 @@ void
 handle_movement(client_t* player, char key, game_t* game)
 {
     if(key == 'q'){
-        send_quitMsg(player);
+        send_quitMsg(player, 1, player->isSpectator);
         
         if (!player->isSpectator){
             // reset spot
@@ -236,7 +242,7 @@ handle_movement(client_t* player, char key, game_t* game)
     }
     else if (isalpha(grid_val)){
         // find the player there using a game function
-        player_t* other_player = find_player(grid_val);
+        player_t* other_player = find_player(grid_val, game);
 
         // switch the positions of the two players
         update_position(other_player, player->x, player->y);
@@ -263,23 +269,36 @@ handle_movement(client_t* player, char key, game_t* game)
    
 }
 
-// make spectator quit
 
 void
-send_quitMsg(client_t* client, bool replacingSpectator)
+send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator)
 {
     char* quitMsg = mem_malloc_assert(55, "Error allocating memory in send_quitMsg.\n"); 
     char* quitReason = mem_malloc_assert(45, "Error allocating memory in send_quitMsg.\n");
-    quitReason = "hello";
 
-    if (client->isSpectator){
-        if (replacingSpectator){
-            quitReason = ""
+    if (isSpectator){
+        if (quitCode == 0){
+            strcpy(quitReason, "You have been replaced by a new spectator.");
         }
+        else{
+            strcpy(quitReason, "Thanks for watching!");
+        }
+    }
+    else {
+        if (quitCode == 1){
+            strcpy(quitReason, "Thanks for playing!");
+        }
+        if (quitCode == 2){
+            strcpy(quitReason, "Game is full: no more players can join.");
+        }
+        if (quitCode == 3){
+            strcpy(quitReason, "Sorry - you must provide player's name.");
+        }
+
     }
 
     sprintf(quitMsg, "QUIT %s", quitReason);
-    message_send(client->clientAddr, quitMsg);
+    message_send(clientAddr, quitMsg);
     mem_free(quitMsg);
 
 }
