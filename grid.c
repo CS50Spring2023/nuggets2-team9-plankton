@@ -99,6 +99,7 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, 
     }
 }
 
+
 /*
 * update_player_grid: 
 * Takes in a char** player_grid, char** global_grid, int representing player rows, and int representing player columns
@@ -126,6 +127,7 @@ update_player_grid(char** player_grid, game_t* game, int pr, int pc)
     }
 
 }
+
 
 /*
 * update_grids: given a game object, loops through all clients and update their grids
