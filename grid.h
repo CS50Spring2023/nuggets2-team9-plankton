@@ -13,7 +13,7 @@ Team 9: Plankton, May 2023
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-
+#include "support/message.h"
 #include "libs/file.h"
 #include "libs/mem.h"
 #include "game.h"
@@ -45,7 +45,7 @@ void assign_random_spot(char** grid, int rows, int columns, char thing, int* spo
 * update_player_grid: 
 * Takes in a char** player_grid, char** global_grid, int representing player rows, and int representing player columns
 */
-void update_player_grid(char** player_grid, char** global_grid, int pr, int pc);
+void update_player_grid(char** player_grid, char** global_grid, int pr, int pc, int globalGrid_rows, int globalGrid_columns);
 
 
 /*
@@ -83,7 +83,7 @@ char** getWalls(int pr, int pc);
 * calls helpers which update the player->grid accordingly
 * outputs a boolean which is true if the visibility on the player's grid changes (e.g. new points visible, less points visible, new gold seen etc.)
 */
-bool isVisible(char** global_grid, char** player_grid, int globalGrid_rows, int globalGrid_columns, int pr, int pc, int wr, int wc);
+bool isVisible(game_t* game, char** player_grid, int pr, int pc, int wr, int wc);
 
 
 /* compareGrids: takes in global grid rows & columns, the new player grid, and their former grid
