@@ -42,7 +42,7 @@ main(const int argc, char* argv[])
     // defensive check: file could be opened
     if (map_file == NULL){
         fprintf(stderr, "file could not be opened" );
-		exit(1);
+	exit(1);
     }
 
     // TODO IF NOT HANDLED ELSEWHERE (SR): If the optional seed is provided, the server shall pass it to srand(seed). 
