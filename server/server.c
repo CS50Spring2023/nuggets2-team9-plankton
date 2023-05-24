@@ -378,12 +378,8 @@ handle_movement(client_t* player, char key, game_t* game)
 
     }
 
-<<<<<<< HEAD:server.c
-    // call update grids
-=======
     // call update function
     update_displays(game);
->>>>>>> d03703946b7338fb5a8bd12de0b62be1d2c43861:server/server.c
 
    
 }
