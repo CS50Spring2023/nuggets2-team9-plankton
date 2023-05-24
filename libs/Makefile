@@ -5,7 +5,7 @@
 
 # object files, and the target library
 OBJS = file.o mem.o
-LIB = libcs50.a
+LIB = libs.a
 
 CFLAGS = -Wall -pedantic -std=c11 -ggdb $(FLAGS)
 CC = gcc
