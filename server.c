@@ -1,25 +1,19 @@
-/*
-server.c 
-TODO: high level description
+//
+//
+//
+//
 
-Team 9: Plankton, May 2023
-*/
 
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
-
 #include "libs/file.h"
-#include "libs/mem.h"
-
 #include "support/log.h"
 #include "support/message.h"
-
 #include "game.h"
 #include "grid.h"
-
+#include <ctype.h>
 
 static const int MaxNameLength = 50;   // max number of chars in playerName
 static const int MaxPlayers = 26;      // maximum number of players
@@ -35,9 +29,9 @@ main(const int argc, char* argv[])
     // parse args: first argument should be the pathname for a map file, the second is an optional seed for the random-number generator, which must be a positive int if provided
     
     // make sure there are no more than 2 arguments
-    if (argc > 3){
-        fprintf(stderr, "Too many arguments were provided. Call using the format ./server map.txt [seed]\n");
-	exit(1);
+    if (argc != 3){
+        fprintf(stderr, "Invalid number of arguments provided. Call using the format ./server map.txt [seed]\n");
+	    exit(1);
     }
     
     // parse the command line, open the file
@@ -47,8 +41,8 @@ main(const int argc, char* argv[])
 
     // defensive check: file could be opened
     if (map_file == NULL){
-        fprintf(stderr, "file could not be opened" );
-	exit(1);
+        fprintf(stderr, "Error. File could not be opened\n");
+	    exit(1);
     }
 
     // TODO IF NOT HANDLED ELSEWHERE (SR): If the optional seed is provided, the server shall pass it to srand(seed). 
@@ -82,7 +76,11 @@ handleMessage(void* arg, const addr_t from, const char* message)
         if (game->playersJoined < MaxPlayers){
 
             // put this into helper
-            char* name = extract_playerName(message); // DO THIS FUNCTION
+            char* name = extract_playerName(message, from); // DO THIS FUNCTION
+            if (name == NULL){
+                return false;
+            }
+
             client_t* player = new_player(game, from, name);
             mem_free(name);
 
@@ -124,12 +122,34 @@ handleMessage(void* arg, const addr_t from, const char* message)
 
 }
 
+void
+update_displays(game_t* game)
+{
+    // update spectator if there is one no matter what
+    if (game->isSpectator){
+        sendDisplayMsg(game, game->clients[0]);
+    }
+
+    for (int i = 1; i < game->playersJoined + 1; i++){
+        player_t* player = game->clients[i];
+
+        if (player != NULL){
+            // if the grid changed send a new message
+            if(update_player_grid(player->grid, game, player->x, player->y)){
+                send_displayMsg(game, player);
+            }
+        }
+    }
+}
+
 
 void
 inform_newClient(client_t* client, game_t* game)
 {
     // send grid message
     char* gridMsg = mem_malloc_assert(13, "Error allocating memory in inform_newClient.\n"); // allows for max 3 digit row, columns numbers
+    // check size of rows, columns here
+    
     sprintf(gridMsg, "GRID %d %d", game->rows, game->columns);
     message_send(client->clientAddr, gridMsg);
     mem_free(gridMsg);
@@ -177,9 +197,45 @@ send_displayMsg(game_t* game, client_t* client){
 }
 
 char*
-extract_playerName()
+extract_playerName(char* message, addr_t clientAddr)
 {
+    bool reachedNameStart = false;
+    bool emptyName = true;
+    char* name = mem_malloc_assert(MaxNameLength + 1, "Error allocating memory in extract_playerName.\n");
+    int curr_nameLength = 0;
+
+    for (int i = 0; i < strlen(message); i++){
+        if (isspace(message[i]) && !reachedNameStart){
+            reachedNameStart = true;
+            continue;
+        }
+        else if (reachedNameStart && !isspace(message[i]) && emptyName){
+            emptyName = false;
+        }
+        if (reachedNameStart){
+            if (curr_nameLength < MaxNameLength){
+                if(!isgraph(message[i]) && !isblank(message[i])){
+                    name[curr_nameLength] = '_';
+                }
+                else{
+                    name[curr_nameLength] = message[i];
+                }
+                curr_nameLength++;
+            }
+            else{
+                break;
+            }
+        }
+    }
+    name[MaxNameLength] = '\0';
     
+    if(emptyName){
+        send_quitMsg(clientAddr, 3, false);
+        mem_free(name);
+        return NULL;
+    }
+
+    return name;
 }
 
 char* 
@@ -274,7 +330,7 @@ handle_movement(client_t* player, char key, game_t* game)
     }
     else if (isalpha(grid_val)){
         // find the player there using a game function
-        player_t* other_player = find_player(grid_val, game);
+        client_t* other_player = find_player(grid_val, game);
 
         // switch the positions of the two players
         update_position(other_player, player->x, player->y);
@@ -316,11 +372,18 @@ handle_movement(client_t* player, char key, game_t* game)
         update_position(player, newPos_x, newPos_y);
 
     }
+
+    // call update function
+    update_displays(game);
+
    
 }
 
+
+// loop over clients, update their grid, check if it changed, send message if so
+
 static void
-update_previous_spot(player_t* player, game_t* game, char grid_val)
+update_previous_spot(client_t* player, game_t* game, char grid_val)
 {
     //change the global grid on the spot they came from back to what it was
     if (player->onTunnel){
