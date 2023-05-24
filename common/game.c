@@ -97,8 +97,8 @@ find_client(const addr_t clientAddr, game_t* game)
 {
     for (int i = 0; i < game->playersJoined + 1; i++){
         if ((game->clients)[i] != NULL){
-            // can addresses be compared like this?
-            if (((game->clients)[i])->clientAddr == clientAddr){
+
+            if (message_eqAddr(((game->clients)[i])->clientAddr, clientAddr)){
                 return (game->clients)[i];
                 break;
             }   
