@@ -14,9 +14,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include "libs/file.h"
+
+#include "../libs/file.h"
+#include "../libs/mem.h"
+
+#include "../support/log.h"
+#include "../support/message.h"
+
+#include "game.h"
 #include "grid.h"
-#include "support/message.h"
 
 /**************** global types ****************/
 typedef struct client client_t;

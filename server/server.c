@@ -8,12 +8,17 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include "libs/file.h"
-#include "support/log.h"
-#include "support/message.h"
-#include "game.h"
-#include "grid.h"
 #include <ctype.h>
+
+#include "../libs/file.h"
+#include "../libs/mem.h"
+
+#include "../support/log.h"
+#include "../support/message.h"
+
+#include "../common/game.h"
+#include "../common/grid.h"
+
 
 static const int MaxNameLength = 50;   // max number of chars in playerName
 static const int MaxPlayers = 26;      // maximum number of players
@@ -373,8 +378,12 @@ handle_movement(client_t* player, char key, game_t* game)
 
     }
 
+<<<<<<< HEAD:server.c
+    // call update grids
+=======
     // call update function
     update_displays(game);
+>>>>>>> d03703946b7338fb5a8bd12de0b62be1d2c43861:server/server.c
 
    
 }

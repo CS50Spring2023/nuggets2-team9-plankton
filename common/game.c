@@ -10,9 +10,15 @@ Team 9: Plankton, May 2023
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include "libs/file.h"
+
+#include "../libs/file.h"
+#include "../libs/mem.h"
+
+#include "../support/log.h"
+#include "../support/message.h"
+
+#include "game.h"
 #include "grid.h"
-#include "support/message.h"
 
 
 // a single player's struct
@@ -224,7 +230,7 @@ load_gold(game_t* game, const int goldTotal, const int goldMinPiles, const int g
     int* nugget_counts = nugget_count_array(goldMinPiles, goldMaxPiles, goldTotal);
 
     for (int i = 0; i < goldMaxPiles; i++){
-        gold_amt = nugget_counts[i]
+        gold_amt = nugget_counts[i];
 
         if (gold_amt < 0){
             break;
