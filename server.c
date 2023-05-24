@@ -41,7 +41,7 @@ main(const int argc, char* argv[])
 
     // defensive check: file could be opened
     if (map_file == NULL){
-        fprintf(stderr, "file could not be opened\n");
+        fprintf(stderr, "Error. File could not be opened\n");
 	    exit(1);
     }
 
@@ -122,12 +122,34 @@ handleMessage(void* arg, const addr_t from, const char* message)
 
 }
 
+void
+update_displays(game_t* game)
+{
+    // update spectator if there is one no matter what
+    if (game->isSpectator){
+        sendDisplayMsg(game, game->clients[0]);
+    }
+
+    for (int i = 1; i < game->playersJoined + 1; i++){
+        player_t* player = game->clients[i];
+
+        if (player != NULL){
+            // if the grid changed send a new message
+            if(update_player_grid(player->grid, game, player->x, player->y)){
+                send_displayMsg(game, player);
+            }
+        }
+    }
+}
+
 
 void
 inform_newClient(client_t* client, game_t* game)
 {
     // send grid message
     char* gridMsg = mem_malloc_assert(13, "Error allocating memory in inform_newClient.\n"); // allows for max 3 digit row, columns numbers
+    // check size of rows, columns here
+    
     sprintf(gridMsg, "GRID %d %d", game->rows, game->columns);
     message_send(client->clientAddr, gridMsg);
     mem_free(gridMsg);
@@ -351,8 +373,8 @@ handle_movement(client_t* player, char key, game_t* game)
 
     }
 
-    // call update grids
-    update_grids(game);
+    // call update function
+    update_displays(game);
 
    
 }

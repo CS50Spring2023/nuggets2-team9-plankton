@@ -41,7 +41,7 @@ typedef struct game {
     int rows;
     int columns;
     gold_location_t* locations;
-
+    
 } game_t;
 
 typedef struct gold_location {
@@ -92,8 +92,8 @@ find_client(const addr_t clientAddr, game_t* game)
 {
     for (int i = 0; i < game->playersJoined + 1; i++){
         if ((game->clients)[i] != NULL){
-            // can addresses be compared like this?
-            if (((game->clients)[i])->clientAddr == clientAddr){
+
+            if (message_eqAddr(((game->clients)[i])->clientAddr, clientAddr)){
                 return (game->clients)[i];
                 break;
             }   
@@ -222,7 +222,7 @@ load_gold(game_t* game, const int goldTotal, const int goldMinPiles, const int g
     int* nugget_counts = nugget_count_array(goldMinPiles, goldMaxPiles, goldTotal);
 
     for (int i = 0; i < goldMaxPiles; i++){
-        gold_amt = nugget_counts[i]
+        gold_amt = nugget_counts[i];
 
         if (gold_amt < 0){
             break;
