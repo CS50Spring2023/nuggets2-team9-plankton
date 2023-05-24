@@ -14,6 +14,7 @@ TODOs:
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include <ctype.h>
 #include "support/message.h"
 #include "libs/file.h"
@@ -228,7 +229,7 @@ visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr)
 
             float row = slope*(col-pc) + pr; // compute row
 
-			if (is_integer(row)){  // check if row is integer aka point on grid - also takes care of pr == wr case
+			if (floorf(row) == row){  // check if row is integer aka point on grid - also takes care of pr == wr case
 				if ( (player_grid[(int)row][col] == "|") || (player_grid[(int)row][col] == "-" ) || (player_grid[(int)row][col] == "x") || (player_grid[(int)row][col] == "#") ){
 					// this and all future locations are invisible: set to " "
                     player_grid[(int)row][col] == " ";
@@ -236,7 +237,7 @@ visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr)
                 else{
                     // check if player grid already equal to global grid 
                     if (player_grid[(int)row][col] != global_grid[(int)row][col]){
-                        changed == true;
+                        changed = true;
                     }
                     // update player grid to reflect global grid
                     player_grid[(int)row][col] = global_grid[(int)row][col];
@@ -247,7 +248,7 @@ visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr)
 				if ( (player_grid[(int)row-1][col] == ".") || (player_grid[(int)row-1][col] == "*") || (player_grid[(int)row+1][col] == ".") || (player_grid[(int)row+1][col] == "*") ){
 					// check if player grid already equal to global grid 
                     if (player_grid[(int)row][col] != global_grid[(int)row][col]){
-                        changed == true;
+                        changed = true;
                     }
                     // update player grid to reflect global grid
                     player_grid[(int)row][col] = global_grid[(int)row][col];
@@ -266,7 +267,7 @@ visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr)
 
             float row = slope*(col-pc) + pr;
 
-            if (is_integer(row)){  // aka point on grid
+            if (floorf(row) == row){  // aka point on grid
                 if ( (player_grid[(int)row][col] == "|") || (player_grid[(int)row][col] == "-" ) || (player_grid[(int)row][col] == "x") || (player_grid[(int)row][col] == "#") ){
                     // this and all future locations are invisible to player: make them " "
                     player_grid[(int)row][col] = " ";
@@ -274,7 +275,7 @@ visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr)
                 else{
                     // check if player grid already equal to global grid 
                     if (player_grid[(int)row][col] != global_grid[(int)row][col]){
-                        changed == true;
+                        changed = true;
                     }
                     // update player grid to reflect global grid
                     player_grid[(int)row][col] = global_grid[(int)row][col];
@@ -285,7 +286,7 @@ visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr)
                 if ( (player_grid[(int)row-1][col] == ".") || (player_grid[(int)row-1][col] == "*") || (player_grid[(int)row+1][col] == ".") || (player_grid[(int)row+1][col] == "*") ){
                     // check if player grid already equal to global grid 
                     if (player_grid[(int)row][col] != global_grid[(int)row][col]){
-                        changed == true;
+                        changed = true;
                     }
                     // update player grid to reflect global grid
                     player_grid[(int)row][col] = global_grid[(int)row][col];
@@ -324,7 +325,7 @@ visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc)
 
             float col = pc + (row - pr)/slope;  // compute col
 
-            if (is_integer(col)){  // aka a point on the grid - also takes care of pc == wc case
+            if (floorf(col) == col){  // aka a point on the grid - also takes care of pc == wc case
                 if ( (player_grid[row][(int)col] == "|") || (player_grid[row][(int)col] == "-" ) || (player_grid[row][(int)col] == "x") || (player_grid[row][(int)col] == "#") ){
                     // this and all future locations are invisible: set to " "
                     player_grid[row][(int)col] = " ";
@@ -333,7 +334,7 @@ visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc)
 
                     // check if player grid already equal to global grid 
                     if (player_grid[row][(int)col] != global_grid[row][(int)col]){
-                        changed == true;
+                        changed = true;
                     }
                     player_grid[row][(int)col] = global_grid[row][(int)col];
                 }
@@ -345,7 +346,7 @@ visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc)
                     
                     // check if player grid already equal to global grid 
                     if (player_grid[row][(int)col] != global_grid[row][(int)col]){
-                        changed == true;
+                        changed = true;
                     }
                     player_grid[row][(int)col] = global_grid[row][(int)col];
                 }
@@ -365,7 +366,7 @@ visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc)
 
             float col = pc + (row - pr)/slope;  // compute col
 
-            if (is_integer(col)){  // aka a point on the grid
+            if (floorf(col) == col){  // aka a point on the grid
                 if ( (player_grid[row][(int)col] == "|") || (player_grid[row][(int)col] == "-" ) || (player_grid[row][(int)col] == "x") || (player_grid[row][(int)col] == "#") ){
                     // this and all future locations are invisible: skip all future rows and columns
                     player_grid[row][(int)col] = " ";
@@ -373,7 +374,7 @@ visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc)
                 else{
                     // check if player grid already equal to global grid 
                     if (player_grid[row][(int)col] != global_grid[row][(int)col]){
-                        changed == true;
+                        changed = true;
                     }
                     player_grid[row][(int)col] = global_grid[row][(int)col];
                 }
@@ -385,7 +386,7 @@ visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc)
                     
                     // check if player grid already equal to global grid 
                     if (player_grid[row][(int)col] != global_grid[row][(int)col]){
-                        changed == true;
+                        changed = true;
                     }
                     player_grid[row][(int)col] = global_grid[row][(int)col];
                 }
