@@ -10,9 +10,15 @@ Team 9: Plankton, May 2023
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+
 #include "libs/file.h"
-#include "grid.h"
+#include "libs/mem.h"
+
+#include "support/log.h"
 #include "support/message.h"
+
+#include "game.h"
+#include "grid.h"
 
 
 // a single player's struct

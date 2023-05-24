@@ -1,19 +1,25 @@
-//
-//
-//
-//
+/*
+server.c 
+TODO: high level description
 
+Team 9: Plankton, May 2023
+*/
 
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
+
 #include "libs/file.h"
+#include "libs/mem.h"
+
 #include "support/log.h"
 #include "support/message.h"
+
 #include "game.h"
 #include "grid.h"
-#include <ctype.h>
+
 
 static const int MaxNameLength = 50;   // max number of chars in playerName
 static const int MaxPlayers = 26;      // maximum number of players
