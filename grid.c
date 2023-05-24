@@ -92,12 +92,13 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, 
             grid[x][y]=thing;
             placed = true;
             // assign spot x and y
-            spot_x = x;
-            spot_y = y;
+            *spot_x = x;
+            *spot_y = y;
         }
         // try again with another random spot if it didn't work
     }
 }
+
 
 /*
 * update_player_grid: 
@@ -126,6 +127,7 @@ update_player_grid(char** player_grid, game_t* game, int pr, int pc)
     }
 
 }
+
 
 /*
 * update_grids: given a game object, loops through all clients and update their grids
