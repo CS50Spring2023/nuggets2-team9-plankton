@@ -19,6 +19,8 @@ TODOs:
 #include "libs/file.h"
 #include "libs/mem.h"
 #include "game.h"
+#include "libs/mem.h"
+
 
 /**************** functions: grid as a 2D array  ****************/
 
