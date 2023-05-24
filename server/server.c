@@ -27,6 +27,17 @@ static const int GoldMinNumPiles = 10; // minimum number of gold piles
 static const int GoldMaxNumPiles = 30; // maximum number of gold piles
 
 
+bool handleMessage(void* arg, const addr_t from, const char* message);
+void update_displays(game_t* game);
+void inform_newClient(client_t* client, game_t* game);
+void send_goldMsg(game_t* game, client_t* client, int goldPickedUp);
+void send_displayMsg(game_t* game, client_t* client);
+char* extract_playerName(const char* message, addr_t clientAddr);
+char* extractRequest(const char* input);
+void handle_movement(client_t* player, char key, game_t* game);
+static void update_previous_spot(client_t* player, game_t* game, char grid_val);
+void send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator);
+
 int
 main(const int argc, char* argv[])
 {
@@ -61,7 +72,7 @@ main(const int argc, char* argv[])
 
     // start up message module
     message_init(stderr);
-    message_loop(game, timeout, handleTimeout, NULL, handleMessage);
+    message_loop(game, 0, NULL, NULL, handleMessage);
     message_done();
 
     // close the file
@@ -81,7 +92,7 @@ handleMessage(void* arg, const addr_t from, const char* message)
         if (game->playersJoined < MaxPlayers){
 
             // put this into helper
-            char* name = extract_playerName(message, from); // DO THIS FUNCTION
+            char* name = extract_playerName(message, from); 
             if (name == NULL){
                 return false;
             }
@@ -96,7 +107,7 @@ handleMessage(void* arg, const addr_t from, const char* message)
             mem_free(response); // is this losing the string for whoever receives message?????
 
             // send new client messages: grid, gold, display
-            inform_newClient(client, game);
+            inform_newClient(player, game);
 
         }
         else {
@@ -131,12 +142,12 @@ void
 update_displays(game_t* game)
 {
     // update spectator if there is one no matter what
-    if (game->isSpectator){
-        sendDisplayMsg(game, game->clients[0]);
+    if (game->spectatorActive){
+        send_displayMsg(game, game->clients[0]);
     }
 
     for (int i = 1; i < game->playersJoined + 1; i++){
-        player_t* player = game->clients[i];
+        client_t* player = game->clients[i];
 
         if (player != NULL){
             // if the grid changed send a new message
@@ -172,14 +183,15 @@ send_goldMsg(game_t* game, client_t* client, int goldPickedUp)
 {
     // send gold message
     char* goldMsg = mem_malloc_assert(17, "Error allocating memory in inform_newClient.\n"); // allows for max 3 digit gold count numbers
-    sprintf(gridMsg, "GOLD %d %d %d", goldPickedUp, client->gold, game->goldRemaining); //initial gold message always 0 just picked up
+    sprintf(goldMsg, "GOLD %d %d %d", goldPickedUp, client->gold, game->goldRemaining); //initial gold message always 0 just picked up
     message_send(client->clientAddr, goldMsg);
     mem_free(goldMsg);
 
 }
 
 void
-send_displayMsg(game_t* game, client_t* client){
+send_displayMsg(game_t* game, client_t* client)
+{
     int msgSize;
     char* map;
     char* display;
@@ -202,7 +214,7 @@ send_displayMsg(game_t* game, client_t* client){
 }
 
 char*
-extract_playerName(char* message, addr_t clientAddr)
+extract_playerName(const char* message, addr_t clientAddr)
 {
     bool reachedNameStart = false;
     bool emptyName = true;
@@ -284,7 +296,7 @@ void
 handle_movement(client_t* player, char key, game_t* game)
 {
     if(key == 'q'){
-        send_quitMsg(player, 1, player->isSpectator);
+        send_quitMsg(player->clientAddr, 1, player->isSpectator);
         
         if (!player->isSpectator){
             // reset spot
@@ -353,7 +365,7 @@ handle_movement(client_t* player, char key, game_t* game)
 
     }
     else if (grid_val == '*'){
-        int nuggetsFound = update_gold(game, player, newPos_x, newPos_y, goldMaxPiles);
+        int nuggetsFound = update_gold(game, player, newPos_x, newPos_y, GoldMaxNumPiles);
         
         // update the client that just picked up gold
         send_goldMsg(game, player, nuggetsFound);

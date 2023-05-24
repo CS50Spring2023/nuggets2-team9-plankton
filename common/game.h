@@ -29,6 +29,40 @@ typedef struct client client_t;
 typedef struct game game_t;
 typedef struct gold_location gold_location_t;
 
+typedef struct client {
+    addr_t clientAddr;
+    bool isSpectator;
+    char id;
+    char* real_name;
+    int gold;
+    int x;
+    int y;
+    char** grid;
+    bool onTunnel;
+    int clientsArr_Idx;
+    
+} client_t;
+
+
+// game struct
+typedef struct game {
+    char** grid;
+    client_t** clients;
+    int goldRemaining;
+    int playersJoined;
+    bool spectatorActive;
+    int rows;
+    int columns;
+    gold_location_t** locations;
+    
+} game_t;
+
+typedef struct gold_location {
+    int x;
+    int y;
+    int nuggetCount;
+} gold_location_t;
+
 
 /**************** Functions ****************/
 
@@ -44,9 +78,9 @@ void delete_client(client_t* client, game_t* game);
 
 game_t* new_game(FILE* map_file, const int maxPlayers);
 
-void end_game();
+// void end_game();
 
-void update_gold(game_t* game, client_t* player, int x_pos, int y_pos, int goldMaxPiles);
+int update_gold(game_t* game, client_t* player, int x_pos, int y_pos, int goldMaxPiles);
 
 void load_gold(game_t* game, const int goldTotal, const int goldMinPiles, const int goldMaxPiles);
 

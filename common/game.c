@@ -22,39 +22,39 @@ Team 9: Plankton, May 2023
 
 
 // a single player's struct
-typedef struct client {
-    const addr_t clientAddr;
-    bool isSpectator;
-    char id;
-    char* real_name;
-    int gold;
-    int x;
-    int y;
-    char** grid;
-    bool onTunnel;
-    int clientsArr_Idx;
+// typedef struct client {
+//     addr_t clientAddr;
+//     bool isSpectator;
+//     char id;
+//     char* real_name;
+//     int gold;
+//     int x;
+//     int y;
+//     char** grid;
+//     bool onTunnel;
+//     int clientsArr_Idx;
     
-} client_t;
+// } client_t;
 
 
-// game struct
-typedef struct game {
-    char** grid;
-    client_t* clients;
-    int goldRemaining;
-    int playersJoined;
-    bool spectatorActive;
-    int rows;
-    int columns;
-    gold_location_t* locations;
+// // game struct
+// typedef struct game {
+//     char** grid;
+//     client_t** clients;
+//     int goldRemaining;
+//     int playersJoined;
+//     bool spectatorActive;
+//     int rows;
+//     int columns;
+//     gold_location_t** locations;
     
-} game_t;
+// } game_t;
 
-typedef struct gold_location {
-    int x;
-    int y;
-    int nuggetCount;
-} gold_location_t;
+// typedef struct gold_location {
+//     int x;
+//     int y;
+//     int nuggetCount;
+// } gold_location_t;
 
 
 
@@ -72,8 +72,8 @@ new_player(game_t* game, const addr_t client, char* name)
     player->grid = mem_malloc_assert(game->rows * sizeof(char*), "Error allocating memory in new_player.\n");
     player->onTunnel = false;
 
-    game->clients[playersJoined + 1] = player;
-    player->clientsArr_Idx = playersJoined + 1;
+    game->clients[game->playersJoined + 1] = player;
+    player->clientsArr_Idx = game->playersJoined + 1;
     (game->playersJoined)++;
     
     // assign player to a random spot
@@ -154,27 +154,27 @@ new_spectator(game_t* game, const addr_t client)
 }
 
 
-// not done
-void
-delete_client(client_t* client, game_t* game)
-{
-    if (player->real_name != NULL){
-        mem_free(player->real_name);
-    }
+// // not done
+// void
+// delete_client(client_t* client, game_t* game)
+// {
+//     if (player->real_name != NULL){
+//         mem_free(player->real_name);
+//     }
     
-    // grid delete function call
+//     // grid delete function call
 
-    (game->clients)[client->clientsArr_Idx] = NULL;
+//     (game->clients)[client->clientsArr_Idx] = NULL;
 
-    mem_free(client);
+//     mem_free(client);
 
-}
+// }
 
 game_t*
 new_game(FILE* map_file, const int maxPlayers)
 {
     game_t* new_game = mem_malloc_assert(sizeof(game_t), "Error allocating memory in new_game.\n");
-    new_game->clients =  mem_malloc_assert((maxPlayers + 1) * sizeof(client_t), "Error allocating memory in new_game.\n");
+    new_game->clients =  mem_malloc_assert((maxPlayers + 1) * sizeof(client_t*), "Error allocating memory in new_game.\n");
 
     // initialize array of client to be all NULL
     for (int i = 0; i < maxPlayers + 1; i++){
@@ -223,7 +223,7 @@ load_gold(game_t* game, const int goldTotal, const int goldMinPiles, const int g
 {
     int gold_amt;
 
-    game->locations =  mem_malloc_assert((goldMaxPiles) * sizeof(gold_location_t), "Error allocating memory in load_gold.\n");
+    game->locations =  mem_malloc_assert((goldMaxPiles) * sizeof(gold_location_t*), "Error allocating memory in load_gold.\n");
 
     int* nugget_counts = nugget_count_array(goldMinPiles, goldMaxPiles, goldTotal);
 
@@ -247,7 +247,7 @@ add_gold_pile(game_t* game, int gold_amt, int piles)
     int gold_x;
     int gold_y;
 
-    gold_location_t* gold_spot = mem_malloc_assert(sizeof(gold_location_t));
+    gold_location_t* gold_spot = mem_malloc_assert(sizeof(gold_location_t), "Error allocating memory in add_gold_pile.\n");
     assign_random_spot(game->grid, game->rows, game->columns, '*', &gold_x, &gold_y);
     gold_spot->x = gold_x;
     gold_spot->y = gold_y;
@@ -266,14 +266,14 @@ nugget_count_array(const int goldMinPiles, const int goldMaxPiles, int goldTotal
 
     while (true){
         int piles = 0;
-        int* arr = mem_malloc_assert(goldMaxPiles * sizeof(int));
+        int* arr = mem_malloc_assert(goldMaxPiles * sizeof(int), "Error allocating memory in nugget_count_array.\n");
         int gold_amt;
         int total_gold_added = 0;
 
         while (piles < goldMaxPiles && total_gold_added < goldTotal){
             gold_amt = (rand() % (upper_bound - lower_bound + 1)) + lower_bound;
 
-            if (gold_amt + total_gold_added > goldTotal || piles = goldMaxPiles - 1){
+            if (gold_amt + total_gold_added > goldTotal || piles == goldMaxPiles - 1){
                 gold_amt = goldTotal - total_gold_added;
             }
             
