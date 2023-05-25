@@ -21,42 +21,6 @@ Team 9: Plankton, May 2023
 #include "grid.h"
 
 
-// a single player's struct
-// typedef struct client {
-//     addr_t clientAddr;
-//     bool isSpectator;
-//     char id;
-//     char* real_name;
-//     int gold;
-//     int x;
-//     int y;
-//     char** grid;
-//     bool onTunnel;
-//     int clientsArr_Idx;
-    
-// } client_t;
-
-
-// // game struct
-// typedef struct game {
-//     char** grid;
-//     client_t** clients;
-//     int goldRemaining;
-//     int playersJoined;
-//     bool spectatorActive;
-//     int rows;
-//     int columns;
-//     gold_location_t** locations;
-    
-// } game_t;
-
-// typedef struct gold_location {
-//     int x;
-//     int y;
-//     int nuggetCount;
-// } gold_location_t;
-
-
 
 client_t*
 new_player(game_t* game, const addr_t client, char* name)
@@ -153,22 +117,22 @@ new_spectator(game_t* game, const addr_t client)
 
 }
 
+void
+delete_client(client_t* client, game_t* game)
+{
+    if (player->real_name != NULL){
+        mem_free(player->real_name);
+    }
 
-// // not done
-// void
-// delete_client(client_t* client, game_t* game)
-// {
-//     if (player->real_name != NULL){
-//         mem_free(player->real_name);
-//     }
-    
-//     // grid delete function call
+    if (client->grid != NULL){
+        grid_delete(client->grid);
+    }
 
-//     (game->clients)[client->clientsArr_Idx] = NULL;
+    (game->clients)[client->clientsArr_Idx] = NULL;
 
-//     mem_free(client);
+    mem_free(client);
 
-// }
+}
 
 game_t*
 new_game(FILE* map_file, const int maxPlayers)
@@ -190,9 +154,24 @@ new_game(FILE* map_file, const int maxPlayers)
 }
 
 void
-end_game()
+end_game(game_t* game)
 {
-    // free all memory
+    for (int i = 0; i < game->playersJoined + 1; i++){
+        client_t* client = game->clients[i];
+        if (client != NULL){
+            delete_client(client);
+        }
+    }
+
+    if (game->grid != NULL){
+        grid_delete(game->grid);
+    }
+
+    if (game->locations != NULL){
+        mem_free(game->locations);
+    }
+    
+    mem_free(game);
 
 }
 
