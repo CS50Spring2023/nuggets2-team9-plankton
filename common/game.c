@@ -23,7 +23,7 @@ Team 9: Plankton, May 2023
 
 
 client_t*
-new_player(game_t* game, const addr_t client, char* name)
+new_player(game_t* game, addr_t client, char* name)
 {
     client_t* player = mem_malloc_assert(sizeof(client_t), "Error allocating memory in new_player.\n");
     char* alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -35,7 +35,6 @@ new_player(game_t* game, const addr_t client, char* name)
     player->gold = 0;
     player->grid = mem_malloc_assert(game->rows * sizeof(char*), "Error allocating memory in new_player.\n");
     player->onTunnel = false;
-
     game->clients[game->playersJoined + 1] = player;
     player->clientsArr_Idx = game->playersJoined + 1;
     (game->playersJoined)++;
@@ -58,7 +57,7 @@ update_position(client_t* player, int x, int y)
 
 // add find client
 client_t*
-find_client(const addr_t clientAddr, game_t* game)
+find_client(addr_t clientAddr, game_t* game)
 {
     for (int i = 0; i < game->playersJoined + 1; i++){
         if ((game->clients)[i] != NULL){
@@ -120,12 +119,13 @@ new_spectator(game_t* game, const addr_t client)
 void
 delete_client(client_t* client, game_t* game)
 {
-    if (player->real_name != NULL){
-        mem_free(player->real_name);
+    if (client->real_name != NULL){
+        mem_free(client->real_name);
     }
 
     if (client->grid != NULL){
-        grid_delete(client->grid);
+        // grid_delete(client->grid);
+        free(client->grid);
     }
 
     (game->clients)[client->clientsArr_Idx] = NULL;
@@ -159,12 +159,13 @@ end_game(game_t* game)
     for (int i = 0; i < game->playersJoined + 1; i++){
         client_t* client = game->clients[i];
         if (client != NULL){
-            delete_client(client);
+            delete_client(client, game);
         }
     }
 
     if (game->grid != NULL){
-        grid_delete(game->grid);
+        // grid_delete(game->grid);
+        free(game->grid);
     }
 
     if (game->locations != NULL){
@@ -179,7 +180,8 @@ int
 update_gold(game_t* game, client_t* player, int x_pos, int y_pos, int goldMaxPiles)
 {
     for (int i = 0; i < goldMaxPiles; i++){
-        gold_location_t* location = (game->locations)[i];
+        gold_location_t* location = &(game->locations[i]);
+
         if (location->nuggetCount < 0){
             exit(1);
             // error, reached the end of the gold piles without finding pile
@@ -233,7 +235,15 @@ add_gold_pile(game_t* game, int gold_amt, int piles)
     gold_spot->nuggetCount = gold_amt;
 
     game->goldRemaining += gold_amt;
-    (game->locations)[piles] = gold_spot;
+
+    gold_location_t** locations = game->locations;
+    locations[piles] = &gold_spot;
+
+
+    // (game->locations)[piles] = gold_spot;
+    // (game->locations)[piles] = &gold_spot;
+    // (game->locations)[piles] = gold_spot;
+
 
 }
 

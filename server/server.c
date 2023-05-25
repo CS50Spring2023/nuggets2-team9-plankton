@@ -1,8 +1,9 @@
-//
-//
-//
-//
+/*
+server.c 
+TODO
 
+Team 9: Plankton, May 2023
+*/
 
 #include <stdlib.h>
 #include <stdbool.h>

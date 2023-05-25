@@ -99,7 +99,7 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, 
         int x = rand() % columns;
         int y = rand() % rows;
         // try to place the "thing" there
-        if (strcmp(grid[x][y], '.')==0){
+        if (strcmp(&grid[x][y], ".")==0){
             grid[x][y]=thing;
             placed = true;
             // assign spot x and y
@@ -112,44 +112,12 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, 
 
 
 /*
-* update_player_grid: 
-* Takes in a char** player_grid, char** global_grid, int representing player rows, and int representing player columns
-* outputs nothing 
-* calls getWalls to find room boundaries
-* for each boundary, calls isVisible to update player's grid
-*/
-void
-update_player_grid(char** player_grid, game_t* game, int pr, int pc)
-{
-    // change the player's '@' symbol to their new position.
-    player_grid[pr][pc]='@';
-
-    // then, change their local grid display in reference to where they are and what they can see
-
-    // get walls
-    char** walls = mem_malloc_assert(sizeof(game->rows * sizeof(char*)), "Error allocating memory in getWalls.\n");
-    walls = getWalls(game, game->grid, pr, pc);
-
-    int numRows = sizeof(walls)/sizeof(walls[0]);
-    int numCols = sizeof(walls[0])/sizeof(walls[0][0]);
-
-	// for each wall point (wr, wc) in walls array
-    for(int wr = 0; wr < numRows; wr++) {
-        for(int wc = 0; wc < numCols; wc++) {
-            isVisible(game, player_grid, pr, pc, wr, wc);
-        }
-    }
-
-}
-
-
-/*
 * update_grids: given a game object, loops through all clients and update their grids
 */
 void
 update_grids(game_t* game)
 {
-    char* clients = malloc(sizeof(char*)*26);
+    char** clients = malloc(sizeof(char*)*26);
     clients = game->clients;
 
     // loops thru all players
@@ -162,6 +130,16 @@ update_grids(game_t* game)
         }
         
     }
+}
+
+/*
+* is_integer: takes a char parameter and returns true if it represents a valid int, and false otherwise
+*
+*/
+bool is_integer(float value) {
+    char str[32]; // Adjust the buffer size as per your requirements
+    sprintf(str, "%.0f", value);
+    return (float)atoi(str) == value;
 }
 
 
@@ -261,6 +239,26 @@ getWalls(game_t* game, char** grid, int pr, int pc)
 
 }
 
+/* compareGrids: takes in global grid rows & columns, the new player grid, and their former grid
+* helper for isVisble to compare current to previous player grids for changes in visibility 
+*/
+bool 
+compareGrids(int rows, int columns, char** playerGrid, char** oldGrid)
+{
+    // for every gridspot
+    for (int i = 0; i < rows; i++){
+        for (int j; j < columns; j++){
+            // if there has been a change
+            if (playerGrid[i][j] != oldGrid[i][j]){
+                // return true, a new message needs to be sent to this player
+                return true;
+            }
+        }
+    }
+    // if nothing has changed, then no message needs to be sent
+    return false;
+}
+
 /*
 * isVisible: takes in player, player row & col, wall (boundary) row & column and game
 * checks if wr, wc is visible from position player position pr, pc
@@ -293,25 +291,7 @@ isVisible(game_t* game, char** player_grid, int pr, int pc, int wr, int wc)
 
 }
 
-/* compareGrids: takes in global grid rows & columns, the new player grid, and their former grid
-* helper for isVisble to compare current to previous player grids for changes in visibility 
-*/
-bool 
-compareGrids(int rows, int columns, char** playerGrid, char** oldGrid)
-{
-    // for every gridspot
-    for (int i = 0; i < rows; i++){
-        for (int j; j < columns; j++){
-            // if there has been a change
-            if (playerGrid[i][j] != oldGrid[i][j]){
-                // return true, a new message needs to be sent to this player
-                return true;
-            }
-        }
-    }
-    // if nothing has changed, then no message needs to be sent
-    return false;
-}
+
    
 /* visCol: takes in the player, the player's current column and the column of a wall being investigated
 * helper to compute visibility across columns
@@ -468,3 +448,33 @@ visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc)
     
 }
 
+/*
+* update_player_grid: 
+* Takes in a char** player_grid, char** global_grid, int representing player rows, and int representing player columns
+* outputs nothing 
+* calls getWalls to find room boundaries
+* for each boundary, calls isVisible to update player's grid
+*/
+void
+update_player_grid(char** player_grid, game_t* game, int pr, int pc)
+{
+    // change the player's '@' symbol to their new position.
+    player_grid[pr][pc]='@';
+
+    // then, change their local grid display in reference to where they are and what they can see
+
+    // get walls
+    char** walls = mem_malloc_assert(sizeof(game->rows * sizeof(char*)), "Error allocating memory in getWalls.\n");
+    walls = getWalls(game, game->grid, pr, pc);
+
+    int numRows = sizeof(walls)/sizeof(walls[0]);
+    int numCols = sizeof(walls[0])/sizeof(walls[0][0]);
+
+	// for each wall point (wr, wc) in walls array
+    for(int wr = 0; wr < numRows; wr++) {
+        for(int wc = 0; wc < numCols; wc++) {
+            isVisible(game, player_grid, pr, pc, wr, wc);
+        }
+    }
+
+}
