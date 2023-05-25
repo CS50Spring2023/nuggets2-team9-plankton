@@ -16,3 +16,9 @@ $(LIBS): $(OBJS)
 # dependencies
 grid.o: grid.h 
 game.o: game.h
+
+clean:
+	rm -rf *.dSYM  # MacOS debugger info
+	rm -f *~ *.o
+	rm -f common.a
+
