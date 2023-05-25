@@ -20,8 +20,6 @@ Team 9: Plankton, May 2023
 #include "game.h"
 #include "grid.h"
 
-
-
 client_t*
 new_player(game_t* game, addr_t client, char* name)
 {
@@ -40,7 +38,7 @@ new_player(game_t* game, addr_t client, char* name)
     (game->playersJoined)++;
     
     // assign player to a random spot
-    assign_random_spot(game->grid, game->rows, game->columns, player->id, &player->x, &player->y);
+    assign_random_spot(game->grid, game->rows, game->columns, &player->id, &player->x, &player->y);
     
     // update visibility here
     update_player_grid(player->grid, game, player->x, player->y);
@@ -233,18 +231,10 @@ add_gold_pile(game_t* game, int gold_amt, int piles)
     gold_spot->x = gold_x;
     gold_spot->y = gold_y;
     gold_spot->nuggetCount = gold_amt;
-
     game->goldRemaining += gold_amt;
-
-    gold_location_t** locations = game->locations;
-    locations[piles] = &gold_spot;
-
-
-    // (game->locations)[piles] = gold_spot;
-    // (game->locations)[piles] = &gold_spot;
-    // (game->locations)[piles] = gold_spot;
-
-
+    
+    gold_location_t* locations = game->locations;
+    (game->locations)[piles] = *gold_spot;
 }
 
 int*
