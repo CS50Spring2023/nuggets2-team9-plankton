@@ -1,28 +1,22 @@
-# Makefile for nuggets modules: grid, game, and server
+# Makefile for all Nuggets modules
+#
+# Plankton - May 2023
 
-# only grid is inclued right now
+.PHONY: all clean
 
-OBJS = grid.o libs/file.o libs/mem.o 
+############## default: make all libs and programs ##########
+all: 
+	make -C libs
+	make -C support
+	make -C common
+	make -C server
 
-# uncomment the following to turn on verbose memory logging
-TESTING=-DMEMTEST
+############### TAGS for emacs users ##########
+TAGS:  Makefile */Makefile */*.c */*.h */*.md */*.sh
+	etags $^
 
-CFLAGS = -Wall -pedantic -std=c11 -ggdb $(TESTING) -I/libs
-CC = gcc
-MAKE = make
-# for memory-leak tests
-VALGRIND = valgrind --leak-check=full --show-leak-kinds=all
-
-# compile: $make
-grid: $(OBJS)
-	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
-
-grid.o: grid.c 
-../lib/file.o: ../lib/file.c ../lib/file.h
-../lib/mem.o: ../lib/mem.c ../lib/mem.h
-
+############## clean  ##########
 clean:
-	rm -rf *.dSYM  # MacOS debugger info
-	rm -f *~ *.o
-	rm -f grid
-	rm -f core
+	rm -f *~
+	rm -f TAGS
+	make -C common clean

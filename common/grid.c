@@ -10,10 +10,15 @@ Team 9: Plankton, May 2023
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include "support/message.h"
-#include "libs/file.h"
-#include "libs/mem.h"
+
+#include "../libs/file.h"
+#include "../libs/mem.h"
+
+#include "../support/log.h"
+#include "../support/message.h"
+
 #include "game.h"
+#include "grid.h"
 
 /**************** functions: grid as a 2D array  ****************/
 
@@ -22,7 +27,7 @@ Team 9: Plankton, May 2023
 * Reads the file into an array of strings, each string in the array represents a row of the map
 */
 char** 
-load_grid(FILE* fp)
+load_grid(FILE* fp, int* rows, int* columns)
 {
     // defensive check: file isn't null
     if (fp == NULL){
@@ -31,9 +36,15 @@ load_grid(FILE* fp)
     }
 
     // Create an array of strings, each string is one row of the map
-    char** grid = mem_malloc_assert(file_numLines(fp) * sizeof(char*), "Error allocating memory in load_grid.\n");
+    *rows = file_numLines(fp);
+    char** grid = mem_malloc_assert(*rows * sizeof(char*), "Error allocating memory in load_grid.\n");
     char* newRow = NULL;
     int row = 0; // keeps track of our position while filling in grid array
+
+    char* line = file_readLine(fp);
+    *columns = strlen(line);
+    mem_free(line); // responsible for freeing this memory
+
     rewind(fp);  // reset pointer to beginning of the file
 
     while ((newRow = file_readLine(fp)) != NULL){
@@ -92,12 +103,13 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, 
             grid[x][y]=thing;
             placed = true;
             // assign spot x and y
-            spot_x = x;
-            spot_y = y;
+            *spot_x = x;
+            *spot_y = y;
         }
         // try again with another random spot if it didn't work
     }
 }
+
 
 /*
 * update_player_grid: 
@@ -126,6 +138,7 @@ update_player_grid(char** player_grid, game_t* game, int pr, int pc)
     }
 
 }
+
 
 /*
 * update_grids: given a game object, loops through all clients and update their grids
