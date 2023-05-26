@@ -10,13 +10,10 @@ Team 9: Plankton, May 2023
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-
 #include "../libs/file.h"
 #include "../libs/mem.h"
-
 #include "../support/log.h"
 #include "../support/message.h"
-
 #include "../common/game.h"
 #include "../common/grid.h"
 
@@ -50,7 +47,7 @@ main(const int argc, char* argv[])
         fprintf(stderr, "Invalid number of arguments provided. Call using the format ./server map.txt [seed]\n");
 	    exit(1);
     }
-    
+
     // parse the command line, open the file
     char* mapFilename = argv[1];
     FILE* map_file;
@@ -68,8 +65,28 @@ main(const int argc, char* argv[])
 
 
     // create a new game first
+    printf("hi\n");
+
+
     game_t* game = new_game(map_file, MaxPlayers);
+    printf("hi\n");
+
+
+    printf("%d    %d\n", game->rows, game->columns);
+    printf("%s\n", (game->grid)[1]);
+
+
+    // for (int i = 0; i < game->rows; i++){
+    //     printf("%s\n", game->grid[i]);
+    // }
+
+
+    printf("%s\n", grid_toStr(game->grid));
+
+
+
     load_gold(game, GoldTotal, GoldMinNumPiles, GoldMaxNumPiles);
+    printf("hi\n");
 
     // start up message module
     message_init(stderr);
@@ -116,6 +133,13 @@ handleMessage(void* arg, const addr_t from, const char* message)
         }
     }
     else if (strcmp(request, "SPECTATE") == 0){
+
+        if (game->spectatorActive){
+            send_quitMsg(game->clients[0]->clientAddr, 0, true);
+            delete_client((game->clients)[0], game);
+            game->spectatorActive = false;
+        }
+
         client_t* spectator = new_spectator(game, from);
 
         // send new client messages: grid, gold, display
@@ -139,25 +163,25 @@ handleMessage(void* arg, const addr_t from, const char* message)
 
 }
 
-void
-update_displays(game_t* game)
-{
-    // update spectator if there is one no matter what
-    if (game->spectatorActive){
-        send_displayMsg(game, game->clients[0]);
-    }
+// void
+// update_displays(game_t* game)
+// {
+//     // update spectator if there is one no matter what
+//     if (game->spectatorActive){
+//         send_displayMsg(game, game->clients[0]);
+//     }
 
-    for (int i = 1; i < game->playersJoined + 1; i++){
-        client_t* player = game->clients[i];
+//     for (int i = 1; i < game->playersJoined + 1; i++){
+//         client_t* player = game->clients[i];
 
-        if (player != NULL){
-            // if the grid changed send a new message
-            if(update_player_grid(player->grid, game, player->x, player->y)){
-                send_displayMsg(game, player);
-            }
-        }
-    }
-}
+//         if (player != NULL){
+//             // if the grid changed send a new message
+//             if(update_player_grid(player->grid, game, player->r, player->c)){
+//                 send_displayMsg(game, player);
+//             }
+//         }
+//     }
+// }
 
 
 void
@@ -201,7 +225,7 @@ send_displayMsg(game_t* game, client_t* client)
         map = grid_toStr(game->grid, NULL, game->rows, game->columns);
     }
     else{ // assmumes that grid is already up to date
-        map = grid_toStr(game->grid, client->grid, game->rows, game->columns);
+        map = grid_toStr(game->grid, NULL, game->rows, game->columns);
     }
 
     msgSize = 10 + strlen(map);
@@ -222,7 +246,7 @@ extract_playerName(const char* message, addr_t clientAddr)
     char* name = mem_malloc_assert(MaxNameLength + 1, "Error allocating memory in extract_playerName.\n");
     int curr_nameLength = 0;
 
-    for (int i = 0; i < strlen(message); i++){
+    for (int i = 0; i < (int)strlen(message); i++){
         if (isspace(message[i]) && !reachedNameStart){
             reachedNameStart = true;
             continue;
@@ -302,35 +326,35 @@ handle_movement(client_t* player, char key, game_t* game)
         if (!player->isSpectator){
             // reset spot
             if (player->onTunnel){
-                change_spot(game, player->x, player->y, '#');
+                change_spot(game, player->r, player->c, '#');
             }
             else{
-                change_spot(game, player->x, player->y, '.');
+                change_spot(game, player->r, player->c, '.');
             }
         }
 
         delete_client(player, game);
     }
 
-    int newPos_x = player->x;
-    int newPos_y = player->y;
+    int newPos_r = player->r;
+    int newPos_c = player->c;
 
 
     switch (key) {
         // update new Pos based on the key inputted
-        case 'h': newPos_x--; break;
-        case 'l': newPos_x++; break;
-        case 'j': newPos_y++; break;
-        case 'k': newPos_y--; break;
-        case 'y': newPos_x--; newPos_y--; break;
-        case 'u': newPos_x++; newPos_y--; break;
-        case 'b': newPos_x--; newPos_y++; break;
-        case 'n': newPos_x++; newPos_y++; break;
+        case 'h': newPos_c--; break;
+        case 'l': newPos_c++; break;
+        case 'j': newPos_r++; break;
+        case 'k': newPos_r--; break;
+        case 'y': newPos_c--; newPos_r--; break;
+        case 'u': newPos_c++; newPos_r--; break;
+        case 'b': newPos_c--; newPos_r++; break;
+        case 'n': newPos_c++; newPos_r++; break;
         default: exit(1);
 
     }
 
-    char grid_val = get_grid_value(game, newPos_x, newPos_y);
+    char grid_val = get_grid_value(game, newPos_r, newPos_c);
 
     if (grid_val == '+' || grid_val == '-' || grid_val == '|' || grid_val == ' '){
         return;
@@ -340,10 +364,10 @@ handle_movement(client_t* player, char key, game_t* game)
         update_previous_spot(player, game, grid_val);
         
         // change the global grid on the spot they are now on to be their letter
-        change_spot(game, newPos_x, newPos_y, player->id);
+        change_spot(game, newPos_r, newPos_c, player->id);
 
         // update the player's position in the player struct
-        update_position(player, newPos_x, newPos_y);
+        update_position(player, newPos_r, newPos_c);
         
     }
     else if (isalpha(grid_val)){
@@ -351,8 +375,8 @@ handle_movement(client_t* player, char key, game_t* game)
         client_t* other_player = find_player(grid_val, game);
 
         // switch the positions of the two players
-        update_position(other_player, player->x, player->y);
-        update_position(player, newPos_x, newPos_y);
+        update_position(other_player, player->r, player->c);
+        update_position(player, newPos_r, newPos_c);
 
         // update the player's records on the spot they stand on 
         bool player_OnTunnel = player->onTunnel;
@@ -360,13 +384,13 @@ handle_movement(client_t* player, char key, game_t* game)
         other_player->onTunnel = player_OnTunnel;
 
         // update the global grid to reflect change
-        change_spot(game, player->x, player->y, player->id);
-        change_spot(game, other_player->x, other_player->y, other_player->id);
+        change_spot(game, player->r, player->c, player->id);
+        change_spot(game, other_player->r, other_player->c, other_player->id);
 
 
     }
     else if (grid_val == '*'){
-        int nuggetsFound = update_gold(game, player, newPos_x, newPos_y, GoldMaxNumPiles);
+        int nuggetsFound = update_gold(game, player, newPos_r, newPos_c, GoldMaxNumPiles);
         
         // update the client that just picked up gold
         send_goldMsg(game, player, nuggetsFound);
@@ -384,15 +408,15 @@ handle_movement(client_t* player, char key, game_t* game)
         update_previous_spot(player, game, grid_val);
         
         // change the global grid on the spot they are now on to be their letter
-        change_spot(game, newPos_x, newPos_y, player->id);
+        change_spot(game, newPos_r, newPos_c, player->id);
 
         // update the player's position in the player struct
-        update_position(player, newPos_x, newPos_y);
+        update_position(player, newPos_r, newPos_c);
 
     }
 
     // call update function
-    update_displays(game);
+    // update_displays(game);
 
    
 }
@@ -405,10 +429,10 @@ update_previous_spot(client_t* player, game_t* game, char grid_val)
 {
     //change the global grid on the spot they came from back to what it was
     if (player->onTunnel){
-        change_spot(game, player->x, player->y, '#');
+        change_spot(game, player->r, player->c, '#');
     }
     else{
-        change_spot(game, player->x, player->y, '.');
+        change_spot(game, player->r, player->c, '.');
     }
     player->onTunnel = (grid_val == '#');
 }

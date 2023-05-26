@@ -5,8 +5,8 @@ TODO: add details here
 Team 9: Plankton, May 2023
 */
 
-#ifndef __GAME_H
-#define __GAME_H
+#ifndef __GAME_H_
+#define __GAME_H_
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -110,5 +110,7 @@ void visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int 
 */ 
 void visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc);
 
+void grid_delete(char** grid, int rows);
 
-#endif // __GRID_H
+
+#endif // __GRID_H_
