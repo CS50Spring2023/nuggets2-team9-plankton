@@ -16,11 +16,14 @@ MAKE = make
 common.a: $(OBJS) $(LLIBS)
 	ar cr $@ $^
 
-grid.o: grid.c grid.h game.h ../libs/file.h ../libs/mem.h
-	$(CC) $(CFLAGS) -c grid.c
+# grid.o: grid.c grid.h game.h ../libs/file.h ../libs/mem.h
+# 	$(CC) $(CFLAGS) -c grid.c
 
-game.o: game.c game.h grid.h ../libs/file.h ../libs/mem.h
-	$(CC) $(CFLAGS) -c game.c
+# game.o: game.c game.h grid.h ../libs/file.h ../libs/mem.h
+# 	$(CC) $(CFLAGS) -c game.c
+
+game.o: game.h
+grid.o: grid.h 
 
 .PHONY: clean
 

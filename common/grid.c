@@ -18,6 +18,7 @@ Team 9: Plankton, May 2023
 #include "../support/log.h"
 #include "../support/message.h"
 
+#include "structs.h"
 #include "game.h"
 #include "grid.h"
 

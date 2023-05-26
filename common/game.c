@@ -14,6 +14,8 @@ Team 9: Plankton, May 2023
 #include "../libs/file.h"
 #include "../libs/mem.h"
 
+
+#include "structs.h"
 #include "game.h"
 #include "grid.h"
 
@@ -35,7 +37,7 @@ new_player(game_t* game, addr_t client, char* name)
     (game->playersJoined)++;
     
     // assign player to a random spot
-    assign_random_spot(game->grid, game->rows, game->columns, &player->id, &player->r, &player->c);
+    assign_random_spot(game->grid, game->rows, game->columns, player->id, &player->r, &player->c);
     
     // update visibility here
     // update_player_grid(player->grid, game, player->r, player->c);

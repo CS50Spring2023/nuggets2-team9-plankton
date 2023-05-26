@@ -65,28 +65,19 @@ main(const int argc, char* argv[])
 
 
     // create a new game first
-    printf("hi\n");
-
 
     game_t* game = new_game(map_file, MaxPlayers);
     printf("hi\n");
 
 
     printf("%d    %d\n", game->rows, game->columns);
-    printf("%s\n", (game->grid)[1]);
-
-
-    // for (int i = 0; i < game->rows; i++){
-    //     printf("%s\n", game->grid[i]);
-    // }
-
-
-    printf("%s\n", grid_toStr(game->grid));
-
-
+    printf("hi\n");
 
     load_gold(game, GoldTotal, GoldMinNumPiles, GoldMaxNumPiles);
     printf("hi\n");
+
+    printf("%s\n", grid_toStr(game->grid, NULL, game->rows, game->columns));
+
 
     // start up message module
     message_init(stderr);
@@ -148,7 +139,8 @@ handleMessage(void* arg, const addr_t from, const char* message)
     }
     else if (strcmp(request, "KEY") == 0){
         client_t* player = find_client(from, game);
-        handle_movement(player, request[4], game);
+
+        handle_movement(player, message[4], game);
         
     }
 
@@ -157,31 +149,30 @@ handleMessage(void* arg, const addr_t from, const char* message)
     return false;
 
 
-
-
 // the server immediately sends a GRID, GOLD and DISPLAY message to all new clients
 
 }
 
-// void
-// update_displays(game_t* game)
-// {
-//     // update spectator if there is one no matter what
-//     if (game->spectatorActive){
-//         send_displayMsg(game, game->clients[0]);
-//     }
+void
+update_displays(game_t* game)
+{
+    // update spectator if there is one no matter what
+    if (game->spectatorActive){
+        send_displayMsg(game, game->clients[0]);
+    }
 
-//     for (int i = 1; i < game->playersJoined + 1; i++){
-//         client_t* player = game->clients[i];
+    for (int i = 1; i < game->playersJoined + 1; i++){
+        client_t* player = game->clients[i];
 
-//         if (player != NULL){
-//             // if the grid changed send a new message
-//             if(update_player_grid(player->grid, game, player->r, player->c)){
-//                 send_displayMsg(game, player);
-//             }
-//         }
-//     }
-// }
+        if (player != NULL){
+            send_displayMsg(game, player);
+            // if the grid changed send a new message
+            // if(update_player_grid(player->grid, game, player->r, player->c)){
+            //     send_displayMsg(game, player);
+            // }
+        }
+    }
+}
 
 
 void
@@ -320,7 +311,9 @@ extractRequest(const char* input)
 void
 handle_movement(client_t* player, char key, game_t* game)
 {
+
     if(key == 'q'){
+        printf("---&%c-\n", key);
         send_quitMsg(player->clientAddr, 1, player->isSpectator);
         
         if (!player->isSpectator){
@@ -416,7 +409,7 @@ handle_movement(client_t* player, char key, game_t* game)
     }
 
     // call update function
-    // update_displays(game);
+    update_displays(game);
 
    
 }
