@@ -67,16 +67,7 @@ main(const int argc, char* argv[])
     // create a new game first
 
     game_t* game = new_game(map_file, MaxPlayers);
-    printf("hi\n");
-
-
-    printf("%d    %d\n", game->rows, game->columns);
-    printf("hi\n");
-
     load_gold(game, GoldTotal, GoldMinNumPiles, GoldMaxNumPiles);
-    printf("hi\n");
-
-    printf("%s\n", grid_toStr(game->grid, NULL, game->rows, game->columns));
 
 
     // start up message module
@@ -148,8 +139,6 @@ handleMessage(void* arg, const addr_t from, const char* message)
 
     return false;
 
-
-// the server immediately sends a GRID, GOLD and DISPLAY message to all new clients
 
 }
 
@@ -386,6 +375,7 @@ handle_movement(client_t* player, char key, game_t* game)
         int nuggetsFound = update_gold(game, player, newPos_r, newPos_c, GoldMaxNumPiles);
         
         // update the client that just picked up gold
+        printf("%d\n", nuggetsFound);
         send_goldMsg(game, player, nuggetsFound);
 
         // update the other clients about the gold counts
