@@ -35,6 +35,7 @@ char* extractRequest(const char* input);
 void handle_movement(client_t* player, char key, game_t* game);
 static void update_previous_spot(client_t* player, game_t* game, char grid_val);
 void send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator);
+void quit_all(game_t* game, int maxPlayers);
 
 int
 main(const int argc, char* argv[])
@@ -116,7 +117,7 @@ handleMessage(void* arg, const addr_t from, const char* message)
     }
     else if (strcmp(request, "SPECTATE") == 0){
 
-        if (game->spectatorActive){
+        if (game->spectatorActive && game->clients[0] != NULL){
             send_quitMsg(game->clients[0]->clientAddr, 0, true);
             delete_client((game->clients)[0], game);
             game->spectatorActive = false;
@@ -296,7 +297,7 @@ extractRequest(const char* input)
 }
 
 
-
+// make return false when game over
 void
 handle_movement(client_t* player, char key, game_t* game)
 {
@@ -396,12 +397,28 @@ handle_movement(client_t* player, char key, game_t* game)
         // update the player's position in the player struct
         update_position(player, newPos_r, newPos_c);
 
+        if (game->goldRemaining == 0){
+            quit_all(game, MaxPlayers);
+        }
+
     }
 
     // call update function
     update_displays(game);
 
    
+}
+
+void
+quit_all(game_t* game, int maxPlayers)
+{
+    for (int i = 0; i < maxPlayers + 1; i++){
+        client_t* client = game->clients[i];
+        if (client != NULL){
+            send_quitMsg(client->clientAddr, 1, client->isSpectator);
+        }
+    }
+
 }
 
 
