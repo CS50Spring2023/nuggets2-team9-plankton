@@ -14,13 +14,10 @@ Team 9: Plankton, May 2023
 #include "../libs/file.h"
 #include "../libs/mem.h"
 
-#include "../support/log.h"
-#include "../support/message.h"
 
+#include "structs.h"
 #include "game.h"
 #include "grid.h"
-
-
 
 client_t*
 new_player(game_t* game, addr_t client, char* name)
@@ -40,19 +37,21 @@ new_player(game_t* game, addr_t client, char* name)
     (game->playersJoined)++;
     
     // assign player to a random spot
-    assign_random_spot(game->grid, game->rows, game->columns, player->id, &player->x, &player->y);
+    assign_random_spot(game->grid, game->rows, game->columns, player->id, &player->r, &player->c);
     
     // update visibility here
-    update_player_grid(player->grid, game, player->x, player->y);
+    // update_player_grid(player->grid, game, player->r, player->c);
+
+    return player;
     
 }
 
 // add update position function
 void
-update_position(client_t* player, int x, int y)
+update_position(client_t* player, int r, int c)
 {
-    player->x = x;
-    player->y = y;
+    player->r = r;
+    player->c = c;
 }
 
 // add find client
@@ -93,11 +92,6 @@ find_player(char id, game_t* game)
 client_t*
 new_spectator(game_t* game, const addr_t client)
 {
-    if (game->spectatorActive){
-        send_quitMsg(game->clients[0], 0, true);
-        delete_client((game->clients)[0], game);
-        game->spectatorActive = false;
-    }
 
     client_t* spectator = mem_malloc_assert(sizeof(client_t), "Error allocating memory in new_spectator.\n");
     spectator->isSpectator = true;
@@ -124,8 +118,7 @@ delete_client(client_t* client, game_t* game)
     }
 
     if (client->grid != NULL){
-        // grid_delete(client->grid);
-        free(client->grid);
+        grid_delete(client->grid, game->rows);
     }
 
     (game->clients)[client->clientsArr_Idx] = NULL;
@@ -142,7 +135,7 @@ new_game(FILE* map_file, const int maxPlayers)
 
     // initialize array of client to be all NULL
     for (int i = 0; i < maxPlayers + 1; i++){
-        new_game->clients = NULL;
+        (new_game->clients)[i] = NULL;
     }
 
     new_game->goldRemaining = 0;
@@ -150,11 +143,13 @@ new_game(FILE* map_file, const int maxPlayers)
     new_game->spectatorActive = false;
     new_game->grid = load_grid(map_file, &(new_game->rows), &(new_game->columns));
 
+    return new_game;
+
 
 }
 
 void
-end_game(game_t* game)
+end_game(game_t* game, int maxGoldPiles)
 {
     for (int i = 0; i < game->playersJoined + 1; i++){
         client_t* client = game->clients[i];
@@ -162,13 +157,17 @@ end_game(game_t* game)
             delete_client(client, game);
         }
     }
+    mem_free(game->clients);
 
     if (game->grid != NULL){
-        // grid_delete(game->grid);
-        free(game->grid);
+        grid_delete(game->grid, game->rows);
     }
 
     if (game->locations != NULL){
+        for (int i = 0; i < maxGoldPiles; i++){
+            mem_free(game->locations[i]);
+        }
+
         mem_free(game->locations);
     }
     
@@ -177,19 +176,19 @@ end_game(game_t* game)
 }
 
 int
-update_gold(game_t* game, client_t* player, int x_pos, int y_pos, int goldMaxPiles)
+update_gold(game_t* game, client_t* player, int r, int c, int goldMaxPiles)
 {
     for (int i = 0; i < goldMaxPiles; i++){
-        gold_location_t* location = &(game->locations[i]);
+        gold_location_t* location = game->locations[i];
 
         if (location->nuggetCount < 0){
             exit(1);
             // error, reached the end of the gold piles without finding pile
         }
 
-        if (location->x == x_pos && location->y == y_pos){
+        if (location->r == r && location->c == c){
             game->goldRemaining -= location->nuggetCount;
-            player->gold -= location->nuggetCount;            
+            player->gold += location->nuggetCount;            
 
             return location->nuggetCount;
         }
@@ -211,7 +210,7 @@ load_gold(game_t* game, const int goldTotal, const int goldMinPiles, const int g
     for (int i = 0; i < goldMaxPiles; i++){
         gold_amt = nugget_counts[i];
 
-        if (gold_amt < 0){
+        if (gold_amt <= 0){
             break;
         }
 
@@ -225,26 +224,14 @@ load_gold(game_t* game, const int goldTotal, const int goldMinPiles, const int g
 void 
 add_gold_pile(game_t* game, int gold_amt, int piles)
 {
-    int gold_x;
-    int gold_y;
 
     gold_location_t* gold_spot = mem_malloc_assert(sizeof(gold_location_t), "Error allocating memory in add_gold_pile.\n");
-    assign_random_spot(game->grid, game->rows, game->columns, '*', &gold_x, &gold_y);
-    gold_spot->x = gold_x;
-    gold_spot->y = gold_y;
+    assign_random_spot(game->grid, game->rows, game->columns, '*', &(gold_spot->r), &(gold_spot->c));
+
     gold_spot->nuggetCount = gold_amt;
-
     game->goldRemaining += gold_amt;
-
-    gold_location_t** locations = game->locations;
-    locations[piles] = &gold_spot;
-
-
-    // (game->locations)[piles] = gold_spot;
-    // (game->locations)[piles] = &gold_spot;
-    // (game->locations)[piles] = gold_spot;
-
-
+    
+    (game->locations)[piles] = gold_spot;
 }
 
 int*

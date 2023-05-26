@@ -5,8 +5,8 @@ TODO: add details here
 Team 9: Plankton, May 2023
 */
 
-#ifndef __GAME_H
-#define __GAME_H
+#ifndef __GRID_H_
+#define __GRID_H_
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -20,8 +20,8 @@ Team 9: Plankton, May 2023
 #include "../support/log.h"
 #include "../support/message.h"
 
+#include "structs.h"
 #include "game.h"
-#include "grid.h"
 
 
 /*
@@ -65,21 +65,21 @@ void update_grids(char** global_grid, game_t* game);
 * outputs whatever symbol is at that point in the grid
 *
 */
-char* get_grid_value(game_t* game, int x, int y);
+char get_grid_value(game_t* game, int x, int y);
 
 
 /*
 * change_spot: takes in grid, number of rows and columns, coordinate values, and a symbol
 * changes whatever is at that spot to the new symbol
 */
-void change_spot(game_t* game, int x, int y, char* symbol);
+void change_spot(game_t* game, int x, int y, char symbol);
 
 
 /*
 * getWalls: takes in player row & col
 * outputs array with room boundaries necessary to determine visibility
 */
-char** getWalls(game_t* game, char** grid, int pr, int pc);
+// char** getWalls(game_t* game, char** grid, int pr, int pc);
 
 
 /*
@@ -88,27 +88,29 @@ char** getWalls(game_t* game, char** grid, int pr, int pc);
 * calls helpers which update the player->grid accordingly
 * outputs a boolean which is true if the visibility on the player's grid changes (e.g. new points visible, less points visible, new gold seen etc.)
 */
-bool isVisible(game_t* game, char** player_grid, int pr, int pc, int wr, int wc);
+// bool isVisible(game_t* game, char** player_grid, int pr, int pc, int wr, int wc);
 
 
 /* compareGrids: takes in global grid rows & columns, the new player grid, and their former grid
 * helper for isVisble to compare current to previous player grids for changes in visibility 
 */
-bool compareGrids(int rows, int columns, char** playerGrid, char** oldGrid);
+// bool compareGrids(int rows, int columns, char** playerGrid, char** oldGrid);
 
 
 /* visCol: takes in the player, the player's current column and the column of a wall being investigated
 * helper to compute visibility across columns
 * outputs nothing, but updates the player->grid to either the global grid if point is visible or to " " otherwise
 */ 
-void visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr);
+// void visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr);
 
 
 /* visRow: takes in the player, the player's current row and the row of a wall being investigated
 * helper to compute visibility across rows
 * outputs nothing, but updates the player->grid to either the global grid if point is visible or to " " otherwise
 */ 
-void visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc);
+// void visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc);
+
+void grid_delete(char** grid, int rows);
 
 
-#endif // __GRID_H
+#endif // __GRID_H_
