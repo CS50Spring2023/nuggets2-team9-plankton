@@ -188,7 +188,7 @@ update_gold(game_t* game, client_t* player, int r, int c, int goldMaxPiles)
 
         if (location->r == r && location->c == c){
             game->goldRemaining -= location->nuggetCount;
-            player->gold -= location->nuggetCount;            
+            player->gold += location->nuggetCount;            
 
             return location->nuggetCount;
         }
