@@ -32,10 +32,11 @@ void send_goldMsg(game_t* game, client_t* client, int goldPickedUp);
 void send_displayMsg(game_t* game, client_t* client);
 char* extract_playerName(const char* message, addr_t clientAddr);
 char* extractRequest(const char* input);
-void handle_movement(client_t* player, char key, game_t* game);
+bool handle_movement(client_t* player, char key, game_t* game);
 static void update_previous_spot(client_t* player, game_t* game, char grid_val);
 void send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator);
 void quit_all(game_t* game, int maxPlayers);
+void handle_quit(client_t* player, game_t* game);
 
 int
 main(const int argc, char* argv[])
@@ -75,6 +76,7 @@ main(const int argc, char* argv[])
     message_init(stderr);
     message_loop(game, 0, NULL, NULL, handleMessage);
     message_done();
+    end_game(game, GoldMaxNumPiles);
 
     // close the file
     fclose(map_file);
@@ -90,6 +92,7 @@ handleMessage(void* arg, const addr_t from, const char* message)
     char* request = extractRequest(message);
 
     if (strcmp(request, "PLAY") == 0){
+        mem_free(request);
         if (game->playersJoined < MaxPlayers){
 
             // put this into helper
@@ -110,13 +113,16 @@ handleMessage(void* arg, const addr_t from, const char* message)
             // send new client messages: grid, gold, display
             inform_newClient(player, game);
 
+            // update displays
+            update_displays(game);
+
         }
         else {
             send_quitMsg(from, 2, false);
         }
     }
     else if (strcmp(request, "SPECTATE") == 0){
-
+        mem_free(request);
         if (game->spectatorActive && game->clients[0] != NULL){
             send_quitMsg(game->clients[0]->clientAddr, 0, true);
             delete_client((game->clients)[0], game);
@@ -130,13 +136,19 @@ handleMessage(void* arg, const addr_t from, const char* message)
 
     }
     else if (strcmp(request, "KEY") == 0){
+        mem_free(request);
+
         client_t* player = find_client(from, game);
 
-        handle_movement(player, message[4], game);
+        // returns true when all gold is found
+        if (message[4] == 'q'){
+            handle_quit(player, game);
+        }
+        else if (handle_movement(player, message[4], game)){
+            return true; // causes message loop to end
+        }
         
     }
-
-    mem_free(request);
 
     return false;
 
@@ -296,28 +308,30 @@ extractRequest(const char* input)
     return firstWord;
 }
 
+void 
+handle_quit(client_t* player, game_t* game)
+{
+    send_quitMsg(player->clientAddr, 1, player->isSpectator);
+    
+    if (!player->isSpectator){
+        // reset spot
+        if (player->onTunnel){
+            change_spot(game, player->r, player->c, '#');
+        }
+        else{
+            change_spot(game, player->r, player->c, '.');
+        }
+    }
+
+    delete_client(player, game);
+
+    update_displays(game);
+}
 
 // make return false when game over
-void
+bool
 handle_movement(client_t* player, char key, game_t* game)
 {
-
-    if(key == 'q'){
-        printf("---&%c-\n", key);
-        send_quitMsg(player->clientAddr, 1, player->isSpectator);
-        
-        if (!player->isSpectator){
-            // reset spot
-            if (player->onTunnel){
-                change_spot(game, player->r, player->c, '#');
-            }
-            else{
-                change_spot(game, player->r, player->c, '.');
-            }
-        }
-
-        delete_client(player, game);
-    }
 
     int newPos_r = player->r;
     int newPos_c = player->c;
@@ -333,14 +347,14 @@ handle_movement(client_t* player, char key, game_t* game)
         case 'u': newPos_c++; newPos_r--; break;
         case 'b': newPos_c--; newPos_r++; break;
         case 'n': newPos_c++; newPos_r++; break;
-        default: exit(1);
+        default: return false;
 
     }
 
     char grid_val = get_grid_value(game, newPos_r, newPos_c);
 
     if (grid_val == '+' || grid_val == '-' || grid_val == '|' || grid_val == ' '){
-        return;
+        return false;
     }
     else if (grid_val == '.' || grid_val == '#'){
         // change the spot the player came from back
@@ -399,12 +413,14 @@ handle_movement(client_t* player, char key, game_t* game)
 
         if (game->goldRemaining == 0){
             quit_all(game, MaxPlayers);
+            return true;
         }
 
     }
 
     // call update function
     update_displays(game);
+    return false;
 
    
 }
@@ -468,5 +484,6 @@ send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator)
     sprintf(quitMsg, "QUIT %s", quitReason);
     message_send(clientAddr, quitMsg);
     mem_free(quitMsg);
+    mem_free(quitReason);
 
 }
