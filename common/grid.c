@@ -309,7 +309,6 @@ void get_player_visible(game_t* game, client_t* client, int columns, int rows, i
             // if it's not where the player is currently standing, and the spot is not visible
             } else if (!is_visible(game, x,y, i, j)) {
                 // change its representation on the player grid to " "
-                change_spot(game, i, j, ' ');
                 client->grid[i][j]=' ';
             }
         }
