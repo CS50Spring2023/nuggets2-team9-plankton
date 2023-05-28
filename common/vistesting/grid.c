@@ -316,25 +316,33 @@ get_player_visible(game_t* game, client_t* player)
         for (int r = 0; r < game->rows-1; r++){
             // for every column in the grid
             for (int c = 0; c < game->columns-1; c++){
-                // if this is where the playere currently is, and it isn't where they weree before
+                // if this is where the playere currently is, and it isn't where they were before
                 if (r == pr && c == pc){
                     // modified changes to true bc this player's display needs to change, and their location on the grid changes as well
                     modified = (player->grid[r][c] != '@');
                     player->grid[r][c] = '@';
                 }
+                // if a spot is visible now, but wasn't before update it
                 else if (is_visible(game, pc, pr, c, r)){
                     modified = (player->grid[r][c] != game->grid[r][c]);
                     player->grid[r][c] = game->grid[r][c];
                 }
+                // if a spot contained gold but it is now out of range, updatee 
                 else if (player->grid[r][c] == '*'){
                     player->grid[r][c] = '.';
                     modified = true;
                 }
+
                 else if (isalpha(player->grid[r][c])){
                     // get the player
                     // check if tunnel
                     // change accordingly
                     modified = true;
+                }
+
+                // THIS NEEDS TO BE CHANGED SO THAT PLACES THAT HAVE BEEN SEEN BEFORE REMAIN, BUT WORKS FOR INITIALIZATION
+                else {
+                    player->grid[r][c] = ' ';
                 }
             }
         }  
