@@ -156,8 +156,7 @@ change_spot(game_t* game, int r, int c, char symbol)
 
 
 /*
-* isOpen: takes in grid, player column, player row, spot column, spot row
-* computes whether a spot is visible, based on where the player is
+* isOpen: takes in game, column, and row, and returns true if the spot is one where a player can move to
 */
 bool static isOpen(game_t* game, const int c, const int r){
     if( '.' == get_grid_value(game, c, r) || '*' == get_grid_value(game, c, r) ){
