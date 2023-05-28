@@ -162,6 +162,173 @@ change_spot(game_t* game, int r, int c, char symbol)
 }
 
 
+/**************** NEW VISIBILITY FUNCTIONS ****************/
+/*
+* isVisible: takes in grid, player column, player row, spot column, spot row
+* computes whether a spot is visible, based on where the player is
+*/
+bool is_visible(grid_t* grid, const int playerColumn, const int playerRow, const int column, const int row) {
+
+    // calculate difference between where the player is and where the spot is
+    int changeY = row - playerRow;
+    int changeX = column - playerColumn;
+    int slope = 0;
+    int constant, columnStart, columnEnd, rowStart, rowEnd;
+
+    // if the x coordinate doesn't change (the line is vertical)
+    if (changeX == 0) { 
+        columnStart = 0;
+        columnEnd = 0;
+        // either move up or down based on where the player is at
+        if (playerRow > row) {
+            rowStart = row + 1;
+            rowEnd = playerRow;
+        } else {
+            rowStart = playerRow + 1;
+            rowEnd = row;
+        }
+    // if the y coordinate doesn't change (the line is horizontal)
+    } else if (changeY == 0) { 
+
+        rowStart = 0;
+        rowEnd = 0;
+
+        // either move left or right based on where the player is at 
+        if (playerColumn > column) {
+            columnStart = column + 1;
+            columnEnd = playerColumn;
+        } else {
+            columnStart = playerColumn + 1;
+            columnEnd = column;
+        }
+    
+    // if both the x and y coordinate change (the line is diagonal)
+    } else {
+        // slope is rise over run
+        slope = changeY / changeX;
+        constant = playerRow - (slope * playerColumn);
+        columnStart = 0;
+        columnEnd = 0;
+        rowStart = 0;
+        rowEnd = 0;
+
+        if (playerColumn > column) {
+            columnStart = column + 1;
+            columnEnd = playerColumn;
+        } else if (playerColumn < column) {
+            columnStart = playerColumn + 1;
+            columnEnd = column;
+        }
+
+        if (playerRow > row) {
+            rowStart = row + 1;
+            rowEnd = playerRow;
+        } else if (playerRow < row) {
+            rowStart = playerRow + 1;
+            rowEnd = row;
+        }
+    }
+
+    for (; columnStart < columnEnd; columnStart++) {
+        double newY;
+
+        // if the line is horizontal
+        if (rowStart == 0 && rowEnd == 0) {
+            newY = playerRow;
+        } else {
+            newY = slope * columnStart + constant;
+        }
+
+        // check for grid point
+        if ((is_integer(columnStart)) && (newY)) {
+            if (!isOpen(grid, columnStart, newY)) {
+                return false;
+            }
+        } else {
+            // if not a grid point, check the top and bottom
+            if (!(isOpen(grid, columnStart, floor(newY)) || isOpen(grid, columnStart, ceil(newY)))) {
+                return false;
+            }
+        }
+    }
+
+    for (; rowStart < rowEnd; rowStart++) {
+        double newX;
+
+        // if the line is vertical
+        if (columnStart == 0 && columnEnd == 0) {
+            newX = playerColumn;
+        } else {
+            newX = (rowStart - constant) / slope;
+        }
+
+        // check for grid point
+
+        if ((is_integer(newX)) && (is_integer(rowStart))){
+            if (!isOpen(grid, newX, rowStart)) {
+                return false;
+            }
+        }
+        else {
+            // if not a grid point, check the top and bottom
+            if (!(isOpen(grid, floor(newX), rowStart) || isOpen(grid, ceil(newX), rowStart))) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+
+/*
+* isOpen: takes in grid, player column, player row, spot column, spot row
+* computes whether a spot is visible, based on where the player is
+*/
+bool static isOpen(game_t* game, const int c, const int r){
+    if( '.' == get_grid_value(grid, c, r) || '*' == grid_get_char_at(grid, c, r) ){
+        return true;
+    }
+    else if( isalpha(grid_get_char_at(grid,c,r))){
+        return true;
+    }
+    return false;
+}
+
+/*
+* is_integer: takes in a value, determines whether it's an integer, returns boolean
+*/
+bool static is_integer(double num){
+    int convertedNum = (int)num;
+    return (convertedNum == num);
+}
+
+/*
+* get_player_visible: loops over every position in the grid and calls "is_visible", changes what is stored at each grid point accordingly
+*/
+grid_t* get_player_visible(grid_t* grid, int width, int height, int x, int y){
+    for(int i = 0; i < width ; i++){
+        for(int j = 0; j < height+1 ; j++){
+            if(x == i && j == y){
+                change_spot(grid, i,j, '@');
+            } else if(!is_visible(grid, x,y, i, j)) {
+                change_spot(grid, i, j, ' ');
+            }
+        }
+    }                                                                                                                                                                             
+  return grid;
+}
+
+void
+grid_delete(char** grid, int rows)
+{
+    for (int r = 0; r < rows; r++){
+        mem_free(grid[r]);
+    }
+
+    mem_free(grid);
+}
+
+/**************** PREVIOUS VISIBILITY FUNCTIONS ****************/
 /*
 * getWalls: takes in player row & col
 * outputs array with room boundaries necessary to determine visibility
@@ -496,12 +663,3 @@ change_spot(game_t* game, int r, int c, char symbol)
 //     }
 // }
 
-void
-grid_delete(char** grid, int rows)
-{
-    for (int r = 0; r < rows; r++){
-        mem_free(grid[r]);
-    }
-
-    mem_free(grid);
-}
