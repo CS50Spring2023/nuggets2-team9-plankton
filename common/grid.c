@@ -59,6 +59,33 @@ load_grid(FILE* fp, int* rows, int* columns)
     return grid;
 }
 
+char**
+load_player_grid(game_t* game)
+{
+    char** grid = mem_malloc_assert(game->rows * sizeof(char*), "Error allocating memory in load_player_grid.\n");
+    
+
+    char* emptyRow = mem_malloc_assert(game->columns + 1, "Error allocating memory in load_player_grid.\n");
+
+    for (int c = 0; c < game->columns; c++){
+        emptyRow[c] = ' ';
+    }
+
+    emptyRow[game->columns + 1] = '\0';
+
+
+    for (int r = 0; r < game->rows; r++){
+        grid[r] = mem_malloc_assert(game->columns + 1, "Error allocating memory in load_player_grid.\n");
+        strcpy(grid[r], emptyRow);
+    }
+
+    mem_free(emptyRow);
+
+    return grid;
+}
+
+
+
 /*
 * grid_toStr: converts a grid to a string that can be sent to and displayed by the client
 * Takes in a char** global_grid and optionally a char** player_grid (which can be null) as well as the number of rows and columns in the grid
@@ -129,16 +156,6 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_r, 
 }
 
 
-/*
-* is_integer: takes a char parameter and returns true if it represents a valid int, and false otherwise
-*
-*/
-// bool is_integer(float value) {
-//     char str[32]; // Adjust the buffer size as per your requirements
-//     sprintf(str, "%.0f", value);
-//     return (float)atoi(str) == value;
-// }
-
 
 /*
 * get_grid_value: takes in a grid object, x value, y value, number of rows, number of columns
@@ -167,11 +184,18 @@ change_spot(game_t* game, int r, int c, char symbol)
 /*
 * isOpen: takes in game, column, and row, and returns true if the spot is one where a player can move to
 */
-bool static isOpen(game_t* game, const int c, const int r){
-    if( '.' == get_grid_value(game, c, r) || '*' == get_grid_value(game, c, r) || '#' == get_grid_value(game, c, r)){
+static bool 
+isOpen(game_t* game, const int c, const int r){
+
+    if (game == NULL) {
+        fprintf(stderr, "game pointer was null\n");
+	    exit(1);
+    }    
+
+    if( '.' == get_grid_value(game, r, c) || '*' == get_grid_value(game, r, c) || '#' == get_grid_value(game, r, c)){
         return true;
     }
-    else if( isalpha(get_grid_value(game,c,r))){
+    else if( isalpha(get_grid_value(game,r,c))){
         return true;
     }
     return false;
@@ -189,9 +213,14 @@ bool static is_integer(float num){
 * isVisible: takes in grid, player column, player row, spot column, spot row
 * computes whether a spot is visible, based on where the player is
 */
-bool is_visible(game_t* game, const int playerColumn, const int playerRow, const int column, const int row) {
+bool 
+is_visible(game_t* game, const int playerColumn, const int playerRow, const int column, const int row) 
+{
 
-    // char** grid = game->grid;
+    if (game == NULL) {
+        fprintf(stderr, "game pointer was null\n");
+	    exit(1);
+    }      
 
     // calculate difference between where the player is and where the spot is
     int changeY = row - playerRow;
@@ -227,7 +256,7 @@ bool is_visible(game_t* game, const int playerColumn, const int playerRow, const
         }
     
     // if both the x and y coordinate change (the line is diagonal)
-    } else {
+    } else if (changeX != 0 && changeY != 0){
         // calculate slope: rise over run
         slope = (double) changeY / changeX;
         constant = playerRow - (slope * playerColumn);
@@ -277,12 +306,12 @@ bool is_visible(game_t* game, const int playerColumn, const int playerRow, const
     }
 
     for (; rowStart < rowEnd; rowStart++) {
-        float newX;
+        double newX;
 
         // if the line is vertical
         if (columnStart == 0 && columnEnd == 0) {
             newX = playerColumn;
-        } else {
+        } else if (slope != 0) {
             newX = (rowStart - constant) / slope;
         }
 
@@ -310,12 +339,14 @@ bool is_visible(game_t* game, const int playerColumn, const int playerRow, const
 bool 
 get_player_visible(game_t* game, client_t* player)
 {
+    printf("vis111\n");
     bool modified = false;
     int pr = player->r;
     int pc = player->c;
 
     for (int r = 0; r < game->rows; r++){
         for (int c = 0; c < game->columns; c++){
+
             if (r == pr && c == pc){
                 modified = (player->grid[r][c] != '@');
                 player->grid[r][c] = '@';
@@ -334,6 +365,7 @@ get_player_visible(game_t* game, client_t* player)
                 // change accordingly
                 modified = true;
             }
+
             
         }
     }

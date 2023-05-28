@@ -1,0 +1,11 @@
+START OF LOG
+client on port 52004
+interactive player mode; name 'n'
+OK message received: OK B
+GRID message received: GRID 5 14
+displayStart
+wRows = 24
+wCols = 80
+GOLD message received: GOLD 0 0 250
+[?1049h[22;0;0t[1;24r(B[m[4l[?7h[39;49m[39;49m[37m[40m[H[2J[33m[40mPlayer B has 0 nuggets (250 nuggets unclaimed).  [2d(B[m[39;49m[37m[40mDISPLAY message received
+[33m[40m  +-[9b+[3d  |..*****A*@|[4d  |.**.*.*..*|[5;10H[1K .*.|[6d  +-[9b+[3d(B[m[39;49m[37m[40m[39;49m[24d[K[24;1H[?1049l[23;0;0t[?1l>

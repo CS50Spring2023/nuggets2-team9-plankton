@@ -31,6 +31,8 @@ Team 9: Plankton, May 2023
 */
 char** load_grid(FILE* fp, int* rowp, int* columnp);
 
+char** load_player_grid(game_t* game);
+
 
 /*
 * grid_toStr: converts a grid to a string that can be sent to and displayed by the player

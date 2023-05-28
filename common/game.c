@@ -30,7 +30,9 @@ new_player(game_t* game, addr_t client, char* name)
     player->real_name = mem_malloc_assert(strlen(name) + 1, "Error allocating memory in new_player.\n");
     strcpy(player->real_name, name);
     player->gold = 0;
-    player->grid = mem_malloc_assert(game->rows * sizeof(char*), "Error allocating memory in new_player.\n");
+    player->grid = load_player_grid(game);
+
+
     player->onTunnel = false;
     game->clients[game->playersJoined + 1] = player;
     player->clientsArr_Idx = game->playersJoined + 1;
