@@ -159,7 +159,7 @@ change_spot(game_t* game, int r, int c, char symbol)
 * isOpen: takes in game, column, and row, and returns true if the spot is one where a player can move to
 */
 bool static isOpen(game_t* game, const int c, const int r){
-    if( '.' == get_grid_value(game, c, r) || '*' == get_grid_value(game, c, r) ){
+    if( '.' == get_grid_value(game, c, r) || '*' == get_grid_value(game, c, r) || '#' == get_grid_value(game, c, r)){
         return true;
     }
     else if( isalpha(get_grid_value(game,c,r))){
@@ -298,18 +298,19 @@ bool is_visible(game_t* game, const int playerColumn, const int playerRow, const
 /*
 * get_player_visible: loops over every position in the grid and calls "is_visible", changes what is stored at each grid point accordingly
 */
-void get_player_visible(game_t* game, int columns, int rows, int x, int y){
+void get_player_visible(game_t* game, client_t* client, int columns, int rows, int x, int y){
     // for every column (x value)
     for (int i = 0; i < columns ; i++){
         // for every row (y value)
         for (int j = 0; j < rows+1 ; j++){
             // if this is where the player now is, update the location of the "@" symbol
             if (x == i && j == y){
-                change_spot(game, i,j, '@');
+                client->grid[i][j]='@';
             // if it's not where the player is currently standing, and the spot is not visible
             } else if (!is_visible(game, x,y, i, j)) {
                 // change its representation on the player grid to " "
                 change_spot(game, i, j, ' ');
+                client->grid[i][j]=' ';
             }
         }
     }                                                                                                                                                                             
@@ -329,7 +330,7 @@ void update_grids(game_t* game)
         client_t* client = clients[i];
 
         if (client != NULL){
-           get_player_visible(game, game->columns, game->rows, client->c, client->r);
+           get_player_visible(game, client, game->columns, game->rows, client->c, client->r);
         }
     }
 }
