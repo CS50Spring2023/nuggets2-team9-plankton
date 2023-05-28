@@ -11,6 +11,7 @@ Team 9: Plankton, May 2023
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
+#include <math.h>
 
 #include "../libs/file.h"
 #include "../libs/mem.h"
@@ -57,6 +58,33 @@ load_grid(FILE* fp, int* rows, int* columns)
 
     return grid;
 }
+
+char**
+load_player_grid(game_t* game)
+{
+    char** grid = mem_malloc_assert(game->rows * sizeof(char*), "Error allocating memory in load_player_grid.\n");
+    
+
+    char* emptyRow = mem_malloc_assert(game->columns + 1, "Error allocating memory in load_player_grid.\n");
+
+    for (int c = 0; c < game->columns; c++){
+        emptyRow[c] = ' ';
+    }
+
+    emptyRow[game->columns + 1] = '\0';
+
+
+    for (int r = 0; r < game->rows; r++){
+        grid[r] = mem_malloc_assert(game->columns + 1, "Error allocating memory in load_player_grid.\n");
+        strcpy(grid[r], emptyRow);
+    }
+
+    mem_free(emptyRow);
+
+    return grid;
+}
+
+
 
 /*
 * grid_toStr: converts a grid to a string that can be sent to and displayed by the client
@@ -128,16 +156,6 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_r, 
 }
 
 
-/*
-* is_integer: takes a char parameter and returns true if it represents a valid int, and false otherwise
-*
-*/
-// bool is_integer(float value) {
-//     char str[32]; // Adjust the buffer size as per your requirements
-//     sprintf(str, "%.0f", value);
-//     return (float)atoi(str) == value;
-// }
-
 
 /*
 * get_grid_value: takes in a grid object, x value, y value, number of rows, number of columns
@@ -161,340 +179,201 @@ change_spot(game_t* game, int r, int c, char symbol)
     game->grid[r][c] = symbol;
 }
 
+/**************** NEW VISIBILITY FUNCTIONS ****************/
 
 /*
-* getWalls: takes in player row & col
-* outputs array with room boundaries necessary to determine visibility
+* isOpen: takes in game, column, and row, and returns true if the spot is one where a player can move to
 */
-// char**
-// getWalls(game_t* game, char** grid, int pr, int pc)
-// {
+static bool 
+isOpen(game_t* game, const int c, const int r){
 
-//     // assuming coord (0,0) is in the top left corner
+    if (game == NULL) {
+        fprintf(stderr, "game pointer was null\n");
+	    exit(1);
+    }    
 
-//     // get walls
-//     char** walls = mem_malloc_assert(sizeof(game->rows * sizeof(char*)), "Error allocating memory in getWalls.\n");
+    if( '.' == get_grid_value(game, r, c) || '*' == get_grid_value(game, r, c) || '#' == get_grid_value(game, r, c)){
+        return true;
+    }
+    else if( isalpha(get_grid_value(game,r,c))){
+        return true;
+    }
+    return false;
+}
 
-
-//     while ( (grid[pr][pc] != '-') || (grid[pr][pc] != '#') || (grid[pr][pc] != 'x') ){
-//         // while inside playing field, go down until wall reached
-//         pr++;
-//     }
-
-//     // save element in walls array
-//     walls[pc][pr] = grid[pr][pc];
-
-//     // save coordinates as first coords
-//     int pr1 = pr;
-//     int pc1 = pc;
-
-
-//     while ((pr != pr1) && (pc != pc1)){
-        
-//         // if wall type to the right
-//         if ( (grid[pr][pc+1] == '-') || (grid[pr][pc+1] == '#') || (grid[pr][pc+1] == 'x') ){
-//             // if curr element not also a tunel, move
-//             if (grid[pr][pc] != '#'){
-//                 // move one step in that direction
-//                 pc++;
-//             }  
-//         }
-
-//         // if wall type up
-//         else if ( (grid[pr-1][pc] == '-') || (grid[pr-1][pc] == '#') || (grid[pr-1][pc] == 'x') ){
-//             // if curr element not also a tunel, move
-//             if (grid[pr][pc] != '#'){
-//                 // move one step in that direction
-//                 pr--;
-//             }  
-//         }  
-
-//         // if wall type to the left
-//         else if ( (grid[pr][pc-1] == '-') || (grid[pr][pc-1] == '#') || (grid[pr][pc-1] == 'x') ){
-//             // if curr element not also a tunel, move
-//             if (grid[pr][pc] != '#'){
-//                 // move one step in that direction
-//                 pc--;
-//             }  
-//         }
-
-//         // if wall type down
-//         else if ( (grid[pr+1][pc] == '-') || (grid[pr+1][pc] == '#') || (grid[pr+1][pc] == 'x') ){
-//             // if curr element not also a tunel, move
-//             if (grid[pr][pc] != '#'){
-//                 // move one step in that direction
-//                 pr++;
-//             }  
-//         }
-
-//         // save element into wall 2d array
-//         walls[pr][pc] = grid[pr][pc];
-
-//     } 
-//     return walls;
-
-// }
-
-/* compareGrids: takes in global grid rows & columns, the new player grid, and their former grid
-* helper for isVisble to compare current to previous player grids for changes in visibility 
+/*
+* is_integer: takes in a value, determines whether it's an integer, returns boolean
 */
-// bool 
-// compareGrids(int rows, int columns, char** playerGrid, char** oldGrid)
-// {
-//     // for every gridspot
-//     for (int i = 0; i < rows; i++){
-//         for (int j; j < columns; j++){
-//             // if there has been a change
-//             if (playerGrid[i][j] != oldGrid[i][j]){
-//                 // return true, a new message needs to be sent to this player
-//                 return true;
-//             }
-//         }
-//     }
-//     // if nothing has changed, then no message needs to be sent
-//     return false;
-// }
+bool static is_integer(float num){
+    int convertedNum = (int)num;
+    return (convertedNum == num);
+}
 
-   
-/* visCol: takes in the player, the player's current column and the column of a wall being investigated
-* helper to compute visibility across columns
-* outputs nothing, but updates the player->grid to either the global grid if point is visible or to " " otherwise
-*/ 
-// void
-// visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr)
-// {
+/*
+* isVisible: takes in grid, player column, player row, spot column, spot row
+* computes whether a spot is visible, based on where the player is
+*/
+bool 
+is_visible(game_t* game, const int playerColumn, const int playerRow, const int column, const int row) 
+{
 
-//     float slope;
+    if (game == NULL) {
+        fprintf(stderr, "game pointer was null\n");
+	    exit(1);
+    }      
 
-//     // calculate and set slope based on the player in reference to the wall being investigated
-// 	if (pc != wc) {
-//         slope = (wr-pr)/(wc-pc);
-//     }
+    // calculate difference between where the player is and where the spot is
+    int changeY = row - playerRow;
+    int changeX = column - playerColumn;
+    int slope = 0;
+    int constant, columnStart, columnEnd, rowStart, rowEnd;
 
-//     // if the player is to the left of the wall
-//     if (pc < wc){
-// 		// check point on each column between and not including pc and wc
-// 	    for (int col = pc+1; col < wc; col++){
+    // if the x coordinate doesn't change (the line is vertical)
+    if (changeX == 0) { 
+        columnStart = 0;
+        columnEnd = 0;
+        // either move up or down based on where the player is at
+        if (playerRow > row) {
+            rowStart = row + 1;
+            rowEnd = playerRow;
+        } else {
+            rowStart = playerRow + 1;
+            rowEnd = row;
+        }
+    // if the y coordinate doesn't change (the line is horizontal)
+    } else if (changeY == 0) { 
 
-//             float row = slope*(col-pc) + pr; // compute row
+        rowStart = 0;
+        rowEnd = 0;
 
-// 			if (is_integer(row)){  // check if row is integer aka point on grid - also takes care of pr == wr case
-// 				if ( (player_grid[(int)row][col] == '|') || (player_grid[(int)row][col] == '-' ) || (player_grid[(int)row][col] == 'x') || (player_grid[(int)row][col] == '#') ){
-// 					// this and all future locations are invisible: set to " "
-//                     player_grid[(int)row][col] == ' ';
-//                 }
-//                 else{
-//                     player_grid[(int)row][col] = global_grid[(int)row][col];
-//                 }
-//             }
-
-// 			else{  // point not on grid
-// 				if ( (player_grid[(int)row-1][col] == '.') || (player_grid[(int)row-1][col] == '*') || (player_grid[(int)row+1][col] == '.') || (player_grid[(int)row+1][col] == '*') ){
-// 					// player grid at row, col gets the global grid's value at row, col
-// 			        player_grid[(int)row][col] = global_grid[(int)row][col];
-//                 }
-// 				else{
-//                     // this and all future locations are invisible to player: make them " "
-//                     player_grid[(int)row][col] = ' ';
-//                 }
-//             } 
-//         }			
-//     }
-
-//     else if (pc > wc){
-//         // check point on each column between and not including pc and wc
-// 		for (int col = pc-1; col > wc; col--){
-
-//             float row = slope*(col-pc) + pr;
-
-//             if (is_integer(row)){  // aka point on grid
-//                 if ( (player_grid[(int)row][col] == '|') || (player_grid[(int)row][col] == '-' ) || (player_grid[(int)row][col] == 'x') || (player_grid[(int)row][col] == '#') ){
-//                     // this and all future locations are invisible to player: make them " "
-//                     player_grid[(int)row][col] = ' ';
-//                 }
-//                 else{
-//                     player_grid[(int)row][col] = global_grid[(int)row][col];
-//                 }
-//             }
-
-//             else{  // point not on grid
-//                 if ( (player_grid[(int)row-1][col] == '.') || (player_grid[(int)row-1][col] == '*') || (player_grid[(int)row+1][col] == '.') || (player_grid[(int)row+1][col] == '*') ){
-//                     player_grid[(int)row][col] = global_grid[(int)row][col];
-//                 }
-//                 else{
-//                     // this and all future locations are invisible to player: make them " "
-//                     player_grid[(int)row][col] = ' ';
-//                 }
-//             }
-//         }
-//     }
+        // either move left or right based on where the player is at 
+        if (playerColumn > column) {
+            columnStart = column + 1;
+            columnEnd = playerColumn;
+        } else {
+            columnStart = playerColumn + 1;
+            columnEnd = column;
+        }
     
-// }
+    // if both the x and y coordinate change (the line is diagonal)
+    } else if (changeX != 0 && changeY != 0){
+        // calculate slope: rise over run
+        slope = (double) changeY / changeX;
+        constant = playerRow - (slope * playerColumn);
+        columnStart = 0;
+        columnEnd = 0;
+        rowStart = 0;
+        rowEnd = 0;
 
+        if (playerColumn > column) {
+            columnStart = column + 1;
+            columnEnd = playerColumn;
+        } else if (playerColumn < column) {
+            columnStart = playerColumn + 1;
+            columnEnd = column;
+        }
 
-/* visRow: takes in the player, the player's current row and the row of a wall being investigated
-* helper to compute visibility across rows
-* outputs nothing, but updates the player->grid to either the global grid if point is visible or to " " otherwise
-*/ 
-// void
-// visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc)
-// {
+        if (playerRow > row) {
+            rowStart = row + 1;
+            rowEnd = playerRow;
+        } else if (playerRow < row) {
+            rowStart = playerRow + 1;
+            rowEnd = row;
+        }
+    }
 
-//     float slope;
+    for (; columnStart < columnEnd; columnStart++) {
+        double newY;
 
-//     // set slope
-// 	if (pc != wc) {
-//         slope = (wr-pr)/(wc-pc);
-//     }
-    
-//     if (pr < wr){
-//         // check points on each row between and not including pr and wr
-//         for (int row = pr+1; row < wr; row++){
+        // if the line is horizontal
+        if (rowStart == 0 && rowEnd == 0) {
+            newY = playerRow;
+        } else {
+            newY = slope * columnStart + constant;
+        }
 
-//             float col = pc + (row - pr)/slope;  // compute col
+        // check for grid point
+        if ((is_integer(columnStart)) && is_integer(newY)) {
+            if (!isOpen(game, columnStart, newY)) {
+                return false;
+            }
+        } else {
+            // if not a grid point, check the top and bottom
+            if (!(isOpen(game, columnStart, floor(newY)) || isOpen(game, columnStart, ceil(newY)))) {
+                return false;
+            }
+        }
+    }
 
-//             if (is_integer(col)){  // aka a point on the grid - also takes care of pc == wc case
-//                 if ( (player_grid[row][(int)col] == '|') || (player_grid[row][(int)col] == '-' ) || (player_grid[row][(int)col] == 'x') || (player_grid[row][(int)col] == '#') ){
-//                     // this and all future locations are invisible: set to " "
-//                     player_grid[row][(int)col] = ' ';
-//                 }
-//                 else{
-//                     // player grid at row, col gets the global grid's value at row, col
-//                     player_grid[row][(int)col] = global_grid[row][(int)col];
-//                 }
-//             }
+    for (; rowStart < rowEnd; rowStart++) {
+        double newX;
 
-//             else{  // point not on grid
-//                 if( (player_grid[row][(int)col-1] == '.') || (player_grid[row][(int)col-1] =='*') || (player_grid[row][(int)col+1] == '.') || (player_grid[row][(int)col+1] == '*') ){
-//                     // player grid at row, col gets the global grid's value at row, col
-//                     player_grid[row][(int)col] = global_grid[row][(int)col];
-//                 }
+        // if the line is vertical
+        if (columnStart == 0 && columnEnd == 0) {
+            newX = playerColumn;
+        } else if (slope != 0) {
+            newX = (rowStart - constant) / slope;
+        }
 
-//                 else{
-//                     // this and all future locations are invisible: set to " "
-//                     player_grid[row][(int)col] = ' ';
-//                 }
-//             }
-//         }
-//     }
-        
-    
-//     else if (pr > wr){
-//         // check points on each row between and not including pr and wr
-//         for (int row = pr-1; row > wr; row--){
+        // check that both points are ints
+        if ((is_integer(newX)) && (is_integer(rowStart))){
+            // if it's not an "open" point, then return false
+            if (!isOpen(game, newX, rowStart)) {
+                return false;
+            }
+        }
+        else {
+            // if both points are not ints, check the top and bottom for obstructions
+            if (!(isOpen(game, floor(newX), rowStart) || isOpen(game, ceil(newX), rowStart))) {
+                return false;
+            }
+        }
+    }
+    // spot is visible
+    return true;
+}
 
-//             float col = pc + (row - pr)/slope;  // compute col
+/*
+* get_player_visible: loops over every position in the grid and calls "is_visible", changes what is stored at each grid point accordingly
+*/
+bool 
+get_player_visible(game_t* game, client_t* player)
+{
+    printf("vis111\n");
+    bool modified = false;
+    int pr = player->r;
+    int pc = player->c;
 
-//             if (is_integer(col)){  // aka a point on the grid
-//                 if ( (player_grid[row][(int)col] == '|') || (player_grid[row][(int)col] == '-' ) || (player_grid[row][(int)col] == 'x') || (player_grid[row][(int)col] == '#') ){
-//                     // this and all future locations are invisible: skip all future rows and columns
-//                     player_grid[row][(int)col] = ' ';
-//                 }
-//                 else{
-//                     player_grid[row][(int)col] = global_grid[row][(int)col];
-//                 }
-//             }
+    for (int r = 0; r < game->rows; r++){
+        for (int c = 0; c < game->columns; c++){
 
-//             else{  // point not on grid
-//                 if ( (player_grid[row][(int)col-1] == '.') || (player_grid[row][(int)col-1] =='*') || (player_grid[row][(int)col+1] == '.') || (player_grid[row][(int)col+1] == '*') ){
-//                     // player grid at row, col gets the global grid's value at row, col
-//                     player_grid[row][(int)col] = global_grid[row][(int)col];
-//                 }
-//                 else{
-//                     // this and all future locations are invisible: set to " "
-//                     player_grid[row][(int)col] = ' ';
-//                 }
-//             }
-//         }
+            if (r == pr && c == pc){
+                modified = (player->grid[r][c] != '@');
+                player->grid[r][c] = '@';
+            }
+            else if (is_visible(game, pc, pr, c, r)){
+                modified = (player->grid[r][c] != game->grid[r][c]);
+                player->grid[r][c] = game->grid[r][c];
+            }
+            else if (player->grid[r][c] == '*'){
+                player->grid[r][c] = '.';
+                modified = true;
+            }
+            else if (isalpha(player->grid[r][c])){
+                // get the player
+                // check if tunnel
+                // change accordingly
+                modified = true;
+            }
+
             
-//     }
-    
-// }
+        }
+    }
 
-/*
-* isVisible: takes in player, player row & col, wall (boundary) row & column and game
-* checks if wr, wc is visible from position player position pr, pc
-* calls helpers which update the player->grid accordingly
-* outputs a boolean which is true if the visibility on the player's grid changes (e.g. new points visible, less points visible, new gold seen etc.)
-*/
-// bool
-// isVisible(game_t* game, char** player_grid, int pr, int pc, int wr, int wc)
-// {
-//     // assume (0,0) point in top left corner, as in example presented in REQUIREMENTS.md
-    
-// 	bool gridChanged;  // switch for determining if visibility changed
-//     char** global_grid = game->grid;
-//     int globalGrid_rows = game->rows;
-//     int globalGrid_columns = game->columns;
-
-//     // set up another grid to player's grid before updates for latter comparison
-//     char** oldGrid = mem_malloc_assert(globalGrid_rows * sizeof(char*), "Error allocating memory in isVisible.\n");
-//     oldGrid = player_grid;
-
-//     // update player grid
-//     visCol(global_grid, player_grid, pc, pr, wc, wr);  // visCol handles pc < wc AND pc > wc cases
-//     visRow(global_grid, player_grid, pr, pc, wr, wc);  // visRow handles pr < wr AND pr > wr cases
-
-//     // check if new player map has changed from previous version
-//     gridChanged = compareGrids(globalGrid_rows, globalGrid_columns, player_grid, oldGrid);
-
-//     // boolean, will be used to determine whether a messsage should be sent to this player
-//     return gridChanged;
-
-// }
+    return modified;                                                                                                                                                                             
+}
 
 
-/*
-* update_player_grid: 
-* Takes in a char** player_grid, char** global_grid, int representing player rows, and int representing player columns
-* outputs nothing 
-* calls getWalls to find room boundaries
-* for each boundary, calls isVisible to update player's grid
-*/
-// void
-// update_player_grid(char** player_grid, game_t* game, int pr, int pc)
-// {
-//     // change the player's '@' symbol to their new position.
-//     player_grid[pr][pc]='@';
-
-//     // then, change their local grid display in reference to where they are and what they can see
-
-//     // get walls
-//     char** walls = mem_malloc_assert(sizeof(game->rows * sizeof(char*)), "Error allocating memory in getWalls.\n");
-//     walls = getWalls(game, game->grid, pr, pc);
-
-//     int numRows = sizeof(walls)/sizeof(walls[0]);
-//     int numCols = sizeof(walls[0])/sizeof(walls[0][0]);
-
-// 	// for each wall point (wr, wc) in walls array
-//     for(int wr = 0; wr < numRows; wr++) {
-//         for(int wc = 0; wc < numCols; wc++) {
-//             isVisible(game, player_grid, pr, pc, wr, wc);
-//         }
-//     }
-
-// }
-
-// /*
-// * update_grids: given a game object, loops through all clients and update their grids
-// */
-// void
-// update_grids(game_t* game)
-// {
-//     // char** clients = malloc(sizeof(char*)*26);
-//     client_t** clients = game->clients;
-
-//     // loops thru all players
-//     for (int i=1; i < game->playersJoined; i++){
-
-//         client_t* client = clients[i];
-
-//         if (client != NULL){
-//             update_player_grid(client->grid, game, client->x, client->y);
-//         }
-        
-//     }
-// }
 
 void
 grid_delete(char** grid, int rows)

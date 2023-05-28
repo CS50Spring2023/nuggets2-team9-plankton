@@ -1,0 +1,10 @@
+START OF LOG
+client on port 60167
+interactive player mode; name 'n'
+OK message received: OK A
+GRID message received: GRID 21 79
+displayStart
+wRows = 8
+wCols = 166
+GOLD message received: GOLD 0 0 250
+DISPLAY message received
