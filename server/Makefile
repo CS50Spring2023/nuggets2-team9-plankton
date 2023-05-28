@@ -8,7 +8,7 @@ LIBS = ../common/common.a ../libs/libs.a ../support/support.a
 
 
 CC = gcc
-CFLAGS = -Wall -pedantic -std=c11 -g -ggdb -I ../common -I ../libs -I ../support
+CFLAGS = -Wall -pedantic -std=c11 -g -ggdb -I ../common -I ../libs -I ../support -lm
 MAKE = make
 
 # for memory-leak tests
@@ -19,7 +19,7 @@ VALGRIND = valgrind -s --leak-check=full --show-leak-kinds=all
 all: server
 
 server: $(OBJS) $(LIBS)
-	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+	$(CC) $(CFLAGS) $^ $(LIBS) -o $@ -lm
 
 server.o: server.c ../common/grid.h ../common/game.h 
 

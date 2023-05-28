@@ -13,6 +13,7 @@ Team 9: Plankton, May 2023
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
 
 #include "../libs/file.h"
 #include "../libs/mem.h"
@@ -74,41 +75,9 @@ char get_grid_value(game_t* game, int x, int y);
 */
 void change_spot(game_t* game, int x, int y, char symbol);
 
+bool is_visible(game_t* game, const int playerColumn, const int playerRow, const int column, const int row);
 
-/*
-* getWalls: takes in player row & col
-* outputs array with room boundaries necessary to determine visibility
-*/
-// char** getWalls(game_t* game, char** grid, int pr, int pc);
-
-
-/*
-* isVisible: takes in player, player row & col, wall (boundary) row & column and game
-* checks if wr, wc is visible from position player position pr, pc
-* calls helpers which update the player->grid accordingly
-* outputs a boolean which is true if the visibility on the player's grid changes (e.g. new points visible, less points visible, new gold seen etc.)
-*/
-// bool isVisible(game_t* game, char** player_grid, int pr, int pc, int wr, int wc);
-
-
-/* compareGrids: takes in global grid rows & columns, the new player grid, and their former grid
-* helper for isVisble to compare current to previous player grids for changes in visibility 
-*/
-// bool compareGrids(int rows, int columns, char** playerGrid, char** oldGrid);
-
-
-/* visCol: takes in the player, the player's current column and the column of a wall being investigated
-* helper to compute visibility across columns
-* outputs nothing, but updates the player->grid to either the global grid if point is visible or to " " otherwise
-*/ 
-// void visCol(char** global_grid, char** player_grid, int pc, int pr, int wc, int wr);
-
-
-/* visRow: takes in the player, the player's current row and the row of a wall being investigated
-* helper to compute visibility across rows
-* outputs nothing, but updates the player->grid to either the global grid if point is visible or to " " otherwise
-*/ 
-// void visRow(char** global_grid, char** player_grid, int pr, int pc, int wr, int wc);
+bool get_player_visible(game_t* game, client_t* player);
 
 void grid_delete(char** grid, int rows);
 

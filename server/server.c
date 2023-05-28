@@ -45,7 +45,7 @@ main(const int argc, char* argv[])
     // parse args: first argument should be the pathname for a map file, the second is an optional seed for the random-number generator, which must be a positive int if provided
     
     // make sure there are no more than 2 arguments
-    if (argc != 3){
+    if (argc != 3 && argc != 2){
         fprintf(stderr, "Invalid number of arguments provided. Call using the format ./server map.txt [seed]\n");
 	    exit(1);
     }
@@ -167,11 +167,11 @@ update_displays(game_t* game)
         client_t* player = game->clients[i];
 
         if (player != NULL){
-            send_displayMsg(game, player);
-            // if the grid changed send a new message
-            // if(update_player_grid(player->grid, game, player->r, player->c)){
-            //     send_displayMsg(game, player);
-            // }
+            // send_displayMsg(game, player);
+
+            if (get_player_visible(game, player)){
+                send_displayMsg(game, player);
+            }
         }
     }
 }
