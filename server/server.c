@@ -110,12 +110,10 @@ handleMessage(void* arg, const addr_t from, const char* message)
             message_send(from, response);
             mem_free(response); // is this losing the string for whoever receives message?????
 
-            // update displays
-            update_displays(game);
-
             // send new client messages: grid, gold, display
             inform_newClient(player, game);
 
+            update_displays(game);
 
         }
         else {
@@ -169,7 +167,7 @@ update_displays(game_t* game)
 
         if (player != NULL){
             if (true){
-                // get_player_visible(game, player);
+                get_player_visible(game, player);
                 printf("test\n");
                 send_displayMsg(game, player);
             }
