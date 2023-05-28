@@ -10,6 +10,7 @@ Team 9: Plankton, May 2023
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <unistd.h>
 #include "../libs/file.h"
 #include "../libs/mem.h"
 #include "../support/log.h"
@@ -60,11 +61,14 @@ main(const int argc, char* argv[])
         fprintf(stderr, "Error. File could not be opened\n");
 	    exit(1);
     }
-
-    // TODO IF NOT HANDLED ELSEWHERE (SR): If the optional seed is provided, the server shall pass it to srand(seed). 
-    // If no seed is provided, the server shall use srand(getpid()) to produce random behavior.
-        // int seed = argv[2];
-
+    // if the user provided a seed, use it to initialize the random sequence:
+    if (argc == 3){
+        srand(atoi(argv[2]));
+    }
+    // if they did not, seed the random-number generator with the process id
+    else {
+        srand(getpid());
+    }
 
     // create a new game first
 
