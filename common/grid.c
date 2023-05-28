@@ -128,6 +128,18 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_r, 
     }
 }
 
+
+/*
+* is_integer: takes a char parameter and returns true if it represents a valid int, and false otherwise
+*
+*/
+// bool is_integer(float value) {
+//     char str[32]; // Adjust the buffer size as per your requirements
+//     sprintf(str, "%.0f", value);
+//     return (float)atoi(str) == value;
+// }
+
+
 /*
 * get_grid_value: takes in a grid object, x value, y value, number of rows, number of columns
 * outputs whatever symbol is at that point in the grid
@@ -150,10 +162,7 @@ change_spot(game_t* game, int r, int c, char symbol)
     game->grid[r][c] = symbol;
 }
 
-
 /**************** NEW VISIBILITY FUNCTIONS ****************/
-
-
 
 /*
 * isOpen: takes in game, column, and row, and returns true if the spot is one where a player can move to
@@ -298,45 +307,40 @@ bool is_visible(game_t* game, const int playerColumn, const int playerRow, const
 /*
 * get_player_visible: loops over every position in the grid and calls "is_visible", changes what is stored at each grid point accordingly
 */
-void get_player_visible(game_t* game, client_t* client, int columns, int rows, int x, int y){
-    // for every column (x value)
-    for (int i = 0; i < columns ; i++){
-        // for every row (y value)
-        for (int j = 0; j < rows+1 ; j++){
-            // if this is where the player now is, update the location of the "@" symbol
-            if (x == i && j == y){
-                client->grid[i][j]='@';
-            // if it's not where the player is currently standing, and the spot is not visible
-            } else if (!is_visible(game, x,y, i, j)) {
-                // change its representation on the player grid to " "
-                client->grid[i][j]=' ';
-            }
-        }
-    }                                                                                                                                                                             
-}
-
-/*
-* update_grids: given a game object, loops through all clients and update their grids
-*/
-void update_grids(game_t* game)
+bool 
+get_player_visible(game_t* game, client_t* player)
 {
-    // char** clients = malloc(sizeof(char*)*26);
-    client_t** clients = game->clients;
+    bool modified = false;
+    int pr = player->r;
+    int pc = player->c;
 
-    // loops thru all players
-    for (int i=1; i < game->playersJoined; i++){
-
-        client_t* client = clients[i];
-
-        if (client != NULL){
-           get_player_visible(game, client, game->columns, game->rows, client->c, client->r);
+    for (int r = 0; r < game->rows; r++){
+        for (int c = 0; c < game->columns; c++){
+            if (r == pr && c == pc){
+                modified = (player->grid[r][c] != '@');
+                player->grid[r][c] = '@';
+            }
+            else if (is_visible(game, pc, pr, c, r)){
+                modified = (player->grid[r][c] != game->grid[r][c]);
+                player->grid[r][c] = game->grid[r][c];
+            }
+            else if (player->grid[r][c] == '*'){
+                player->grid[r][c] = '.';
+                modified = true;
+            }
+            else if (isalpha(player->grid[r][c])){
+                // get the player
+                // check if tunnel
+                // change accordingly
+                modified = true;
+            }
+            
         }
     }
+
+    return modified;                                                                                                                                                                             
 }
 
-/*
-* grid_delete: delete grid, free all memory
-*/
 void
 grid_delete(char** grid, int rows)
 {
@@ -346,4 +350,3 @@ grid_delete(char** grid, int rows)
 
     mem_free(grid);
 }
-
