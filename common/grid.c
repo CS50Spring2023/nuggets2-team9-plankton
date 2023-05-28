@@ -220,7 +220,7 @@ bool is_visible(game_t* game, const int playerColumn, const int playerRow, const
     // if both the x and y coordinate change (the line is diagonal)
     } else {
         // calculate slope: rise over run
-        slope = changeY / changeX;
+        slope = (double) changeY / changeX;
         constant = playerRow - (slope * playerColumn);
         columnStart = 0;
         columnEnd = 0;
@@ -245,7 +245,7 @@ bool is_visible(game_t* game, const int playerColumn, const int playerRow, const
     }
 
     for (; columnStart < columnEnd; columnStart++) {
-        float newY;
+        double newY;
 
         // if the line is horizontal
         if (rowStart == 0 && rowEnd == 0) {
@@ -255,7 +255,7 @@ bool is_visible(game_t* game, const int playerColumn, const int playerRow, const
         }
 
         // check for grid point
-        if ((is_integer(columnStart)) && (newY)) {
+        if ((is_integer(columnStart)) && is_integer(newY)) {
             if (!isOpen(game, columnStart, newY)) {
                 return false;
             }
