@@ -85,13 +85,32 @@ int main()
   bool vis4 = is_visible(game, 14, 13, 9, 16);
   printf("%d\n", vis4);
 
-  // seg faults
-  // get_player_visible(game, player);
+  printf("the number of rows in this (global) grid is: \n");
+  // // game, pc, pr, sc, sr
+  printf("%d\n", game->rows);
+    printf("the number of columns in this (global) grid is: \n");
+  // // game, pc, pr, sc, sr
+  printf("%d\n", game->columns);
+
+  printf("this player's row is: \n");
+  // // game, pc, pr, sc, sr
+  printf("%d\n", player->r);
+
+  printf("this player's column is: \n");
+  // // game, pc, pr, sc, sr
+  printf("%d\n", player->c);
+
+  // SEGFAULTS WHEN YOU TRY TO INDEX INTO PLAYER GRID IN THIS WAY
+  // printf("%d\n", player->grid[2][2]);
+
+  // seg fault- FIXED
+  get_player_visible(game, player);
 
   printf("\n\n");
 
   fclose(map_file);
-  grid_toStr(game->grid, NULL, game->rows, game->columns);
+  // grid_toStr(game->grid, NULL, game->rows, game->columns);
+  printf(grid_toStr(game->grid, player->grid, game->rows, game->columns));
   grid_delete(game->grid, game->rows);
   return 0; // exit status
 }

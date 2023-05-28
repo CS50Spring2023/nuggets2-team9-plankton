@@ -128,18 +128,6 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_r, 
     }
 }
 
-
-/*
-* is_integer: takes a char parameter and returns true if it represents a valid int, and false otherwise
-*
-*/
-// bool is_integer(float value) {
-//     char str[32]; // Adjust the buffer size as per your requirements
-//     sprintf(str, "%.0f", value);
-//     return (float)atoi(str) == value;
-// }
-
-
 /*
 * get_grid_value: takes in a grid object, x value, y value, number of rows, number of columns
 * outputs whatever symbol is at that point in the grid
@@ -186,13 +174,13 @@ static bool isOpen(game_t* game, const int c, const int r){
 /*
 * is_integer: takes in a value, determines whether it's an integer, returns boolean
 */
-static bool is_integer(float num){
+static bool is_integer(double num){
     int convertedNum = (int)num;
     return (convertedNum == num);
 }
 
 /*
-* isVisible: takes in grid, player column, player row, spot column, spot row
+* isVisible: takes in game, player column, player row, spot column, spot row
 * computes whether a spot is visible, based on where the player is
 */
 bool is_visible(game_t* game, const int playerColumn, const int playerRow, const int column, const int row) {
@@ -201,8 +189,6 @@ bool is_visible(game_t* game, const int playerColumn, const int playerRow, const
         fprintf(stderr, "game pointer was null\n");
 	    exit(1);
     }      
-
-    // char** grid = game->grid;
 
     // calculate difference between where the player is and where the spot is
     int changeY = row - playerRow;
@@ -238,7 +224,7 @@ bool is_visible(game_t* game, const int playerColumn, const int playerRow, const
         }
     
     // if both the x and y coordinate change (the line is diagonal)
-    } else {
+    } else if (changeX != 0 && changeY != 0){
         // calculate slope: rise over run
         slope = (double) changeY / changeX;
         constant = playerRow - (slope * playerColumn);
@@ -288,12 +274,12 @@ bool is_visible(game_t* game, const int playerColumn, const int playerRow, const
     }
 
     for (; rowStart < rowEnd; rowStart++) {
-        float newX;
+        double newX;
 
         // if the line is vertical
         if (columnStart == 0 && columnEnd == 0) {
             newX = playerColumn;
-        } else {
+        } else if (slope != 0) {
             newX = (rowStart - constant) / slope;
         }
 
@@ -326,9 +312,13 @@ get_player_visible(game_t* game, client_t* player)
         int pr = player->r;
         int pc = player->c;
 
+        // for every row in the grid
         for (int r = 0; r < game->rows-1; r++){
+            // for every column in the grid
             for (int c = 0; c < game->columns-1; c++){
+                // if this is where the playere currently is, and it isn't where they weree before
                 if (r == pr && c == pc){
+                    // modified changes to true bc this player's display needs to change, and their location on the grid changes as well
                     modified = (player->grid[r][c] != '@');
                     player->grid[r][c] = '@';
                 }

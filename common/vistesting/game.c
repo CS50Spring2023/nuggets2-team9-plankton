@@ -38,6 +38,9 @@ new_player(game_t* game, addr_t client, char* name)
     
     // assign player to a random spot
     assign_random_spot(game->grid, game->rows, game->columns, player->id, &player->r, &player->c);
+
+    // give the player the global grid to begin
+    player->grid = game->grid;
     
     // update visibility here
     // update_player_grid(player->grid, game, player->r, player->c);
