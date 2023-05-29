@@ -78,7 +78,7 @@ Updates the previous spot occupies by a player when they move to the next spot.
 static void update_previous_spot(client_t* player, game_t* game, char grid_val);
 ```
 
-Sends message to client about to quit the game. Called if a client hits `Q` on their keyboard, if a new client tries to join the game when the maximum number of players has been reached, or if a new spectator joins the game.
+Sends message to client about to quit the game. Called if a client hits `Q` on their keyboard, if the game ends by virtue of all gold being collected, if a new client tries to join the game when the maximum number of players has been reached, or if a new spectator joins the game.
 ```c
 void send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator);
 ```
@@ -86,17 +86,6 @@ void send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator);
 ### Detailed pseudo code
 
 > Pseudocode for the most important functions in Server.
-
-#### `EXAMPLE: sparseArgs`:
-
-	validate commandline
-	verify map file can be opened for reading
-	if seed provided
-		verify it is a valid seed number
-		seed the random-number generator with that seed
-	else
-		seed the random-number generator with getpid()
-
 
 #### `handleMessage`:
 
@@ -123,6 +112,39 @@ void send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator);
     loop through players
         send message to update their local grids
 
+
+#### `inform_newClient`:
+
+    send grid (location) message
+    call function to send gold message
+    call function to send display message
+
+
+#### `send_goldMsg`:
+
+    send gold message: how much was picked up, how much player owns, how much is left
+
+
+#### `send_displayMsg`:
+
+    if client is a spectator
+        convert global map array of strings to array
+    else if client is a player
+        convert local map array of strings to array
+    send display message to client
+
+
+#### `extract_playerName`:
+
+    initialize an array for the client's name
+    for each character in a client's message
+        parse message until start of player name
+            if name length less than maximum length
+                if the character is printable and not blank
+                    add it to the clinet's name array
+                if it's blank
+                    add "_" to the client's name array
+    
 
 #### `extractRequest`:
 
@@ -158,10 +180,29 @@ void send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator);
             update the player's record of their position
     update displays of affected players
 
+
+#### `update_previous_spot`:
+
+    if previous spot was a tunnel
+        update it to "#"
+    if previous spot was a grid spot
+        update it to "."
+
+
+#### `send_quitMsg`:
+
+    if client is a spectator
+        record the quit reason: the game endeded (the client pressed "q" or the gold was collected) or another spectator joined
+    if client is a player
+        record the quit reason: the game endeded (the client pressed "q" or the gold was collected) or the player maximum number has been reached
+    send quit message with the quit reason
+
 ---
 
 
 ## Grid module
+
+The functions in this helper module are utilized by the server.
 
 ### Data structures
 
@@ -169,31 +210,229 @@ All data structures are defined within the [Game](##Game) module section.
 
 ### Definition of function prototypes
 
+Reads a file into an array of strings, with each string in the array representing a row of the game map.
+```c
+char** load_grid(FILE* fp, int* rows, int* columns)
+```
 
-### `isVisible` 
-Checks the visibility of each point on the grid from a player's location, (pr, pc). For each wall/corner point (wr, wc), the function loops over the grid rows strictly between pr and wr, and over the columns strictly betwen pc and wc. We split this function in cases covering N-S, E-W of the player and all the areas in between. If these points are grid elements (integers) and don't include a boundary (wall or corner) as their value, then the player's grid gets updated to the value of the global grid. If these points are in between grid elements, we check the grid points above/below and to the left/right of the points. If at least one of each doesn't include a boundary, then the player's grid gets updated to the value of the global grid. Otherwise, the point and all points following it (in the direction examined) remain invisible to the player.
+Loads an empty player grid of equal rows and columns as the global grid.
+```c
+char** load_player_grid(game_t* game)
+```
 
+Converts an array of strings to a string
+```c
+char* grid_toStr(char** global_grid, char** player_grid, int rows, int columns)
+```
+
+Assigns a random spot for an object (used to randomly place players and gold)
+```c
+void assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_r, int* spot_c)
+```
+
+Returns the symbol at given coordinates of a grid.
+```c
+char get_grid_value(game_t* game, int r, int c)
+```
+
+Assigns a new symbol at given coordinates of a grid.
+```c
+void change_spot(game_t* game, int r, int c, char symbol)
+```
+
+Checks whether a location is open for a player to move in.
+```c
+static bool isOpen(game_t* game, const int c, const int r)
+```
+
+Determines if a value is an integer.
+```c
+bool static is_integer(float num);
+```
+
+Computes whether a point on the grid is visible from a player's current location.
+```c
+bool is_visible(game_t* game, const int playerColumn, const int playerRow, const int column, const int row) 
+```
+
+Loops over each point in the grid and calls `is_visible`, updating the player's grid accordingly. Returns true if the player's grid was modified.
+```c
+bool get_player_visible(game_t* game, client_t* player)
+```
+
+Frees memory allocated to a grid.
+```c
+void grid_delete(char** grid, int rows)
+```
 
 ### Detailed pseudo code
+
+#### `load_grid`:
+
+    check if file is valid
+    while there are rows in the map file
+        add row containing a string of the file to grid 2d character array
+
+
+#### `load_player_grid`:
+
+    initialize an empty row as a string containing "\0" at an index equal to the last global grid cloumn + 1
+    for each row in the global grid
+        add an empty row into a player's local grid
+
+
+#### `grid_toStr`:
+
+    initialize a string for the converted map
+    for each row the grid
+        for each column in the grid
+            the map string at index (current_row * (columns + 1) + current_column) is assigned the value of grid[current_row][current_column]
+            if the player's grid is not null
+                the map string gets assigned the value of player's grid[current_row][current_column] (at the same index as above)
+        add "\0"
+    add "\0"
+    return the string
+
+
+#### `assign_random_spot`:
+
+    while not placed
+        pick random row, column values 
+        if location is a grid point "."
+            place object (player or gold) at that location grid 
+
+
+#### `get_grid_value`:
+
+    return grid symbol at given row and column
+
+
+#### `change_spot`:
+
+    assign symbol to grid location at given row and column
+
+
+#### `isOpen`:
+
+    if symbol at given grid location is viable for player movement (".", "#", "*", or a letter)
+        return true
+    return false
+
+
+#### `is_integer`:
+
+    return true if a floating point variable is equal to iself cast as an integer
+
+
+#### `is_visible`:
+
+    calculate difference in x and y between the player and the spot
+    if no change in x (player on same column as spot)  
+        move incrementally towards the spot (either up or down, depending on player location)
+    if no change in y (player on same row as spot)
+        move incrementally towards the spot (either left or right, depending on player location)
+    if change in both x and y
+        calculate the slope
+        calculate movement bounds
+        for each column between player and spot
+            if the point is on the grid (and integer)
+                if it is not a valid grid point (".", "#", "*", or a letter)
+                    return false
+            else
+                if the grid points above and below the point are not valid (".", "#", "*", or a letter)
+                    return false 
+        for each row between player and spot
+            if the point is on the grid (and integer)
+                if it is not a valid grid point (".", "#", "*", or a letter)
+                    return false
+            else
+                if the grid points above and below the point are not valid (".", "#", "*", or a letter)
+                    return false 
+    return true
+
+
+#### `get_player_visible`:
+
+    initialize a variable, modified, as false to check if player's visibility changed
+    for each row in the player's grid
+        for each column in the player's grid
+            if player at point location
+                update player grid
+                update modified
+            if point is visible
+                update player grid
+                update modified
+            if ...
+    return modified
+
+
+#### `grid_delete`:
+
+    for each row in a grid
+        free its memory
+    free grid memory
+
 
 ---
 
 ## Game module
 
+The functions in this helper module are utilized by the server.
 
 ### Data structures
 ```c 
-
+game_t
 ```
-```c 
 
-```
 ```c 
-
+client_t
 ```
 
 ### Definition of function prototypes
 
+```c
+client_t* new_player(game_t* game, addr_t client, char* name)
+```
+
+```c
+void update_position(client_t* player, int r, int c)
+```
+
+```c
+client_t* find_client(addr_t clientAddr, game_t* game)
+```
+
+```c
+client_t* find_player(char id, game_t* game)
+```
+
+```c
+void delete_client(client_t* client, game_t* game)
+```
+
+```c
+game_t* new_game(FILE* map_file, const int maxPlayers)
+```
+
+```c
+void end_game(game_t* game, int maxGoldPiles)
+```
+
+```c
+int update_gold(game_t* game, client_t* player, int r, int c, int goldMaxPiles)
+```
+
+```c
+void load_gold(game_t* game, const int goldTotal, const int goldMinPiles, const int goldMaxPiles)
+```
+
+```c
+void add_gold_pile(game_t* game, int gold_amt, int piles)
+```
+
+```c
+int* nugget_count_array(const int goldMinPiles, const int goldMaxPiles, int goldTotal)
+```
 
 ### Detailed pseudo code
 

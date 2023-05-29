@@ -299,7 +299,7 @@ is_visible(game_t* game, const int playerColumn, const int playerRow, const int 
             }
         } else {
             // if not a grid point, check the top and bottom
-            if (!(isOpen(game, columnStart, floor(newY)) || isOpen(game, columnStart, ceil(newY)))) {
+            if (!(isOpen(game, columnStart, floor(newY)) || isOpen(game, columnStart, ceil(newY)))) {  // shouldn't it be !isOpen && !isOpen ??
                 return false;
             }
         }
