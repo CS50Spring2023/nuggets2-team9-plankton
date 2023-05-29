@@ -25,10 +25,6 @@
 #include "grid.h"
 
 
-// typedef struct gold_location gold_location_t;
-// typedef struct client client_t;
-// typedef struct game game_t;
-
 /**************** Functions ****************/
 
 // TODO: add description for each function

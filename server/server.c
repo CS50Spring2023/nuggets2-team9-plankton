@@ -32,11 +32,12 @@ void send_goldMsg(game_t* game, client_t* client, int goldPickedUp);
 void send_displayMsg(game_t* game, client_t* client);
 char* extract_playerName(const char* message, addr_t clientAddr);
 char* extractRequest(const char* input);
-bool handle_movement(client_t* player, char key, game_t* game);
+int handle_movement(client_t* player, char key, game_t* game);
 static void update_previous_spot(client_t* player, game_t* game, char grid_val);
 void send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator);
 void quit_all(game_t* game, int maxPlayers);
 void handle_quit(client_t* player, game_t* game);
+void send_gameOverMsg(game_t* game, int maxNameLength);
 
 int
 main(const int argc, char* argv[])
@@ -140,11 +141,25 @@ handleMessage(void* arg, const addr_t from, const char* message)
         client_t* player = find_client(from, game);
 
         // returns true when all gold is found
-        if (message[4] == 'q'){
+        if (tolower(message[4]) == 'q'){
             handle_quit(player, game);
         }
-        else if (handle_movement(player, message[4], game)){
-            return true; // causes message loop to end
+        else{
+            int movementCode = handle_movement(player, message[4], game);
+            // signifies all gold was found
+            if (movementCode == 2){
+                return true; // causes message loop to end
+            }
+            // if we were able to move and the the key was uppercase
+            else if (movementCode != 1 && isupper(message[4])){
+                // keep moving while possible
+                while (movementCode == 0){
+                    movementCode = handle_movement(player, message[4], game);
+                }
+            }
+            if (movementCode == 2){ // handles edge case of shift moving into the last gold
+                return true; // causes message loop to end
+            }
         }
         
     }
@@ -166,9 +181,7 @@ update_displays(game_t* game)
         client_t* player = game->clients[i];
 
         if (player != NULL){
-            if (true){
-                get_player_visible(game, player);
-                printf("test\n");
+            if (get_player_visible(game, player)){
                 send_displayMsg(game, player);
             }
         }
@@ -328,7 +341,7 @@ handle_quit(client_t* player, game_t* game)
 }
 
 // make return false when game over
-bool
+int
 handle_movement(client_t* player, char key, game_t* game)
 {
 
@@ -336,7 +349,7 @@ handle_movement(client_t* player, char key, game_t* game)
     int newPos_c = player->c;
 
 
-    switch (key) {
+    switch (tolower(key)) {
         // update new Pos based on the key inputted
         case 'h': newPos_c--; break;
         case 'l': newPos_c++; break;
@@ -346,14 +359,14 @@ handle_movement(client_t* player, char key, game_t* game)
         case 'u': newPos_c++; newPos_r--; break;
         case 'b': newPos_c--; newPos_r++; break;
         case 'n': newPos_c++; newPos_r++; break;
-        default: return false;
+        default: return 1;
 
     }
 
     char grid_val = get_grid_value(game, newPos_r, newPos_c);
 
     if (grid_val == '+' || grid_val == '-' || grid_val == '|' || grid_val == ' '){
-        return false;
+        return 1; // code meaning unable to move
     }
     else if (grid_val == '.' || grid_val == '#'){
         // change the spot the player came from back
@@ -411,15 +424,16 @@ handle_movement(client_t* player, char key, game_t* game)
         update_position(player, newPos_r, newPos_c);
 
         if (game->goldRemaining == 0){
-            quit_all(game, MaxPlayers);
-            return true;
+            send_gameOverMsg(game, MaxNameLength);
+            // quit_all(game, MaxPlayers);
+            return 2; // code meaning game over
         }
 
     }
 
     // call update function
     update_displays(game);
-    return false;
+    return 0; // code meaning sucessful move
 
    
 }
@@ -484,5 +498,42 @@ send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator)
     message_send(clientAddr, quitMsg);
     mem_free(quitMsg);
     mem_free(quitReason);
+
+}
+
+void
+send_gameOverMsg(game_t* game, int maxNameLength)
+{
+    char* message = mem_malloc_assert(16+ ((maxNameLength + 14) * game->playersJoined), "Error allocating memory in send_gameOverMsg.\n");
+    strcpy(message, "QUIT GAME OVER:\n");
+
+    for (int i = 1; i < game->playersJoined + 1; i++){
+        client_t* player = game->clients[i];
+        if (player != NULL){
+            char* playerStr = mem_malloc_assert(maxNameLength + 14, "Error allocating memory in send_gameOverMsg.\n");
+            if (i == game->playersJoined - 1){
+                sprintf(playerStr, "%c       %3d %s", player->id, player->gold, player->real_name);
+            }
+            else{
+                sprintf(playerStr, "%c       %3d %s\n", player->id, player->gold, player->real_name);
+            }
+
+            strcat(message, playerStr);
+            mem_free(playerStr);
+        }
+    }    
+
+    // Add the null terminator at the end of the message string
+    int messageLength = strlen(message);
+    message[messageLength] = '\0';
+
+    for (int i = 0; i < game->playersJoined + 1; i++){
+        client_t* client = game->clients[i];
+        if (client != NULL){
+            message_send(client->clientAddr, message);
+        }
+    }
+
+    mem_free(message);
 
 }
