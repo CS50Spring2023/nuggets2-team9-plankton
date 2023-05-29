@@ -13,3 +13,6 @@ When all gold nuggets are collected, the game ends and a summary is printed.
 See the [support library](support/README.md) for some useful modules.
 
 See the [maps](maps/README.md) for some draft maps.
+
+Assumptions:
+Game over message doesn't include info about quit players and only gives the scores of players present when the game ends.

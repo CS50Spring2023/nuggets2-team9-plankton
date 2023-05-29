@@ -45,6 +45,7 @@ typedef struct game {
     int rows;
     int columns;
     gold_location_t** locations;
+    int totalGoldPiles;
 
 } game_t;
 

@@ -165,7 +165,7 @@ end_game(game_t* game, int maxGoldPiles)
     }
 
     if (game->locations != NULL){
-        for (int i = 0; i < maxGoldPiles; i++){
+        for (int i = 0; i < game->totalGoldPiles; i++){
             mem_free(game->locations[i]);
         }
 
@@ -212,6 +212,7 @@ load_gold(game_t* game, const int goldTotal, const int goldMinPiles, const int g
         gold_amt = nugget_counts[i];
 
         if (gold_amt <= 0){
+            game->totalGoldPiles = i;
             break;
         }
 
@@ -262,7 +263,7 @@ nugget_count_array(const int goldMinPiles, const int goldMaxPiles, int goldTotal
 
         if(piles >= goldMinPiles){
             if (piles < goldMaxPiles - 1){
-                arr[piles + 1] = -1;
+                arr[piles] = -1;
             }
             return arr;
         }

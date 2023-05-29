@@ -72,7 +72,7 @@ load_player_grid(game_t* game)
         emptyRow[c] = ' ';
     }
 
-    emptyRow[game->columns + 1] = '\0';
+    emptyRow[game->columns] = '\0';
 
 
     for (int r = 0; r < game->rows; r++){

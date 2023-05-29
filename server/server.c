@@ -96,9 +96,9 @@ handleMessage(void* arg, const addr_t from, const char* message)
         mem_free(request);
         if (game->playersJoined < MaxPlayers){
 
-            // put this into helper
             char* name = extract_playerName(message, from); 
             if (name == NULL){
+                // log here
                 return false;
             }
 
@@ -109,7 +109,7 @@ handleMessage(void* arg, const addr_t from, const char* message)
             sprintf(response, "OK %c", player->id);
 
             message_send(from, response);
-            mem_free(response); // is this losing the string for whoever receives message?????
+            mem_free(response); 
 
             // send new client messages: grid, gold, display
             inform_newClient(player, game);
@@ -138,6 +138,10 @@ handleMessage(void* arg, const addr_t from, const char* message)
     else if (strcmp(request, "KEY") == 0){
         mem_free(request);
 
+        if (strlen(message) != 5 || !isalpha(message[4])){
+            // log error
+        }
+
         client_t* player = find_client(from, game);
 
         // returns true when all gold is found
@@ -162,6 +166,9 @@ handleMessage(void* arg, const addr_t from, const char* message)
             }
         }
         
+    }
+    else{
+        // log error
     }
 
     return false;
@@ -259,6 +266,7 @@ extract_playerName(const char* message, addr_t clientAddr)
         else if (reachedNameStart && !isspace(message[i]) && emptyName){
             emptyName = false;
         }
+
         if (reachedNameStart){
             if (curr_nameLength < MaxNameLength){
                 if(!isgraph(message[i]) && !isblank(message[i])){
@@ -274,7 +282,7 @@ extract_playerName(const char* message, addr_t clientAddr)
             }
         }
     }
-    name[MaxNameLength] = '\0';
+    name[curr_nameLength] = '\0';
     
     if(emptyName){
         send_quitMsg(clientAddr, 3, false);
@@ -510,7 +518,7 @@ send_gameOverMsg(game_t* game, int maxNameLength)
     for (int i = 1; i < game->playersJoined + 1; i++){
         client_t* player = game->clients[i];
         if (player != NULL){
-            char* playerStr = mem_malloc_assert(maxNameLength + 14, "Error allocating memory in send_gameOverMsg.\n");
+            char* playerStr = mem_malloc_assert(strlen(player->real_name) + 14, "Error allocating memory in send_gameOverMsg.\n");
             sprintf(playerStr, "\n%c       %3d %s", player->id, player->gold, player->real_name);
             strcat(message, playerStr);
             mem_free(playerStr);
