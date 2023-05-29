@@ -505,19 +505,13 @@ void
 send_gameOverMsg(game_t* game, int maxNameLength)
 {
     char* message = mem_malloc_assert(16+ ((maxNameLength + 14) * game->playersJoined), "Error allocating memory in send_gameOverMsg.\n");
-    strcpy(message, "QUIT GAME OVER:\n");
+    strcpy(message, "QUIT GAME OVER:");
 
     for (int i = 1; i < game->playersJoined + 1; i++){
         client_t* player = game->clients[i];
         if (player != NULL){
             char* playerStr = mem_malloc_assert(maxNameLength + 14, "Error allocating memory in send_gameOverMsg.\n");
-            if (i == game->playersJoined - 1){
-                sprintf(playerStr, "%c       %3d %s", player->id, player->gold, player->real_name);
-            }
-            else{
-                sprintf(playerStr, "%c       %3d %s\n", player->id, player->gold, player->real_name);
-            }
-
+            sprintf(playerStr, "\n%c       %3d %s", player->id, player->gold, player->real_name);
             strcat(message, playerStr);
             mem_free(playerStr);
         }
