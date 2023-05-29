@@ -1,7 +1,6 @@
 /* 
 * game.h - header for module handling game and client methods
-*
-* TODO: add details here
+* includes functions to modify the overall status of the game, as well as locate entities within the game
 *
 * Team 9: Plankton, May 2023
 */
