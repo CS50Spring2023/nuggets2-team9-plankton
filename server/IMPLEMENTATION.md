@@ -27,7 +27,7 @@ Sanjana:
 
 ### Data structures
 
-All data structures are defined within the [Game](##Game) module section.
+All data structures are defined within the [Game](#game-module) module section.
 
 ### Definition of function prototypes
 
@@ -206,7 +206,7 @@ The functions in this helper module are utilized by the server.
 
 ### Data structures
 
-All data structures are defined within the [Game](##Game) module section.
+All data structures are defined within the [Game](#game-module) module section.
 
 ### Definition of function prototypes
 
