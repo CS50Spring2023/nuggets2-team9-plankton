@@ -12,6 +12,8 @@ Team 9: Plankton, May 2023
 #include <ctype.h>
 #include <unistd.h>
 
+
+
 #include "../libs/file.h"
 #include "../libs/mem.h"
 #include "../support/log.h"
@@ -75,16 +77,17 @@ main(const int argc, char* argv[])
 	    exit(1);
     }
 
+
     // if the user provided a seed and it's a valid number, use it to initialize the random sequence:
     if (argc == 3 && (atoi(argv[2]) != 0)) {
         srand(atoi(argv[2]));
     }
-    
+
     // if they did not, seed the random-number generator with the process id
     else {
         srand(getpid());
     }
-    
+
     // create a new game first
     game_t* game = new_game(map_file, MaxPlayers);
     load_gold(game, GoldTotal, GoldMinNumPiles, GoldMaxNumPiles);

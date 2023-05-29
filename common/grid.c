@@ -311,11 +311,8 @@ is_visible(game_t* game, const int playerColumn, const int playerRow, const int 
             }
         } else {
             // if not a grid point, check the top and bottom
+
             if (!(is_open(game, columnStart, floor(newY)) || is_open(game, columnStart, ceil(newY)))) {
-                return false;
-            }
-        }
-    }
 
     for (; rowStart < rowEnd; rowStart++) {
         double newX;

@@ -22,7 +22,7 @@ typedef struct gold_location {
 
 // typedef struct client client_t;
 typedef struct client {
-     addr_t clientAddr;
+    addr_t clientAddr;
     bool isSpectator;
     char id;
     char* real_name;
