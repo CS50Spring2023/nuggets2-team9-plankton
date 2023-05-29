@@ -10,7 +10,7 @@ We avoid repeating information that is provided in the requirements spec.
 
 ## Plan for division of labor
 
-Andra: design doc, implementation doc, visibility
+Andra: design & implementation docs, visibility
 
 Jackson: design doc, server, game module, integration & testing
 
