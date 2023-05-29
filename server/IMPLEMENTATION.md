@@ -38,45 +38,54 @@ Handles messages to `PLAY`, `SPECTATE`, or a specific `KEY` sent by a client. Th
 bool handleMessage(void* arg, const addr_t from, const char* message);
 ```
 
+
 Sends a message to all players and the spectator to update their local displays by calling `send_displayMsg`.
 ```c
 void update_displays(game_t* game);
 ```
+
 
 Called by handleMessage when a client sends a `PLAY` or `SPECTATE` request. Sends client a gold message by calling `send_goldMsg` and a display message by calling `send_displayMsg`.
 ```c
 void inform_newClient(client_t* client, game_t* game);
 ```
 
+
 Called in `inform_newClient` and `handle_message`. Informs players of the amount of gold they pick up, the amount in their purses, and both players and spectators of the amount left in the game.
 ```c
 void send_goldMsg(game_t* game, client_t* client, int goldPickedUp);
 ```
+
 
 Called by `update_displays` to update an individual client's display.
 ```c
 void send_displayMsg(game_t* game, client_t* client);
 ```
 
+
 Extracts each player's name when they first join the game, storing the string up to a maximum of 50 characters.
 ```c
 char* extract_playerName(const char* message, addr_t clientAddr);
 ```
+
 
 Called by `handleMessage` to handle each request, or message, of a client playing the game.
 ```c
 char* extractRequest(const char* input);
 ```
 
+
 Called by `handleMessage` to handle the movement of a player whenever they press `Q` for quitting or a key for moving within the grid. When moving, the function updates a player's position, visibility, and handles the cases when a player steps on gold or another player.
 ```c
 void handle_movement(client_t* player, char key, game_t* game);
 ```
 
+
 Updates the previous spot occupies by a player when they move to the next spot.
 ```c
 static void update_previous_spot(client_t* player, game_t* game, char grid_val);
 ```
+
 
 Sends message to client about to quit the game. Called if a client hits `Q` on their keyboard, if the game ends by virtue of all gold being collected, if a new client tries to join the game when the maximum number of players has been reached, or if a new spectator joins the game.
 ```c
@@ -215,50 +224,60 @@ Reads a file into an array of strings, with each string in the array representin
 char** load_grid(FILE* fp, int* rows, int* columns)
 ```
 
+
 Loads an empty player grid of equal rows and columns as the global grid.
 ```c
 char** load_player_grid(game_t* game)
 ```
 
-Converts an array of strings to a string
+
+Converts an array of strings to a string.
 ```c
 char* grid_toStr(char** global_grid, char** player_grid, int rows, int columns)
 ```
 
-Assigns a random spot for an object (used to randomly place players and gold)
+
+Assigns a random spot for an object (used to randomly place players and gold).
 ```c
 void assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_r, int* spot_c)
 ```
+
 
 Returns the symbol at given coordinates of a grid.
 ```c
 char get_grid_value(game_t* game, int r, int c)
 ```
 
+
 Assigns a new symbol at given coordinates of a grid.
 ```c
 void change_spot(game_t* game, int r, int c, char symbol)
 ```
+
 
 Checks whether a location is open for a player to move in.
 ```c
 static bool isOpen(game_t* game, const int c, const int r)
 ```
 
+
 Determines if a value is an integer.
 ```c
 bool static is_integer(float num);
 ```
+
 
 Computes whether a point on the grid is visible from a player's current location.
 ```c
 bool is_visible(game_t* game, const int playerColumn, const int playerRow, const int column, const int row) 
 ```
 
+
 Loops over each point in the grid and calls `is_visible`, updating the player's grid accordingly. Returns true if the player's grid was modified.
 ```c
 bool get_player_visible(game_t* game, client_t* player)
 ```
+
 
 Frees memory allocated to a grid.
 ```c
