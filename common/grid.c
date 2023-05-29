@@ -1,7 +1,7 @@
 /*
 grid.c 
 module for handling the global and player grids
-
+specific function descriptions are located in grid.h
 Team 9: Plankton, May 2023
 */
 
@@ -23,12 +23,27 @@ Team 9: Plankton, May 2023
 #include "game.h"
 #include "grid.h"
 
-/**************** functions: grid as a 2D array  ****************/
+/**************** static function declarations  ****************/
 
 /*
-* load_grid: takes in a FILE* fp to a map file which is assumed to be valid
-* Reads the file into an array of strings, each string in the array represents a row of the map
+* is_open: takes in game, column, and row, and returns true if the spot is one where a player can move to
 */
+static bool is_open(game_t* game, const int c, const int r);
+
+/*
+* is_integer: takes in a value, determines whether it's an integer, returns boolean
+*/
+static bool is_integer(float num);
+
+/*
+* is_gridspot: takes in two doubles, returns true if they're both ints (otherwise, need to check top and bottom)
+*/
+static bool 
+is_gridspot(double a, double b)
+
+
+/**************** local function declarations  ****************/
+/**************** load_grid  ****************/
 char** 
 load_grid(FILE* fp, int* rows, int* columns)
 {
@@ -59,6 +74,7 @@ load_grid(FILE* fp, int* rows, int* columns)
     return grid;
 }
 
+/**************** load_player_grid  ****************/
 char**
 load_player_grid(game_t* game)
 {
@@ -71,7 +87,7 @@ load_player_grid(game_t* game)
         emptyRow[c] = ' ';
     }
 
-    emptyRow[game->columns + 1] = '\0';
+    emptyRow[game->columns] = '\0';
 
 
     for (int r = 0; r < game->rows; r++){
@@ -84,13 +100,7 @@ load_player_grid(game_t* game)
     return grid;
 }
 
-
-
-/*
-* grid_toStr: converts a grid to a string that can be sent to and displayed by the client
-* Takes in a char** global_grid and optionally a char** player_grid (which can be null) as well as the number of rows and columns in the grid
-* If a player_grid is NULL the output string will just be the global_grid
-*/
+/**************** grid_toStr  ****************/
 char*
 grid_toStr(char** global_grid, char** player_grid, int rows, int columns)
 {
@@ -118,10 +128,7 @@ grid_toStr(char** global_grid, char** player_grid, int rows, int columns)
    return display;
 }
 
-/*
-* assign_random_spot: assigns a "thing" to a random place on the grid where it's allowed
-* Takes in a char** global_grid, number of rows, number of columns, a "thing" to be placed, as well as x and y pointers to be filled
-*/
+/**************** assign_random_spot  ****************/
 void
 assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_r, int* spot_c)
 {
@@ -144,7 +151,6 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_r, 
         if (value == '.'){
 
             grid[r][c] = thing;
-
             placed = true;
 
             // assign spot x and y
@@ -156,12 +162,7 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_r, 
 }
 
 
-
-/*
-* get_grid_value: takes in a grid object, x value, y value, number of rows, number of columns
-* outputs whatever symbol is at that point in the grid
-*
-*/
+/**************** get_grid_value  ****************/
 char 
 get_grid_value(game_t* game, int r, int c)
 {
@@ -169,50 +170,48 @@ get_grid_value(game_t* game, int r, int c)
 }
 
 
-/*
-* change_spot: takes in grid, coordinate values, and a symbol
-* changes whatever is at that spot to the new symbol
-*/
+/**************** change_spot  ****************/
 void 
 change_spot(game_t* game, int r, int c, char symbol)
 {
     game->grid[r][c] = symbol;
 }
 
-/**************** NEW VISIBILITY FUNCTIONS ****************/
-
-/*
-* isOpen: takes in game, column, and row, and returns true if the spot is one where a player can move to
-*/
+/**************** is_open ****************/
 static bool 
-isOpen(game_t* game, const int c, const int r){
+is_open(game_t* game, const int c, const int r){
 
     if (game == NULL) {
         fprintf(stderr, "game pointer was null\n");
 	    exit(1);
     }    
-
-    if( '.' == get_grid_value(game, r, c) || '*' == get_grid_value(game, r, c) || '#' == get_grid_value(game, r, c)){
+    if( '.' == get_grid_value(game, r, c) || '*' == get_grid_value(game, r, c)){
         return true;
     }
     else if( isalpha(get_grid_value(game,r,c))){
         return true;
     }
+    else if ('+' == get_grid_value(game, r, c) || '|' == get_grid_value(game, r, c) || '-' == get_grid_value(game, r, c) || ' ' == get_grid_value(game, r, c)){
+        return false;
+    }
     return false;
 }
 
-/*
-* is_integer: takes in a value, determines whether it's an integer, returns boolean
-*/
-bool static is_integer(float num){
+/**************** is_integer ****************/
+static bool is_integer(float num)
+{
     int convertedNum = (int)num;
     return (convertedNum == num);
 }
 
-/*
-* isVisible: takes in grid, player column, player row, spot column, spot row
-* computes whether a spot is visible, based on where the player is
-*/
+/**************** is_gridspot ****************/
+static bool 
+is_gridspot(double a, double b)
+{
+    return (is_integer(a) && is_integer(b));
+}
+
+/**************** is_visible ****************/
 bool 
 is_visible(game_t* game, const int playerColumn, const int playerRow, const int column, const int row) 
 {
@@ -223,16 +222,19 @@ is_visible(game_t* game, const int playerColumn, const int playerRow, const int 
     }      
 
     // calculate difference between where the player is and where the spot is
-    int changeY = row - playerRow;
-    int changeX = column - playerColumn;
-    int slope = 0;
-    int constant, columnStart, columnEnd, rowStart, rowEnd;
+    double changeY = row - playerRow;
+    double changeX = column - playerColumn;
+    double slope = 0;
+    double constant, columnStart, columnEnd, rowStart, rowEnd;
+
+    // rowStart and rowEnd determine what points we look between for vertical visibility, columnStart and columnEnd determin whatt points we look between for horizontal visibility
 
     // if the x coordinate doesn't change (the line is vertical)
     if (changeX == 0) { 
         columnStart = 0;
         columnEnd = 0;
-        // either move up or down based on where the player is at
+
+        // either move up or down based on where the player is 
         if (playerRow > row) {
             rowStart = row + 1;
             rowEnd = playerRow;
@@ -250,60 +252,67 @@ is_visible(game_t* game, const int playerColumn, const int playerRow, const int 
         if (playerColumn > column) {
             columnStart = column + 1;
             columnEnd = playerColumn;
+
         } else {
             columnStart = playerColumn + 1;
             columnEnd = column;
         }
     
     // if both the x and y coordinate change (the line is diagonal)
-    } else if (changeX != 0 && changeY != 0){
+    } else {
         // calculate slope: rise over run
-        slope = (double) changeY / changeX;
+        slope = (double) (changeY / changeX);
         constant = playerRow - (slope * playerColumn);
         columnStart = 0;
         columnEnd = 0;
         rowStart = 0;
         rowEnd = 0;
 
+        // if the player is to the right of the spot, start from one to the right of the current column, loop to one to the left of the player column
         if (playerColumn > column) {
             columnStart = column + 1;
             columnEnd = playerColumn;
+
+         // if the player is to the left of the spot, start from one to the right of the player column, loop to one to the left of the spot column
         } else if (playerColumn < column) {
             columnStart = playerColumn + 1;
             columnEnd = column;
         }
 
+        // if the player is above the spot, start from one above the spot and loop to one below the player row
         if (playerRow > row) {
             rowStart = row + 1;
             rowEnd = playerRow;
+
+         // if the player is above the spot, start from one above the spot and loop to one below the player row
         } else if (playerRow < row) {
             rowStart = playerRow + 1;
             rowEnd = row;
         }
     }
 
+    // for every point from the column start to end
     for (; columnStart < columnEnd; columnStart++) {
+ 
         double newY;
 
         // if the line is horizontal
         if (rowStart == 0 && rowEnd == 0) {
+            // the "intersecting" y value is the same as the player row
             newY = playerRow;
         } else {
+            // otherwise, calculate the intersecting y value
             newY = slope * columnStart + constant;
         }
-
-        // check for grid point
-        if ((is_integer(columnStart)) && is_integer(newY)) {
-            if (!isOpen(game, columnStart, newY)) {
+        // check if what's located at this y value is 
+        if (is_gridspot(columnStart, newY)) {
+            if (!is_open(game, columnStart, newY)) {
                 return false;
             }
         } else {
             // if not a grid point, check the top and bottom
-            if (!(isOpen(game, columnStart, floor(newY)) || isOpen(game, columnStart, ceil(newY)))) {  // shouldn't it be !isOpen && !isOpen ??
-                return false;
-            }
-        }
-    }
+
+            if (!(is_open(game, columnStart, floor(newY)) || is_open(game, columnStart, ceil(newY)))) {
 
     for (; rowStart < rowEnd; rowStart++) {
         double newX;
@@ -316,15 +325,16 @@ is_visible(game_t* game, const int playerColumn, const int playerRow, const int 
         }
 
         // check that both points are ints
-        if ((is_integer(newX)) && (is_integer(rowStart))){
+       
+        if ((is_gridspot(newX, rowStart))){
             // if it's not an "open" point, then return false
-            if (!isOpen(game, newX, rowStart)) {
+            if (!is_open(game, newX, rowStart)) {
                 return false;
             }
         }
         else {
-            // if both points are not ints, check the top and bottom for obstructions
-            if (!(isOpen(game, floor(newX), rowStart) || isOpen(game, ceil(newX), rowStart))) {
+            // if both points are not ints, check the top and bottom for obstructions-- if both are not open, then there is an obstruction
+            if (!(is_open(game, floor(newX), rowStart) || is_open(game, ceil(newX), rowStart))) {
                 return false;
             }
         }
@@ -333,13 +343,10 @@ is_visible(game_t* game, const int playerColumn, const int playerRow, const int 
     return true;
 }
 
-/*
-* get_player_visible: loops over every position in the grid and calls "is_visible", changes what is stored at each grid point accordingly
-*/
+/**************** get_player_visible ****************/
 bool 
 get_player_visible(game_t* game, client_t* player)
 {
-    printf("vis111\n");
     bool modified = false;
     int pr = player->r;
     int pc = player->c;
@@ -348,11 +355,16 @@ get_player_visible(game_t* game, client_t* player)
         for (int c = 0; c < game->columns; c++){
 
             if (r == pr && c == pc){
-                modified = (player->grid[r][c] != '@');
+                if (player->grid[r][c] != '@'){
+                    modified = true;
+                }
+
                 player->grid[r][c] = '@';
             }
             else if (is_visible(game, pc, pr, c, r)){
-                modified = (player->grid[r][c] != game->grid[r][c]);
+                if (player->grid[r][c] != game->grid[r][c]){
+                    modified = true;
+                }
                 player->grid[r][c] = game->grid[r][c];
             }
             else if (player->grid[r][c] == '*'){
@@ -361,8 +373,17 @@ get_player_visible(game_t* game, client_t* player)
             }
             else if (isalpha(player->grid[r][c])){
                 // get the player
-                // check if tunnel
-                // change accordingly
+                client_t* other_player = find_player(player->grid[r][c], game);
+               
+                // check if tunnel and change spot accordingly
+                if (other_player->onTunnel){
+                    player->grid[r][c] = '#';
+                }
+                else{
+                    player->grid[r][c] = '.';
+                }
+                printf("2\n");
+
                 modified = true;
             }
 
@@ -373,8 +394,7 @@ get_player_visible(game_t* game, client_t* player)
     return modified;                                                                                                                                                                             
 }
 
-
-
+/**************** grid_delete ****************/
 void
 grid_delete(char** grid, int rows)
 {

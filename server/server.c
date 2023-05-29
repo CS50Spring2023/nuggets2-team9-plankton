@@ -1,6 +1,6 @@
 /*
 server.c 
-TODO
+server module for nuggets game: handles overall game logic and all communication with client
 
 Team 9: Plankton, May 2023
 */
@@ -11,6 +11,9 @@ Team 9: Plankton, May 2023
 #include <string.h>
 #include <ctype.h>
 #include <unistd.h>
+
+
+
 #include "../libs/file.h"
 #include "../libs/mem.h"
 #include "../support/log.h"
@@ -19,6 +22,7 @@ Team 9: Plankton, May 2023
 #include "../common/grid.h"
 
 
+/**************** game variables  ****************/
 static const int MaxNameLength = 50;   // max number of chars in playerName
 static const int MaxPlayers = 26;      // maximum number of players
 static const int GoldTotal = 250;      // amount of gold in the game
@@ -26,6 +30,7 @@ static const int GoldMinNumPiles = 10; // minimum number of gold piles
 static const int GoldMaxNumPiles = 30; // maximum number of gold piles
 
 
+/**************** function prototypes  ****************/
 bool handleMessage(void* arg, const addr_t from, const char* message);
 void update_displays(game_t* game);
 void inform_newClient(client_t* client, game_t* game);
@@ -33,12 +38,22 @@ void send_goldMsg(game_t* game, client_t* client, int goldPickedUp);
 void send_displayMsg(game_t* game, client_t* client);
 char* extract_playerName(const char* message, addr_t clientAddr);
 char* extractRequest(const char* input);
-bool handle_movement(client_t* player, char key, game_t* game);
+int handle_movement(client_t* player, char key, game_t* game);
 static void update_previous_spot(client_t* player, game_t* game, char grid_val);
 void send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator);
 void quit_all(game_t* game, int maxPlayers);
 void handle_quit(client_t* player, game_t* game);
+void send_gameOverMsg(game_t* game, int maxNameLength);
 
+
+/**************** functions ****************/
+/**
+ * @brief 
+ * 
+ * @param argc 
+ * @param argv 
+ * @return int 
+ */
 int
 main(const int argc, char* argv[])
 {
@@ -61,20 +76,25 @@ main(const int argc, char* argv[])
         fprintf(stderr, "Error. File could not be opened\n");
 	    exit(1);
     }
-    // if the user provided a seed, use it to initialize the random sequence:
-    if (argc == 3){
+
+
+    // if the user provided a seed and it's a valid number, use it to initialize the random sequence:
+    if (argc == 3 && (atoi(argv[2]) != 0)) {
         srand(atoi(argv[2]));
     }
+
     // if they did not, seed the random-number generator with the process id
     else {
         srand(getpid());
     }
 
     // create a new game first
-
     game_t* game = new_game(map_file, MaxPlayers);
     load_gold(game, GoldTotal, GoldMinNumPiles, GoldMaxNumPiles);
 
+    // start logging
+    FILE* fp = fopen("server.log", "w");
+    flog_init(fp);
 
     // start up message module
     message_init(stderr);
@@ -85,10 +105,21 @@ main(const int argc, char* argv[])
     // close the file
     fclose(map_file);
 
+    // stop logging
+    flog_done(fp);
+    fclose(fp);
     return(0);
 }
 
-// lots of error proofing needed
+/**
+ * @brief 
+ * 
+ * @param arg 
+ * @param from 
+ * @param message 
+ * @return true 
+ * @return false 
+ */
 bool
 handleMessage(void* arg, const addr_t from, const char* message)
 {
@@ -99,9 +130,11 @@ handleMessage(void* arg, const addr_t from, const char* message)
         mem_free(request);
         if (game->playersJoined < MaxPlayers){
 
-            // put this into helper
             char* name = extract_playerName(message, from); 
             if (name == NULL){
+                FILE* fp = fopen("server.log", "w");
+                flog_v(fp, "player name was null");
+                fclose(fp);
                 return false;
             }
 
@@ -112,14 +145,12 @@ handleMessage(void* arg, const addr_t from, const char* message)
             sprintf(response, "OK %c", player->id);
 
             message_send(from, response);
-            mem_free(response); // is this losing the string for whoever receives message?????
-
-            // update displays
-            update_displays(game);
+            mem_free(response); 
 
             // send new client messages: grid, gold, display
             inform_newClient(player, game);
 
+            update_displays(game);
 
         }
         else {
@@ -143,23 +174,50 @@ handleMessage(void* arg, const addr_t from, const char* message)
     else if (strcmp(request, "KEY") == 0){
         mem_free(request);
 
+        if (strlen(message) != 5 || !isalpha(message[4])){
+            FILE* fp = fopen("server.log", "w");
+            flog_e(fp, "message was malformed");
+            fclose(fp);
+        }
+
         client_t* player = find_client(from, game);
 
         // returns true when all gold is found
-        if (message[4] == 'q'){
+        if (tolower(message[4]) == 'q'){
             handle_quit(player, game);
         }
-        else if (handle_movement(player, message[4], game)){
-            return true; // causes message loop to end
+        else{
+            int movementCode = handle_movement(player, message[4], game);
+            // signifies all gold was found
+            if (movementCode == 2){
+                return true; // causes message loop to end
+            }
+            // if we were able to move and the the key was uppercase
+            else if (movementCode != 1 && isupper(message[4])){
+                // keep moving while possible
+                while (movementCode == 0){
+                    movementCode = handle_movement(player, message[4], game);
+                }
+            }
+            if (movementCode == 2){ // handles edge case of shift moving into the last gold
+                return true; // causes message loop to end
+            }
         }
-        
     }
-
+    else{
+        // log error and move on
+        FILE* fp = fopen("server.log", "w");
+        flog_e(fp, "message was malformed");
+        fclose(fp);
+    }
     return false;
-
-
 }
 
+/**
+ * @brief 
+ * 
+ * @param game 
+ */
 void
 update_displays(game_t* game)
 {
@@ -172,16 +230,19 @@ update_displays(game_t* game)
         client_t* player = game->clients[i];
 
         if (player != NULL){
-            if (true){
-                // get_player_visible(game, player);
-                printf("test\n");
+            if (get_player_visible(game, player)){
                 send_displayMsg(game, player);
             }
         }
     }
 }
 
-
+/**
+ * @brief 
+ * 
+ * @param client 
+ * @param game 
+ */
 void
 inform_newClient(client_t* client, game_t* game)
 {
@@ -201,6 +262,13 @@ inform_newClient(client_t* client, game_t* game)
 
 }
 
+/**
+ * @brief 
+ * 
+ * @param game 
+ * @param client 
+ * @param goldPickedUp 
+ */
 void
 send_goldMsg(game_t* game, client_t* client, int goldPickedUp)
 {
@@ -212,6 +280,12 @@ send_goldMsg(game_t* game, client_t* client, int goldPickedUp)
 
 }
 
+/**
+ * @brief 
+ * 
+ * @param game 
+ * @param client 
+ */
 void
 send_displayMsg(game_t* game, client_t* client)
 {
@@ -236,6 +310,13 @@ send_displayMsg(game_t* game, client_t* client)
 
 }
 
+/**
+ * @brief 
+ * 
+ * @param message 
+ * @param clientAddr 
+ * @return char* 
+ */
 char*
 extract_playerName(const char* message, addr_t clientAddr)
 {
@@ -252,6 +333,7 @@ extract_playerName(const char* message, addr_t clientAddr)
         else if (reachedNameStart && !isspace(message[i]) && emptyName){
             emptyName = false;
         }
+
         if (reachedNameStart){
             if (curr_nameLength < MaxNameLength){
                 if(!isgraph(message[i]) && !isblank(message[i])){
@@ -267,7 +349,7 @@ extract_playerName(const char* message, addr_t clientAddr)
             }
         }
     }
-    name[MaxNameLength] = '\0';
+    name[curr_nameLength] = '\0';
     
     if(emptyName){
         send_quitMsg(clientAddr, 3, false);
@@ -278,6 +360,12 @@ extract_playerName(const char* message, addr_t clientAddr)
     return name;
 }
 
+/**
+ * @brief 
+ * 
+ * @param input 
+ * @return char* 
+ */
 char* 
 extractRequest(const char* input) 
 {
@@ -313,6 +401,12 @@ extractRequest(const char* input)
     return firstWord;
 }
 
+/**
+ * @brief 
+ * 
+ * @param player 
+ * @param game 
+ */
 void 
 handle_quit(client_t* player, game_t* game)
 {
@@ -334,15 +428,14 @@ handle_quit(client_t* player, game_t* game)
 }
 
 // make return false when game over
-bool
+int
 handle_movement(client_t* player, char key, game_t* game)
 {
 
     int newPos_r = player->r;
     int newPos_c = player->c;
 
-
-    switch (key) {
+    switch (tolower(key)) {
         // update new Pos based on the key inputted
         case 'h': newPos_c--; break;
         case 'l': newPos_c++; break;
@@ -352,14 +445,13 @@ handle_movement(client_t* player, char key, game_t* game)
         case 'u': newPos_c++; newPos_r--; break;
         case 'b': newPos_c--; newPos_r++; break;
         case 'n': newPos_c++; newPos_r++; break;
-        default: return false;
-
+        default: return 1;
     }
 
     char grid_val = get_grid_value(game, newPos_r, newPos_c);
 
     if (grid_val == '+' || grid_val == '-' || grid_val == '|' || grid_val == ' '){
-        return false;
+        return 1; // code meaning unable to move
     }
     else if (grid_val == '.' || grid_val == '#'){
         // change the spot the player came from back
@@ -404,8 +496,6 @@ handle_movement(client_t* player, char key, game_t* game)
                 send_goldMsg(game, (game->clients)[i], 0);
             }
         }
-
-        // update the grids
                 
         // change the spot the player came from back
         update_previous_spot(player, game, grid_val);
@@ -417,21 +507,24 @@ handle_movement(client_t* player, char key, game_t* game)
         update_position(player, newPos_r, newPos_c);
 
         if (game->goldRemaining == 0){
-            quit_all(game, MaxPlayers);
-            return true;
+            send_gameOverMsg(game, MaxNameLength);
+            // quit_all(game, MaxPlayers);
+            return 2; // code meaning game over
         }
 
     }
-
     // call update function
     update_displays(game);
-    return false;
-
-   
+    return 0; // code meaning sucessful move 
 }
 
-void
-quit_all(game_t* game, int maxPlayers)
+/**
+ * @brief 
+ * 
+ * @param game 
+ * @param maxPlayers 
+ */
+void quit_all(game_t* game, int maxPlayers)
 {
     for (int i = 0; i < maxPlayers + 1; i++){
         client_t* client = game->clients[i];
@@ -443,8 +536,13 @@ quit_all(game_t* game, int maxPlayers)
 }
 
 
-// loop over clients, update their grid, check if it changed, send message if so
-
+/**
+ * @brief 
+ * 
+ * @param player 
+ * @param game 
+ * @param grid_val 
+ */
 static void
 update_previous_spot(client_t* player, game_t* game, char grid_val)
 {
@@ -458,7 +556,13 @@ update_previous_spot(client_t* player, game_t* game, char grid_val)
     player->onTunnel = (grid_val == '#');
 }
 
-
+/**
+ * @brief 
+ * 
+ * @param clientAddr 
+ * @param quitCode 
+ * @param isSpectator 
+ */
 void
 send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator)
 {
@@ -490,5 +594,42 @@ send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator)
     message_send(clientAddr, quitMsg);
     mem_free(quitMsg);
     mem_free(quitReason);
+
+}
+
+/**
+ * @brief 
+ * 
+ * @param game 
+ * @param maxNameLength 
+ */
+void
+send_gameOverMsg(game_t* game, int maxNameLength)
+{
+    char* message = mem_malloc_assert(16+ ((maxNameLength + 14) * game->playersJoined), "Error allocating memory in send_gameOverMsg.\n");
+    strcpy(message, "QUIT GAME OVER:");
+
+    for (int i = 1; i < game->playersJoined + 1; i++){
+        client_t* player = game->clients[i];
+        if (player != NULL){
+            char* playerStr = mem_malloc_assert(strlen(player->real_name) + 14, "Error allocating memory in send_gameOverMsg.\n");
+            sprintf(playerStr, "\n%c       %3d %s", player->id, player->gold, player->real_name);
+            strcat(message, playerStr);
+            mem_free(playerStr);
+        }
+    }    
+
+    // Add the null terminator at the end of the message string
+    int messageLength = strlen(message);
+    message[messageLength] = '\0';
+
+    for (int i = 0; i < game->playersJoined + 1; i++){
+        client_t* client = game->clients[i];
+        if (client != NULL){
+            message_send(client->clientAddr, message);
+        }
+    }
+
+    mem_free(message);
 
 }

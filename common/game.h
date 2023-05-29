@@ -1,7 +1,6 @@
 /* 
 * game.h - header for module handling game and client methods
-*
-* TODO: add details here
+* includes functions to modify the overall status of the game, as well as locate entities within the game
 *
 * Team 9: Plankton, May 2023
 */
@@ -25,13 +24,10 @@
 #include "grid.h"
 
 
-// typedef struct gold_location gold_location_t;
-// typedef struct client client_t;
-// typedef struct game game_t;
-
 /**************** Functions ****************/
 
 // TODO: add description for each function
+
 
 client_t* new_player(game_t* game, addr_t client, char* name);
 void update_position(client_t* player, int r, int c);

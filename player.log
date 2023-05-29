@@ -1,10 +1,42 @@
 START OF LOG
-client on port 60167
+client on port 43401
 interactive player mode; name 'n'
-OK message received: OK A
-GRID message received: GRID 21 79
+OK message received: OK B
+GRID message received: GRID 5 14
 displayStart
-wRows = 8
+wRows = 18
 wCols = 166
 GOLD message received: GOLD 0 0 250
 DISPLAY message received
+GOLD message received: GOLD 21 GOLD meDISPLAY message received
+GOLD message received: GOLD 3GOLD mes
+DISPLAY message received
+GOLD message received: GOLD 27 78 172
+DISPLAY message received
+GOLD message received: GOGOLD messageDISPLAY message received
+DISPLAY message received
+DISPLAY message received
+GOLD message received: GGOLD message DISPLAY message received
+GOLD message received: GOLD 6 97 153
+DISPLAY message received
+DISPLAY message received
+GOLD message received:GOLD message receDISPLAY message received
+GOLD message receivGOLD message receiveDISPLAY message received
+GOLD message received: GOLD 19 150 100
+DISPLAY message received
+GOLD message received: GOLD 7 157 93
+DISPLAY message received
+GOLD messagGOLD message received: GOLDDISPLAY message received
+GOLD mesGOLD message received: GOLD 0 DISPLAY message received
+DISPLAY message received
+GOLD GOLD message received: GOLD 0 0 DISPLAY message received
+GOLGOLD message received: GOLD 0 0 36
+DISPLAY message received
+DISPLAY message received
+GOLD message received: GOLD 0 0 30
+DIDISPLAY message receiveDIDISPLAY message receiveDIDISPLAY message receiveDIDISPLAY message receiveGOLD message received: GOLD 0 0 22
+DISPDISPLAY message receiDISPDISPLAY message rece
+GOLDGOLD message received: GOLD 0 22QUITQUIT message received: QUIT GAME OVER:
+A        22 jackson
+B       228 n
+END OF LOG
