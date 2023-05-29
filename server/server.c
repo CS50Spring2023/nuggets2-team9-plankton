@@ -1,7 +1,7 @@
 /*
 server.c 
 server module for nuggets game: handles overall game logic and all communication with client
-usage: ./server 2>server.log map.txt
+usage: ./server map.txt
 
 Team 9: Plankton, May 2023
 */
