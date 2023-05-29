@@ -33,8 +33,9 @@ All data structures are defined within the [Game](#game-module) module section.
 
 > For each function in server, here is a brief description and its function prototype.
 
-Handles messages to `PLAY`, `SPECTATE`, or a specific `KEY` sent by a client. The function calls `inform_newClient` to allow new players to join the game if the maximum amount of player has not been reached, to ensure the most recent spectator is observing the game, and calls `handle_movement` for any key press.
 ```c
+Handles messages to `PLAY`, `SPECTATE`, or a specific `KEY` sent by a client. The function calls `inform_newClient` to allow new players to join the game if the maximum amount of player has not been reached, to ensure the most recent spectator is observing the game, and calls `handle_movement` for any key press.
+
 bool handleMessage(void* arg, const addr_t from, const char* message);
 ```
 
