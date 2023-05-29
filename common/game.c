@@ -1,9 +1,10 @@
 /*
-game.c 
-module handling game and client methods
-includes functions to modify the overall status of the game, as well as locate entities within the game
-Team 9: Plankton, May 2023
-*/
+ * game.c 
+ * module handling game and client methods
+ * includes functions to modify the overall status of the game, as well as locate entities within the game
+ * specific function descriptions are located in game.h
+ * Team 9: Plankton, May 2023
+ */
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -14,15 +15,14 @@ Team 9: Plankton, May 2023
 #include "../libs/file.h"
 #include "../libs/mem.h"
 
-
 #include "structs.h"
 #include "game.h"
 #include "grid.h"
 
+/**************** new_player ****************/
 client_t*
 new_player(game_t* game, addr_t client, char* name)
 {
-
     // allocate memory for a new client, of type player
     client_t* player = mem_malloc_assert(sizeof(client_t), "Error allocating memory in new_player.\n");
     char* alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -50,7 +50,7 @@ new_player(game_t* game, addr_t client, char* name)
     return player;
 }
 
-
+/**************** update_position ****************/
 void
 update_position(client_t* player, int r, int c)
 {
@@ -59,7 +59,7 @@ update_position(client_t* player, int r, int c)
     player->c = c;
 }
 
-// add find client
+/**************** find_client ****************/
 client_t*
 find_client(addr_t clientAddr, game_t* game)
 {
@@ -75,11 +75,11 @@ find_client(addr_t clientAddr, game_t* game)
     return NULL;
 }
 
-// only for finding a player
+/**************** find_ player ****************/
 client_t*
 find_player(char id, game_t* game)
 {
-    // find the player with the passed ID
+    // find the player with the passed in ID
     for (int i = 1; i < game->playersJoined + 1; i++){
         if ((game->clients)[i] != NULL){
             if (((game->clients)[i])->id == id){
@@ -91,7 +91,7 @@ find_player(char id, game_t* game)
     return NULL;
 }
 
-
+/**************** new_spectator ****************/
 client_t*
 new_spectator(game_t* game, const addr_t client)
 {
@@ -114,6 +114,7 @@ new_spectator(game_t* game, const addr_t client)
     return spectator;
 }
 
+/**************** delete_client ****************/
 void
 delete_client(client_t* client, game_t* game)
 {
@@ -134,6 +135,7 @@ delete_client(client_t* client, game_t* game)
     mem_free(client);
 }
 
+/**************** new_game ****************/
 game_t*
 new_game(FILE* map_file, const int maxPlayers)
 {
@@ -158,6 +160,7 @@ new_game(FILE* map_file, const int maxPlayers)
     return new_game;
 }
 
+/**************** end_game ****************/
 void
 end_game(game_t* game, int maxGoldPiles)
 {
@@ -192,6 +195,7 @@ end_game(game_t* game, int maxGoldPiles)
     mem_free(game);
 }
 
+/**************** update_gold ****************/
 int
 update_gold(game_t* game, client_t* player, int r, int c, int goldMaxPiles)
 {
@@ -216,6 +220,7 @@ update_gold(game_t* game, client_t* player, int r, int c, int goldMaxPiles)
     return -1;
 }
 
+/**************** load_gold ****************/
 void
 load_gold(game_t* game, const int goldTotal, const int goldMinPiles, const int goldMaxPiles)
 {
@@ -245,6 +250,7 @@ load_gold(game_t* game, const int goldTotal, const int goldMinPiles, const int g
     mem_free(nugget_counts);   
 }
 
+/**************** add_gold_pile ****************/
 void 
 add_gold_pile(game_t* game, int gold_amt, int piles)
 {
@@ -260,6 +266,7 @@ add_gold_pile(game_t* game, int gold_amt, int piles)
     (game->locations)[piles] = gold_spot;
 }
 
+/**************** nugget_count_array ****************/
 int*
 nugget_count_array(const int goldMinPiles, const int goldMaxPiles, int goldTotal)
 {
@@ -276,26 +283,26 @@ nugget_count_array(const int goldMinPiles, const int goldMaxPiles, int goldTotal
         while (piles < goldMaxPiles && total_gold_added < goldTotal){
             // generate a pseudo-random number between the upper and lower bound that represents the amount of gold that will be assigned to this pile
             gold_amt = (rand() % (upper_bound - lower_bound + 1)) + lower_bound;
-
+            // if this + the gold already added would be greater than the allowed total, or we have reached the max # of gold piles
             if (gold_amt + total_gold_added > goldTotal || piles == goldMaxPiles - 1){
+                // make the amount the max that can be added
                 gold_amt = goldTotal - total_gold_added;
             }
-            
+            // add the gold amount to the array, and to the total amount of gold added
             arr[piles] = gold_amt;
             total_gold_added += gold_amt;
-
             piles++;
         }
-
+        // if this is greater or equal to the minimum # of gold piles
         if(piles >= goldMinPiles){
+            // and less than the max number of piles -1
             if (piles < goldMaxPiles - 1){
+                // set this index of the array to -1
                 arr[piles] = -1;
             }
             return arr;
         }
-
         mem_free(arr);
     }
-
 }
 
