@@ -33,7 +33,6 @@ char** load_grid(FILE* fp, int* rowp, int* columnp);
 
 char** load_player_grid(game_t* game);
 
-
 /*
 * grid_toStr: converts a grid to a string that can be sent to and displayed by the player
 * Takes in a char** global_grid and optionally a char** player_grid (which can be null) as well as the number of rows and columns in the grid
@@ -41,13 +40,13 @@ char** load_player_grid(game_t* game);
 */
 char* grid_toStr(char** global_grid, char** player_grid, int rows, int columns);
 
-
 /*
 * assign_random_spot: 
 * Takes in a char** global_grid, number of rows, number of columns, a "thing" to be placed, as well as x and y ptrs to be filled
 */
 void assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, int* spot_y);
 
+char get_grid_value(game_t* game, int r, int c);
 
 /*
 * update_player_grid: 
@@ -55,13 +54,13 @@ void assign_random_spot(char** grid, int rows, int columns, char thing, int* spo
 */
 void update_player_grid(char** player_grid, game_t* game, int pr, int pc);
 
+void change_spot(game_t* game, int r, int c, char symbol);
 
 /*
 * update_grids: 
 * loops through all clients and updates their grids
 */
 void update_grids(char** global_grid, game_t* game);
-
 
 /*
 * get_symbol: takes in a grid object, x value, y value, number of rows, number of columns
@@ -70,15 +69,21 @@ void update_grids(char** global_grid, game_t* game);
 */
 char get_grid_value(game_t* game, int x, int y);
 
-
 /*
 * change_spot: takes in grid, number of rows and columns, coordinate values, and a symbol
 * changes whatever is at that spot to the new symbol
 */
 void change_spot(game_t* game, int x, int y, char symbol);
 
+/*
+* is_visible: takes in grid, player column, player row, spot column, spot row
+* computes whether a spot is visible, based on where the player is
+*/
 bool is_visible(game_t* game, const int playerColumn, const int playerRow, const int column, const int row);
 
+/*
+* get_player_visible: loops over every position in the grid and calls "is_visible", changes what is stored at each grid point accordingly
+*/
 bool get_player_visible(game_t* game, client_t* player);
 
 void grid_delete(char** grid, int rows);

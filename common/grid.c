@@ -1,7 +1,7 @@
 /*
 grid.c 
 module for handling the global and player grids
-
+specific function descriptions are located in grid.h
 Team 9: Plankton, May 2023
 */
 
@@ -23,13 +23,27 @@ Team 9: Plankton, May 2023
 #include "game.h"
 #include "grid.h"
 
-
-/**************** functions: grid as a 2D array  ****************/
+/**************** static function declarations  ****************/
 
 /*
-* load_grid: takes in a FILE* fp to a map file which is assumed to be valid
-* Reads the file into an array of strings, each string in the array represents a row of the map
+* is_open: takes in game, column, and row, and returns true if the spot is one where a player can move to
 */
+static bool is_open(game_t* game, const int c, const int r);
+
+/*
+* is_integer: takes in a value, determines whether it's an integer, returns boolean
+*/
+static bool is_integer(float num);
+
+/*
+* is_gridspot: takes in two doubles, returns true if they're both ints (otherwise, need to check top and bottom)
+*/
+static bool 
+is_gridspot(double a, double b)
+
+
+/**************** local function declarations  ****************/
+/**************** load_grid  ****************/
 char** 
 load_grid(FILE* fp, int* rows, int* columns)
 {
@@ -60,6 +74,7 @@ load_grid(FILE* fp, int* rows, int* columns)
     return grid;
 }
 
+/**************** load_player_grid  ****************/
 char**
 load_player_grid(game_t* game)
 {
@@ -85,13 +100,7 @@ load_player_grid(game_t* game)
     return grid;
 }
 
-
-
-/*
-* grid_toStr: converts a grid to a string that can be sent to and displayed by the client
-* Takes in a char** global_grid and optionally a char** player_grid (which can be null) as well as the number of rows and columns in the grid
-* If a player_grid is NULL the output string will just be the global_grid
-*/
+/**************** grid_toStr  ****************/
 char*
 grid_toStr(char** global_grid, char** player_grid, int rows, int columns)
 {
@@ -119,10 +128,7 @@ grid_toStr(char** global_grid, char** player_grid, int rows, int columns)
    return display;
 }
 
-/*
-* assign_random_spot: assigns a "thing" to a random place on the grid where it's allowed
-* Takes in a char** global_grid, number of rows, number of columns, a "thing" to be placed, as well as x and y pointers to be filled
-*/
+/**************** assign_random_spot  ****************/
 void
 assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_r, int* spot_c)
 {
@@ -145,7 +151,6 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_r, 
         if (value == '.'){
 
             grid[r][c] = thing;
-
             placed = true;
 
             // assign spot x and y
@@ -157,12 +162,7 @@ assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_r, 
 }
 
 
-
-/*
-* get_grid_value: takes in a grid object, x value, y value, number of rows, number of columns
-* outputs whatever symbol is at that point in the grid
-*
-*/
+/**************** get_grid_value  ****************/
 char 
 get_grid_value(game_t* game, int r, int c)
 {
@@ -170,23 +170,16 @@ get_grid_value(game_t* game, int r, int c)
 }
 
 
-/*
-* change_spot: takes in grid, coordinate values, and a symbol
-* changes whatever is at that spot to the new symbol
-*/
+/**************** change_spot  ****************/
 void 
 change_spot(game_t* game, int r, int c, char symbol)
 {
     game->grid[r][c] = symbol;
 }
 
-/**************** NEW VISIBILITY FUNCTIONS ****************/
-
-/*
-* isOpen: takes in game, column, and row, and returns true if the spot is one where a player can move to
-*/
+/**************** is_open ****************/
 static bool 
-isOpen(game_t* game, const int c, const int r){
+is_open(game_t* game, const int c, const int r){
 
     if (game == NULL) {
         fprintf(stderr, "game pointer was null\n");
@@ -204,29 +197,21 @@ isOpen(game_t* game, const int c, const int r){
     return false;
 }
 
-/*
-* is_integer: takes in a value, determines whether it's an integer, returns boolean
-*/
-bool static 
-is_integer(float num)
+/**************** is_integer ****************/
+static bool is_integer(float num)
 {
     int convertedNum = (int)num;
     return (convertedNum == num);
 }
 
-/*
-* is_gridspot: takes in two doubles, returns true if they're both ints (otherwise, need to check top and bottom)
-*/
+/**************** is_gridspot ****************/
 static bool 
 is_gridspot(double a, double b)
 {
     return (is_integer(a) && is_integer(b));
 }
 
-/*
-* isVisible: takes in grid, player column, player row, spot column, spot row
-* computes whether a spot is visible, based on where the player is
-*/
+/**************** is_visible ****************/
 bool 
 is_visible(game_t* game, const int playerColumn, const int playerRow, const int column, const int row) 
 {
@@ -321,12 +306,12 @@ is_visible(game_t* game, const int playerColumn, const int playerRow, const int 
         }
         // check if what's located at this y value is 
         if (is_gridspot(columnStart, newY)) {
-            if (!isOpen(game, columnStart, newY)) {
+            if (!is_open(game, columnStart, newY)) {
                 return false;
             }
         } else {
             // if not a grid point, check the top and bottom
-            if (!(isOpen(game, columnStart, floor(newY)) || isOpen(game, columnStart, ceil(newY)))) {
+            if (!(is_open(game, columnStart, floor(newY)) || is_open(game, columnStart, ceil(newY)))) {
                 return false;
             }
         }
@@ -346,13 +331,13 @@ is_visible(game_t* game, const int playerColumn, const int playerRow, const int 
        
         if ((is_gridspot(newX, rowStart))){
             // if it's not an "open" point, then return false
-            if (!isOpen(game, newX, rowStart)) {
+            if (!is_open(game, newX, rowStart)) {
                 return false;
             }
         }
         else {
             // if both points are not ints, check the top and bottom for obstructions-- if both are not open, then there is an obstruction
-            if (!(isOpen(game, floor(newX), rowStart) || isOpen(game, ceil(newX), rowStart))) {
+            if (!(is_open(game, floor(newX), rowStart) || is_open(game, ceil(newX), rowStart))) {
                 return false;
             }
         }
@@ -361,9 +346,7 @@ is_visible(game_t* game, const int playerColumn, const int playerRow, const int 
     return true;
 }
 
-/*
-* get_player_visible: loops over every position in the grid and calls "is_visible", changes what is stored at each grid point accordingly
-*/
+/**************** get_player_visible ****************/
 bool 
 get_player_visible(game_t* game, client_t* player)
 {
@@ -414,8 +397,7 @@ get_player_visible(game_t* game, client_t* player)
     return modified;                                                                                                                                                                             
 }
 
-
-
+/**************** grid_delete ****************/
 void
 grid_delete(char** grid, int rows)
 {

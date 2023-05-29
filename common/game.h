@@ -28,6 +28,7 @@
 
 // TODO: add description for each function
 
+
 client_t* new_player(game_t* game, addr_t client, char* name);
 void update_position(client_t* player, int r, int c);
 client_t* find_client(addr_t clientAddr, game_t* game);
