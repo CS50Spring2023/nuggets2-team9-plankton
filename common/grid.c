@@ -38,8 +38,7 @@ static bool is_integer(float num);
 /*
 * is_gridspot: takes in two doubles, returns true if they're both ints (otherwise, need to check top and bottom)
 */
-static bool 
-is_gridspot(double a, double b)
+static bool is_gridspot(double a, double b);
 
 
 /**************** local function declarations  ****************/
@@ -311,8 +310,11 @@ is_visible(game_t* game, const int playerColumn, const int playerRow, const int 
             }
         } else {
             // if not a grid point, check the top and bottom
-
             if (!(is_open(game, columnStart, floor(newY)) || is_open(game, columnStart, ceil(newY)))) {
+                return false;
+            }
+        }
+    }
 
     for (; rowStart < rowEnd; rowStart++) {
         double newX;
@@ -340,9 +342,8 @@ is_visible(game_t* game, const int playerColumn, const int playerRow, const int 
         }
     }
     // spot is visible
-    return true;
+    return true; 
 }
-
 /**************** get_player_visible ****************/
 bool 
 get_player_visible(game_t* game, client_t* player)

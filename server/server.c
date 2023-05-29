@@ -133,7 +133,7 @@ handleMessage(void* arg, const addr_t from, const char* message)
             char* name = extract_playerName(message, from); 
             if (name == NULL){
                 FILE* fp = fopen("server.log", "w");
-                flog_v(fp, "player name was null");
+                flog_v(fp, "player name was invalid");
                 fclose(fp);
                 return false;
             }
