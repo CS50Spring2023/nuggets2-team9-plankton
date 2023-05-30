@@ -485,6 +485,14 @@ handle_movement(client_t* player, char key, game_t* game)
     }
     else if (grid_val == '*'){
         int nuggetsFound = update_gold(game, player, newPos_r, newPos_c, GoldMaxNumPiles);
+
+        if (nuggetsFound < 0){
+            // attempted to access a spot that wasn't a gold location
+            FILE* fp = fopen("server.log", "w");
+            flog_e(fp, "tried to access a spot that wasn't a gold location.");
+            fclose(fp);
+            return 0;
+        }
         
         // update the client that just picked up gold
         printf("%d\n", nuggetsFound);

@@ -207,7 +207,7 @@ update_gold(game_t* game, client_t* player, int r, int c, int goldMaxPiles)
         gold_location_t* location = game->locations[i];
 
         if (location->nuggetCount < 0){
-            exit(1);    // error, reached the end of the gold piles without finding pile
+            break; // there is no such gold location if this condition is reached
         }
 
         // if the pile matches the row and column that was passed in
@@ -220,7 +220,7 @@ update_gold(game_t* game, client_t* player, int r, int c, int goldMaxPiles)
             return location->nuggetCount;
         }
     }
-    return -1;
+    return -1; // error meaning no such gold location exists
 }
 
 /**************** load_gold ****************/
