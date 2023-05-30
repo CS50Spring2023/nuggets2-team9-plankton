@@ -1,8 +1,7 @@
 /*
-grid.c 
-TODO: add details here
-
-Team 9: Plankton, May 2023
+* grid.c - - header for module handling grid related methods
+* includes functions to load initial grids, update global and local grids, display them, and delete them
+* Team 9: Plankton, May 2023
 */
 
 #ifndef __GRID_H_
@@ -26,66 +25,111 @@ Team 9: Plankton, May 2023
 
 
 /*
-* load_grid: takes in a FILE* fp to a map file which is assumed to be valid
-* Reads the file into an array of strings, each string in the array represents a row of the map
-*/
-char** load_grid(FILE* fp);
+ * load_grid
+ * Loads the game grid from a file.
+ * Inputs:
+ *   - fp: Pointer to the file containing the grid.
+ *   - rows: Pointer to the variable that will store the number of rows in the grid.
+ *   - columns: Pointer to the variable that will store the number of columns in the grid.
+ * Outputs:
+ *   - Returns a dynamically allocated 2D array representing the game grid.
+ */
+char** load_grid(FILE* fp, int* rows, int* columns);
 
+/*
+ * load_player_grid
+ * Loads the player's grid based on the game state.
+ * Inputs:
+ *   - game: Pointer to the game state structure.
+ * Outputs:
+ *   - Returns a dynamically allocated 2D array representing the player's grid.
+ */
 char** load_player_grid(game_t* game);
 
 /*
-* grid_toStr: converts a grid to a string that can be sent to and displayed by the player
-* Takes in a char** global_grid and optionally a char** player_grid (which can be null) as well as the number of rows and columns in the grid
-* If a player_grid is NULL the output string will just be the global_grid
-*/
+ * grid_toStr
+ * Converts the game grids to a string representation.
+ * Inputs:
+ *   - global_grid: Pointer to the global grid array.
+ *   - player_grid: Pointer to the player's grid array.
+ *   - rows: Number of rows in the grids.
+ *   - columns: Number of columns in the grids.
+ * Outputs:
+ *   - Returns a dynamically allocated string representing the grids.
+ */
 char* grid_toStr(char** global_grid, char** player_grid, int rows, int columns);
 
 /*
-* assign_random_spot: 
-* Takes in a char** global_grid, number of rows, number of columns, a "thing" to be placed, as well as x and y ptrs to be filled
-*/
-void assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_x, int* spot_y);
+ * assign_random_spot
+ * Assigns a random spot in the grid for a given thing.
+ * Inputs:
+ *   - grid: Pointer to the game grid array.
+ *   - rows: Number of rows in the grid.
+ *   - columns: Number of columns in the grid.
+ *   - thing: Character representing the thing to assign.
+ *   - spot_r: Pointer to the variable that will store the assigned row.
+ *   - spot_c: Pointer to the variable that will store the assigned column.
+ * Outputs: None
+ */
+void assign_random_spot(char** grid, int rows, int columns, char thing, int* spot_r, int* spot_c);
 
+/*
+ * get_grid_value
+ * Retrieves the value at a specific position in the game grid.
+ * Inputs:
+ *   - game: Pointer to the game state structure.
+ *   - r: Row index in the grid.
+ *   - c: Column index in the grid.
+ * Outputs:
+ *   - Returns the value at the specified position in the grid.
+ */
 char get_grid_value(game_t* game, int r, int c);
 
 /*
-* update_player_grid: 
-* Takes in a char** player_grid, char** global_grid, int representing player rows, and int representing player columns
-*/
-void update_player_grid(char** player_grid, game_t* game, int pr, int pc);
-
+ * change_spot
+ * Changes the value at a specific position in the game grid.
+ * Inputs:
+ *   - game: Pointer to the game state structure.
+ *   - r: Row index in the grid.
+ *   - c: Column index in the grid.
+ *   - symbol: Character representing the new value to assign.
+ * Outputs: None
+ */
 void change_spot(game_t* game, int r, int c, char symbol);
 
 /*
-* update_grids: 
-* loops through all clients and updates their grids
-*/
-void update_grids(char** global_grid, game_t* game);
-
-/*
-* get_symbol: takes in a grid object, x value, y value, number of rows, number of columns
-* outputs whatever symbol is at that point in the grid
-*
-*/
-char get_grid_value(game_t* game, int x, int y);
-
-/*
-* change_spot: takes in grid, number of rows and columns, coordinate values, and a symbol
-* changes whatever is at that spot to the new symbol
-*/
-void change_spot(game_t* game, int x, int y, char symbol);
-
-/*
-* is_visible: takes in grid, player column, player row, spot column, spot row
-* computes whether a spot is visible, based on where the player is
-*/
+ * is_visible
+ * Checks if a position in the grid is visible to the player.
+ * Inputs:
+ *   - game: Pointer to the game state structure.
+ *   - playerColumn: Column index of the player's position.
+ *   - playerRow: Row index of the player's position.
+ *   - column: Column index of the position to check.
+ *   - row: Row index of the position to check.
+ * Outputs:
+ *   - Returns true if the position is visible to the player, false otherwise.
+ */
 bool is_visible(game_t* game, const int playerColumn, const int playerRow, const int column, const int row);
 
 /*
-* get_player_visible: loops over every position in the grid and calls "is_visible", changes what is stored at each grid point accordingly
-*/
+ * get_player_visible
+ * Retrieves the visibility status of a player.
+ * Inputs:
+ *   - game: Pointer to the game state structure.
+ *   - player: Pointer to the player structure.
+ * Outputs:
+ *   - Returns true if the player is visible, false otherwise.
+ */
 bool get_player_visible(game_t* game, client_t* player);
 
+/*
+ * grid_delete
+ * Deallocates the memory occupied by the game grid.
+ * Inputs:
+ *   - grid: Pointer to the game grid array.
+ *   - rows: Number of rows in the grid.
+ * Outputs: None
+ */
 void grid_delete(char** grid, int rows);
 
 

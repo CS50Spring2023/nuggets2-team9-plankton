@@ -68,7 +68,7 @@ Called by `handleMessage` to handle each request, or message, of a client playin
 char* extractRequest(const char* input);
 ```
 
-Called by `handleMessage` to handle the movement of a player whenever they press `Q` for quitting or a key for moving within the grid. When moving, the function updates a player's position, visibility, and handles the cases when a player steps on gold or another player.
+Called by `handleMessage` to handle the action of a player whenever they press `Q` for quitting or a key for moving within the grid. When moving, the function updates a player's position, visibility, and handles the cases when a player steps on gold or another player.
 ```c
 void handle_movement(client_t* player, char key, game_t* game);
 ```

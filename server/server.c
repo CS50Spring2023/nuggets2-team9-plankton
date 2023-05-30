@@ -49,7 +49,7 @@ void send_gameOverMsg(game_t* game, int maxNameLength);
 
 /**************** functions ****************/
 /**
- * @brief 
+ * @brief Parses arguments, and starts up the game.
  * 
  * @param argc 
  * @param argv 
@@ -113,7 +113,7 @@ main(const int argc, char* argv[])
 }
 
 /**
- * @brief 
+ * @brief Handles messages to `PLAY`, `SPECTATE`, or a specific `KEY` sent by a client. The function allows new players to join the game if the maximum amount of player has not been reached, ensures the most recent spectator is observing the game, and calls `handle_movement` for any key press.
  * 
  * @param arg 
  * @param from 
@@ -215,7 +215,7 @@ handleMessage(void* arg, const addr_t from, const char* message)
 }
 
 /**
- * @brief 
+ * @brief Sends a message to all players and the spectator to update their local displays by calling `send_displayMsg`.
  * 
  * @param game 
  */
@@ -239,7 +239,7 @@ update_displays(game_t* game)
 }
 
 /**
- * @brief 
+ * @brief Sends new clients a gold message by calling `send_goldMsg` and a display message by calling `send_displayMsg`.
  * 
  * @param client 
  * @param game 
@@ -264,7 +264,7 @@ inform_newClient(client_t* client, game_t* game)
 }
 
 /**
- * @brief 
+ * @brief Informs players of the amount of gold they pick up, the amount in their purses, and both players and spectators of the amount left in the game.
  * 
  * @param game 
  * @param client 
@@ -282,7 +282,7 @@ send_goldMsg(game_t* game, client_t* client, int goldPickedUp)
 }
 
 /**
- * @brief 
+ * @brief Sends message to update a client's local display.
  * 
  * @param game 
  * @param client 
@@ -312,7 +312,7 @@ send_displayMsg(game_t* game, client_t* client)
 }
 
 /**
- * @brief 
+ * @brief Extracts each player's name when they first join the game, storing the string up to a maximum of 50 characters.
  * 
  * @param message 
  * @param clientAddr 
@@ -362,7 +362,7 @@ extract_playerName(const char* message, addr_t clientAddr)
 }
 
 /**
- * @brief 
+ * @brief Called by `handleMessage` to handle each request (message) of a client playing the game.
  * 
  * @param input 
  * @return char* 
@@ -403,7 +403,7 @@ extractRequest(const char* input)
 }
 
 /**
- * @brief 
+ * @brief Sends quitting message and removes a client from the game, updating the displays of remaining clients to reflect changes.
  * 
  * @param player 
  * @param game 
@@ -429,6 +429,13 @@ handle_quit(client_t* player, game_t* game)
 }
 
 // make return false when game over
+/**
+ * @brief Handles the action a player whenever they press `Q` for quitting or a key for moving within the grid. When moving, the function updates a player's position, visibility, and handles the cases when a player steps on gold or another player.
+ * 
+ * @param player
+ * @param key
+ * @param game 
+ */
 int
 handle_movement(client_t* player, char key, game_t* game)
 {
@@ -520,7 +527,7 @@ handle_movement(client_t* player, char key, game_t* game)
 }
 
 /**
- * @brief 
+ * @brief Sends quit messages to all the clients when the game is over.
  * 
  * @param game 
  * @param maxPlayers 
@@ -538,7 +545,7 @@ void quit_all(game_t* game, int maxPlayers)
 
 
 /**
- * @brief 
+ * @brief Updates the previous spot occupies by a player when they move to the next spot.
  * 
  * @param player 
  * @param game 
@@ -558,7 +565,7 @@ update_previous_spot(client_t* player, game_t* game, char grid_val)
 }
 
 /**
- * @brief 
+ * @brief Sends message to client about to quit the game, according to their role (player or spectator) and the reason for quitting.
  * 
  * @param clientAddr 
  * @param quitCode 
@@ -599,7 +606,7 @@ send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator)
 }
 
 /**
- * @brief 
+ * @brief Sends a message to all clients reflecting the leaderboard when the game ends.
  * 
  * @param game 
  * @param maxNameLength 
