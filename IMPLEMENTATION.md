@@ -2,7 +2,7 @@
 ## Implementation Spec
 ### Team 9: Plankton, 23S, 2023
 
-According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server. As a team of 3, we designed and implemented the server program and used a predesigned client for testing.
+According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server. As a team of 3, we designed and implemented the server program and used an already created client for testing.
 Outside of server, our design also includes the `grid` module, which handles the client and global grids, and the `game` module, which handles initializing, updating, and ending the game.
 We describe each program and module separately.
 We do not describe the `support` library nor the modules that enable features that go beyond the spec.
@@ -12,17 +12,17 @@ We avoid repeating information that is provided in the requirements spec.
 
 Andra: design & implementation docs, visibility
 
-Jackson: design doc, server, game module, integration & testing
+Jackson: design doc, overall logic and flow, server module, game module, integration & testing
 
-Sanjana: grid module, visibility, integration & testing
+Sanjana: grid module, overall logic and flow, visibility, integration & testing
 
 ## Data structures
 
-We defined three custom data structures within `structs.h`, which are utilized by the main module, `server`, as well as by the helper modules `grid` and `game`. Since our grid is represented as an array of strings (or a string), we decided a against creating a grid structure to avoid unnecessary complexity.
+We defined three custom data structures within `structs.h`, which are utilized by the main module, `server`, as well as by the helper modules `grid` and `game`. Since our grid is represented as an array of strings (or a 2D array of characters), we decided a against creating a grid structure to avoid unnecessary complexity.
 
-* `gold_location_t` holds coordiantes and gold count for bundles of gold. The `game` module uses it to handle loading gold piles at the beginning of the game and updating them throughout the game.
+* `gold_location_t` holds coordinates and gold count for piles of gold nuggets. The `game` module uses it to handle loading gold piles at the beginning of the game and updates them throughout the game.
 
-* `client_t` holds all necessary information about each client who joins the game, including their address, position, personalized grid, and amount of gold, if they are a player. This structure is heavily utilized by all three modules.
+* `client_t` holds all necessary information about each client who joins the game, including their address, position, personalized grid, and amount of gold, if they are a player or spectator. This structure is heavily utilized by all three modules.
 
 * `game_t` holds all high level information about the game, including the global grid, a list of all the clients, and the amount of gold remaining in the grid. This structure is heavily utilized by all three modules.
 
@@ -32,6 +32,11 @@ We defined three custom data structures within `structs.h`, which are utilized b
 ### Definition of function prototypes
 
 > For each function in server, here is a brief description and its function prototype.
+
+The main function simply parses the command line arguments, generates a random seed, creates a new game, starts logging, continually loops over and handles messages, then ends the game once all the gold has been collected.
+```c
+int main(const int argc, char* argv[]);
+```
 
 Handles messages to `PLAY`, `SPECTATE`, or a specific `KEY` sent by a client. The function calls `inform_newClient` to allow new players to join the game if the maximum amount of player has not been reached, to ensure the most recent spectator is observing the game, and calls `handle_movement` for any key press.
 ```c
@@ -68,9 +73,19 @@ Called by `handleMessage` to handle each request, or message, of a client playin
 char* extractRequest(const char* input);
 ```
 
+Sends quitting message and removes a client from the game, updating the displays of remaining clients to reflect changes.
+```c
+void handle_quit(client_t* player, game_t* game);
+```
+
 Called by `handleMessage` to handle the movement of a player whenever they press `Q` for quitting or a key for moving within the grid. When moving, the function updates a player's position, visibility, and handles the cases when a player steps on gold or another player.
 ```c
 void handle_movement(client_t* player, char key, game_t* game);
+```
+
+Sends quit messages to all the clients when the game is over.
+```c
+void quit_all(game_t* game, int maxPlayers);
 ```
 
 Updates the previous spot occupies by a player when they move to the next spot.
@@ -83,8 +98,26 @@ Sends message to client about to quit the game. Called if a client hits `Q` on t
 void send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator);
 ```
 
+Sends a message to all clients reflecting the leaderboard when the game ends.
+```c
+void send_gameOverMsg(game_t* game, int maxNameLength);
+```
+
 ### Detailed pseudo code
 
+#### `main`:
+
+    parse the command line, open the file
+    if the user provided a valid seed:
+        use it to initialize the random sequence:
+    if they did not:
+        seed the random-number generator with the process id
+    create a new game
+    start logging
+    start up message module
+    close the file
+    stop logging
+    
 #### `handleMessage`:
 
     extract client request
@@ -152,7 +185,12 @@ void send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator);
     otherwise loop through each character until the first space
         add it to request string
     return request string
-
+    
+#### `handle_quit`:
+    given a player
+    send a quit message
+    if the player isn't a spectator
+        reset the spot they were at to '.', or '#' if they were on a tunnel
 
 #### `handle_movement`:
 
@@ -177,7 +215,10 @@ void send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator);
             update global grid to reflect player at new location
             update the player's record of their position
     update displays of affected players
-
+    
+#### `quit_all`:
+    loop through all players
+        if the client struct isn't null, send them a quit message
 
 #### `update_previous_spot`:
 
@@ -194,6 +235,11 @@ void send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator);
     if client is a player
         record the quit reason: the game endeded (the client pressed "q" or the gold was collected) or the player maximum number has been reached
     send quit message with the quit reason
+    
+ #### `send_gameOverMsg`:
+    loop through all players
+        if the client struct isn't null, send a game over message
+        free the memory allocated to the player
 
 ---
 
