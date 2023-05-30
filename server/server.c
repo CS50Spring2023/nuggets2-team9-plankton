@@ -48,7 +48,7 @@ void send_gameOverMsg(game_t* game, int maxNameLength);
 
 /**************** functions ****************/
 /**
- * @brief 
+ * @brief Parses arguments, and starts up the game.
  * 
  * @param argc 
  * @param argv 
@@ -112,11 +112,13 @@ main(const int argc, char* argv[])
 }
 
 /**
- * @brief 
+ * @brief Handles messages to `PLAY`, `SPECTATE`, or a specific `KEY` sent by a client. 
+ * The function allows new players to join the game if the maximum amount of player has not been reached,
+ * ensures the most recent spectator is observing the game, and calls `handle_movement` for any key press.
  * 
- * @param arg 
- * @param from 
- * @param message 
+ * @param arg - the game_t struct holding game information
+ * @param from - the address of the client who sent the message
+ * @param message - the message string sent from the client
  * @return true 
  * @return false 
  */
@@ -214,9 +216,9 @@ handleMessage(void* arg, const addr_t from, const char* message)
 }
 
 /**
- * @brief 
+ * @brief Sends a message to all players and the spectator to update their local displays by calling `send_displayMsg`.
  * 
- * @param game 
+ * @param game - the game_t struct holding game information
  */
 void
 update_displays(game_t* game)
@@ -238,10 +240,10 @@ update_displays(game_t* game)
 }
 
 /**
- * @brief 
+ * @brief - Sends new clients a gold message by calling `send_goldMsg` and a display message by calling `send_displayMsg`.
  * 
- * @param client 
- * @param game 
+ * @param client - the client_t struct holding information about the new client
+ * @param game -the game_t struct holding game information
  */
 void
 inform_newClient(client_t* client, game_t* game)
@@ -263,11 +265,11 @@ inform_newClient(client_t* client, game_t* game)
 }
 
 /**
- * @brief 
+ * @brief Informs players of the amount of gold they pick up, the amount in their purses, and both players and spectators of the amount left in the game.
  * 
- * @param game 
- * @param client 
- * @param goldPickedUp 
+ * @param game - the game_t struct holding game information
+ * @param client - the client_t struct holding information about the new client
+ * @param goldPickedUp - the amount of gold the client just picked up
  */
 void
 send_goldMsg(game_t* game, client_t* client, int goldPickedUp)
@@ -281,10 +283,10 @@ send_goldMsg(game_t* game, client_t* client, int goldPickedUp)
 }
 
 /**
- * @brief 
+ * @brief Sends message to update a client's local display.
  * 
- * @param game 
- * @param client 
+ * @param game - the game_t struct holding game information
+ * @param client - the client_t struct holding information about the new client
  */
 void
 send_displayMsg(game_t* game, client_t* client)
@@ -311,11 +313,11 @@ send_displayMsg(game_t* game, client_t* client)
 }
 
 /**
- * @brief 
+ * @brief Extracts each player's name when they first join the game, storing the string up to a maximum of 50 characters.
  * 
- * @param message 
- * @param clientAddr 
- * @return char* 
+ * @param message - the message string received from a client
+ * @param clientAddr - the client's address
+ * @return char* - the name extracted from the message
  */
 char*
 extract_playerName(const char* message, addr_t clientAddr)
@@ -361,10 +363,10 @@ extract_playerName(const char* message, addr_t clientAddr)
 }
 
 /**
- * @brief 
+ * @brief Called by `handleMessage` to handle each request (message) of a client playing the game.
  * 
- * @param input 
- * @return char* 
+ * @param input - the whole string received from the client
+ * @return char* - the extracted request string sent from the client
  */
 char* 
 extractRequest(const char* input) 
@@ -402,10 +404,10 @@ extractRequest(const char* input)
 }
 
 /**
- * @brief 
+ * @brief Sends quitting message and removes a client from the game, updating the displays of remaining clients to reflect changes.
  * 
- * @param player 
- * @param game 
+ * @param game - the game_t struct holding game information
+ * @param player - the client_t struct holding information about the new client
  */
 void 
 handle_quit(client_t* player, game_t* game)
@@ -427,7 +429,15 @@ handle_quit(client_t* player, game_t* game)
     update_displays(game);
 }
 
-// make return false when game over
+/**
+ * @brief Handles the action a player whenever they press `Q` for quitting or a key for moving within the grid. 
+ * When moving, the function updates a player's position, visibility, and handles the cases when a player steps on gold or another player.
+ * 
+ * @param player- the client_t struct holding information about the new client
+ * @param key - the key entered by the client
+ * @param game - the game_t struct holding game information
+ * @return int - a code representing the result of the move: 0 means success, 1 means unable to move, 2 means game over
+ */
 int
 handle_movement(client_t* player, char key, game_t* game)
 {
@@ -526,10 +536,10 @@ handle_movement(client_t* player, char key, game_t* game)
 }
 
 /**
- * @brief 
+ * @brief Sends quit messages to all the clients when the game is over.
  * 
- * @param game 
- * @param maxPlayers 
+ * @param game - the game_t struct holding game information
+ * @param maxPlayers - the maximum players that can join
  */
 void quit_all(game_t* game, int maxPlayers)
 {
@@ -544,11 +554,11 @@ void quit_all(game_t* game, int maxPlayers)
 
 
 /**
- * @brief 
+ * @brief Updates the previous spot occupies by a player when they move to the next spot.
  * 
- * @param player 
- * @param game 
- * @param grid_val 
+ * @param player- the client_t struct holding information about the new client
+ * @param game - the game_t struct holding game information
+ * @param grid_val - the char representing the current spot the player is on
  */
 static void
 update_previous_spot(client_t* player, game_t* game, char grid_val)
@@ -564,11 +574,11 @@ update_previous_spot(client_t* player, game_t* game, char grid_val)
 }
 
 /**
- * @brief 
+ * @brief Sends message to client about to quit the game, according to their role (player or spectator) and the reason for quitting.
  * 
- * @param clientAddr 
- * @param quitCode 
- * @param isSpectator 
+ * @param clientAddr - the address the reach the client
+ * @param quitCode - a code representing why the client quit: 0 means spectator was replaced, 1 mean player quit, 2 means full game, 3 means invalid player name
+ * @param isSpectator - boolean, is the client a spectator
  */
 void
 send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator)
@@ -605,10 +615,10 @@ send_quitMsg(addr_t clientAddr, int quitCode, bool isSpectator)
 }
 
 /**
- * @brief 
+ * @brief Sends a message to all clients reflecting the leaderboard when the game ends.
  * 
- * @param game 
- * @param maxNameLength 
+ * @param game - the game_t struct holding game information
+ * @param maxNameLength - the longest a name can be
  */
 void
 send_gameOverMsg(game_t* game, int maxNameLength)
