@@ -30,3 +30,4 @@ sourcelist: Makefile *.md *.c *.h
 clean:
 	rm -f core
 	rm -f $(LIB) *~ *.o
+	rm -f libcs50.a

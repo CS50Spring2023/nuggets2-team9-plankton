@@ -39,3 +39,6 @@ Icon?
 
 # emacs file
 TAGS
+
+# logs
+*.log
