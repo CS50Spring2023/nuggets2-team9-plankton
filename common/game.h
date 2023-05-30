@@ -39,7 +39,7 @@
 client_t* new_player(game_t* game, addr_t client, char* name);
 
 /* update_position
- * Updates the position of the player client.
+ * Updates the position of the player client by passing new row and column coordinates into the player structure.
  * Inputs:
  *     - player: pointer to the player client
  *     - r: row coordinate
@@ -50,7 +50,7 @@ client_t* new_player(game_t* game, addr_t client, char* name);
 void update_position(client_t* player, int r, int c);
 
 /* find_client
- * Finds a client in the game.
+ * Finds a client in the game given an address.
  * Inputs:
  *     - clientAddr: address of the client
  *     - game: pointer to the game object
@@ -60,7 +60,7 @@ void update_position(client_t* player, int r, int c);
 client_t* find_client(addr_t clientAddr, game_t* game);
 
 /* find_player
- * Finds a player client in the game.
+ * Finds a player client in the game given an address.
  * Inputs:
  *     - id: player ID
  *     - game: pointer to the game object
@@ -90,7 +90,8 @@ client_t* new_spectator(game_t* game, const addr_t client);
 void delete_client(client_t* client, game_t* game);
 
 /* new_game
- * Creates a new game object.
+ * Creates a new game object. 
+ * Loads the map file, initializes game statistics to 0, and initializes a NULL list of clients.
  * Inputs:
  *     - map_file: pointer to the file containing the game map
  *     - maxPlayers: maximum number of players allowed in the game
@@ -100,7 +101,7 @@ void delete_client(client_t* client, game_t* game);
 game_t* new_game(FILE* map_file, const int maxPlayers);
 
 /* end_game
- * Ends the game and deallocates the game object.
+ * Ends the game and deallocates the global grid and each of the clients.
  * Inputs:
  *     - game: pointer to the game object
  *     - maxGoldPiles: maximum number of gold piles in the game
@@ -110,7 +111,7 @@ game_t* new_game(FILE* map_file, const int maxPlayers);
 void end_game(game_t* game, int maxGoldPiles);
 
 /* update_gold
- * Updates the gold count for a player client in the game.
+ * Updates amount of gold in a player's purse, the overall amount of gold remaining in the game, and grid representations.
  * Inputs:
  *     - game: pointer to the game object
  *     - player: pointer to the player client
@@ -123,7 +124,8 @@ void end_game(game_t* game, int maxGoldPiles);
 int update_gold(game_t* game, client_t* player, int r, int c, int goldMaxPiles);
 
 /* load_gold
- * Loads the initial gold configuration in the game.
+ * Loads the initial gold configuration in the game. 
+ * Specifically, places gold into random bundles at random locations at the beginning of the game, by calling `add_gold_pile`.
  * Inputs:
  *     - game: pointer to the game object
  *     - goldTotal: total amount of gold in the game
@@ -135,7 +137,7 @@ int update_gold(game_t* game, client_t* player, int r, int c, int goldMaxPiles);
 void load_gold(game_t* game, const int goldTotal, const int goldMinPiles, const int goldMaxPiles);
 
 /* add_gold_pile
- * Adds a new gold pile to the game.
+ * Adds a new gold pile to the game at a random location.
  * Inputs:
  *     - game: pointer to the game object
  *     - gold_amt: amount of gold in the new pile
@@ -146,7 +148,7 @@ void load_gold(game_t* game, const int goldTotal, const int goldMinPiles, const 
 void add_gold_pile(game_t* game, int gold_amt, int piles);
 
 /* nugget_count_array
- * Creates an array containing the number of gold nuggets in each pile.
+ * Creates an array containing the randomly generated amounts of gold nuggets in each pile.
  * Inputs:
  *     - goldMinPiles: minimum number of gold piles in the game
  *     - goldMaxPiles: maximum number of gold piles in the game
