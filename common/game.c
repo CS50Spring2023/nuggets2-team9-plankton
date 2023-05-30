@@ -42,6 +42,8 @@ new_player(game_t* game, addr_t client, char* name)
     // have their player store their index in the array of clients
     player->clientsArr_Idx = game->playersJoined + 1;
     (game->playersJoined)++;
+
+    player->quit = false;
     
     // assign player to a random spot, then update their grid to reflect what is visible to them
     assign_random_spot(game->grid, game->rows, game->columns, player->id, &player->r, &player->c);
@@ -110,6 +112,7 @@ new_spectator(game_t* game, const addr_t client)
     spectator->clientsArr_Idx = 0;
     (game->clients)[0] = spectator;
     game->spectatorActive = true;
+    spectator->quit = false;
     // return spectator 
     return spectator;
 }

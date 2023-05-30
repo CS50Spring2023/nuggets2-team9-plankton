@@ -42,6 +42,7 @@ static bool is_gridspot(double a, double b);
 
 
 /**************** local function declarations  ****************/
+
 /**************** load_grid  ****************/
 char** 
 load_grid(FILE* fp, int* rows, int* columns)

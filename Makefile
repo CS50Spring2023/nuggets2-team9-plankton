@@ -20,3 +20,6 @@ clean:
 	rm -f *~
 	rm -f TAGS
 	make -C common clean
+	make -C libs clean
+	make -C support clean
+	make -C server clean

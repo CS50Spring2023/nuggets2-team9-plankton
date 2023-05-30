@@ -229,7 +229,7 @@ update_displays(game_t* game)
     for (int i = 1; i < game->playersJoined + 1; i++){
         client_t* player = game->clients[i];
 
-        if (player != NULL){
+        if (player != NULL && !player->quit){
             if (get_player_visible(game, player)){
                 send_displayMsg(game, player);
             }
@@ -422,7 +422,7 @@ handle_quit(client_t* player, game_t* game)
         }
     }
 
-    delete_client(player, game);
+    player->quit = true;
 
     update_displays(game);
 }
@@ -492,7 +492,7 @@ handle_movement(client_t* player, char key, game_t* game)
 
         // update the other clients about the gold counts
         for (int i = 0; i < game->playersJoined + 1; i++){
-            if (game->clients[i] != NULL && ((game->clients)[i])->id != player->id){
+            if (game->clients[i] != NULL && ((game->clients)[i])->id != player->id && !((game->clients[i])->quit)){
                 send_goldMsg(game, (game->clients)[i], 0);
             }
         }
@@ -508,7 +508,6 @@ handle_movement(client_t* player, char key, game_t* game)
 
         if (game->goldRemaining == 0){
             send_gameOverMsg(game, MaxNameLength);
-            // quit_all(game, MaxPlayers);
             return 2; // code meaning game over
         }
 
@@ -528,7 +527,7 @@ void quit_all(game_t* game, int maxPlayers)
 {
     for (int i = 0; i < maxPlayers + 1; i++){
         client_t* client = game->clients[i];
-        if (client != NULL){
+        if (client != NULL && !client->quit){
             send_quitMsg(client->clientAddr, 1, client->isSpectator);
         }
     }
@@ -625,7 +624,7 @@ send_gameOverMsg(game_t* game, int maxNameLength)
 
     for (int i = 0; i < game->playersJoined + 1; i++){
         client_t* client = game->clients[i];
-        if (client != NULL){
+        if (client != NULL && !client->quit){
             message_send(client->clientAddr, message);
         }
     }

@@ -27,4 +27,5 @@ clean:
 	rm -rf *.dSYM  # MacOS debugger info
 	rm -f *~ *.o
 	rm -f server
+	rm -f *.log
 
