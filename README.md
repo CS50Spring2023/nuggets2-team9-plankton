@@ -12,6 +12,9 @@ When all gold nuggets are collected, the game ends and a summary is printed.
 Assumptions:
 Game over message doesn't include info about quit players and only gives the scores of players present when the game ends.
 
+## Limitations
+Our code begins to lag and run slowly with large numbers of bots and despit our efforts to increase the efficiency of visibility and sending messages only when necessary, large numbers of bots begin to slow down the program. If we had more than 2 people writing code we would have had enough time to be more thorough in handling larger games without slowing down and could have tested out more potential fixes.
+
 ## Subdirectories
 
 The subdirectories included are:

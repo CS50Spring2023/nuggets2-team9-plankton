@@ -387,8 +387,6 @@ get_player_visible(game_t* game, client_t* player)
                 else{
                     player->grid[r][c] = '.';
                 }
-                printf("2\n");
-
                 modified = true;
             }
 
