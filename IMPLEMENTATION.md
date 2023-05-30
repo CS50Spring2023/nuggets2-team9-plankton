@@ -2,17 +2,21 @@
 ## Implementation Spec
 ### Team 9: Plankton, 23S, 2023
 
-According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server. As a team of 3, we designed and implemented the server program and used an already created client for testing.
+According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server. As a team of 3, we designed and implemented the server program and used the client in the shared folder for testing.
+
 Outside of server, our design also includes the `grid` module, which handles the client and global grids, and the `game` module, which handles initializing, updating, and ending the game.
+
 We describe each program and module separately.
+
 We do not describe the `support` library nor the modules that enable features that go beyond the spec.
+
 We avoid repeating information that is provided in the requirements spec.
 
 ## Plan for division of labor
 
-Andra: design & implementation docs, visibility
+Andra: header file (grid.h), implementation spec
 
-Jackson: design doc, overall logic and flow, server module, game module, integration & testing
+Jackson: game module, structs.h, grid module (except for isvisible), server module
 
 Sanjana: grid module, overall logic and flow, visibility, integration & testing
 
@@ -603,20 +607,44 @@ int* nugget_count_array(const int goldMinPiles, const int goldMaxPiles, int gold
 
 ## Testing plan
 
-### unit testing
+### Unit Testing
 
-We will first ensure that all modules compile separately. We will create a unit test for the grid module, testing loading in a map file and the functions in the grid module. We will also create a unit test for the server to ensure that it can send and receive messages to and from clients. Since the game module's function is to initialize, update, and end the game, we will test it in integration with the server.
+We will first ensure that all modules compile separately. 
 
-### integration testing
+We will create a unit test for the grid module, testing loading in a map file and converting it to a string.
 
-As a team of three, we will test the integration of the server with our custom helper modules. We will test that game properly initializes, updates, and ends the game when the respective messages are received by the server. We will also test grid integration by observing whether a client's and spectator's (global) grids update as expected for specific player moves, in terms of visibility, symbols, and game statistics present on the grid displays. We will also test the functioning of the game on a custom grid we created, `plankton.txt`.
+We will also create a unit test for the game module, testing game functions such as loading gold, creating new players, etc.
+
+Once the core grid and game functions are complete, we will do a unit test of all visibility functions by starting a game, loading in a grid, creating players, loading in gold, and then printing the "visible" grids of different players, making sure to do it enough and with to feel confident that edge cases are handled, with different maps. 
+
+#### Retrospective Note
+All unit tests were done in local folders with copies of all dependendent files. We debugged in these local folders and then transferred changes to the original c files. We decided not to include these local testing folders in order to keep the submission repository more clean and less confusing.
+
+
+### Integration Testing
+
+As a team of three, we will test the integration of the server with our custom helper modules. We will test that game properly initializes, updates, and ends the game in accordance to thee `REQUIREMENTS`spec. 
+
+We will also test grid integration by observing whether a client's and spectator's (global) grids update as expected for specific player moves, in terms of visibility, symbols, and game statistics present on the grid displays. 
+
+We will also test the functioning of the game on a custom grid we created, `plankton.txt`.
+
+#### Retrospective Note
+
+We tested by running various games on different maps, and watching for different aspects of "correct" behavior each time.
+
+For example, we entered the game ourselves on different maps and 
+* hit invalid keys
+* passed in too many arguments
+* ran into walls
+* quit the game
+* toggled betweeen a spectator terminal and player terminal to ensure that displays were consistent and up to spec
+
+Towards the end of our testing, we ran a game with 26 bots on different maps (also tested kicking out a spectator), 
+
 
 ---
 
 ## Limitations
 
-> Bulleted list of any limitations of your implementation.
-> This section may not be relevant when you first write your Implementation Plan, but could be relevant after completing the implementation.
-
-*
-
+* server logging always logs to a file named "server.log" rather than taking a filename as a parameter

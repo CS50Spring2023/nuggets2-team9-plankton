@@ -355,7 +355,10 @@ get_player_visible(game_t* game, client_t* player)
 
     for (int r = 0; r < game->rows; r++){
         for (int c = 0; c < game->columns; c++){
-
+            // don't compute anything if the game grid space is empty
+            if (isspace(game->grid[r][c])){
+                continue;
+            }
             if (r == pr && c == pc){
                 if (player->grid[r][c] != '@'){
                     modified = true;

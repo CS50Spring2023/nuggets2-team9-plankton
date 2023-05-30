@@ -32,7 +32,7 @@ static const int GoldMaxNumPiles = 30; // maximum number of gold piles
 
 /**************** function prototypes  ****************/
 bool handleMessage(void* arg, const addr_t from, const char* message);
-void update_displays(game_t* game);
+void update_displays(game_t* game, int r1, int c1, int r2, int c2);
 void inform_newClient(client_t* client, game_t* game);
 void send_goldMsg(game_t* game, client_t* client, int goldPickedUp);
 void send_displayMsg(game_t* game, client_t* client);
@@ -152,7 +152,7 @@ handleMessage(void* arg, const addr_t from, const char* message)
             // send new client messages: grid, gold, display
             inform_newClient(player, game);
 
-            update_displays(game);
+            update_displays(game, player->r, player->c, -1, -1);
 
         }
         else {
@@ -219,22 +219,38 @@ handleMessage(void* arg, const addr_t from, const char* message)
  * @brief Sends a message to all players and the spectator to update their local displays by calling `send_displayMsg`.
  * 
  * @param game - the game_t struct holding game information
+ * @param takes in two positions to check if they changed for the player, second point is optional and will be ignored if -1 is passed for r2 and c2
  */
 void
-update_displays(game_t* game)
+update_displays(game_t* game, int r1, int c1, int r2, int c2)
 {
     // update spectator if there is one no matter what
     if (game->spectatorActive){
         send_displayMsg(game, game->clients[0]);
     }
 
+    // used to check whether or not the points that changed are visible for the player
+    bool point1_vis = false;
+    bool point2_vis = false; // this second point is options
+
     for (int i = 1; i < game->playersJoined + 1; i++){
         client_t* player = game->clients[i];
 
         if (player != NULL && !player->quit){
-            if (get_player_visible(game, player)){
-                send_displayMsg(game, player);
+            point1_vis = !isspace(player->grid[r1][c1]); // checks if the player can see that point
+            if (r2 != -1){ //point2_vis is set to true if -1 is passed otherwise we check if it is visible
+                point2_vis = !isspace(player->grid[r2][c2]);
             }
+            else {
+                point2_vis = true;
+            }
+            // only update visibility if points changed are currently in sight
+            if (point1_vis && point2_vis){
+                if (get_player_visible(game, player)){
+                    send_displayMsg(game, player); // only send a new message if their display changes
+                }
+            }
+
         }
     }
 }
@@ -426,7 +442,7 @@ handle_quit(client_t* player, game_t* game)
 
     player->quit = true;
 
-    update_displays(game);
+    update_displays(game, player->r, player->c, -1, -1);
 }
 
 /**
@@ -470,8 +486,14 @@ handle_movement(client_t* player, char key, game_t* game)
         // change the global grid on the spot they are now on to be their letter
         change_spot(game, newPos_r, newPos_c, player->id);
 
+        int pr = player->r;
+        int pc = player->c;
+
         // update the player's position in the player struct
         update_position(player, newPos_r, newPos_c);
+
+        // call update function
+        update_displays(game, pr, pc, newPos_r, newPos_c);
         
     }
     else if (isalpha(grid_val)){
@@ -491,6 +513,9 @@ handle_movement(client_t* player, char key, game_t* game)
         change_spot(game, player->r, player->c, player->id);
         change_spot(game, other_player->r, other_player->c, other_player->id);
 
+        // call update function
+        update_displays(game, other_player->r, other_player->c, player->r, player->c);
+
 
     }
     else if (grid_val == '*'){
@@ -505,7 +530,6 @@ handle_movement(client_t* player, char key, game_t* game)
         }
         
         // update the client that just picked up gold
-        printf("%d\n", nuggetsFound);
         send_goldMsg(game, player, nuggetsFound);
 
         // update the other clients about the gold counts
@@ -521,8 +545,15 @@ handle_movement(client_t* player, char key, game_t* game)
         // change the global grid on the spot they are now on to be their letter
         change_spot(game, newPos_r, newPos_c, player->id);
 
+        int pr = player->r;
+        int pc = player->c;
+
         // update the player's position in the player struct
         update_position(player, newPos_r, newPos_c);
+
+        // call update function
+        update_displays(game, pr, pc, newPos_r, newPos_c);
+
 
         if (game->goldRemaining == 0){
             send_gameOverMsg(game, MaxNameLength);
@@ -530,8 +561,8 @@ handle_movement(client_t* player, char key, game_t* game)
         }
 
     }
-    // call update function
-    update_displays(game);
+    
+
     return 0; // code meaning sucessful move 
 }
 
