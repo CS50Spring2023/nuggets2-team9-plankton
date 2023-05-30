@@ -10,11 +10,11 @@ We avoid repeating information that is provided in the requirements spec.
 
 ## Plan for division of labor
 
-Andra: design & implementation docs, visibility
-
 Jackson: design doc, server, game module, integration & testing
 
-Sanjana: grid module, visibility, integration & testing
+Sanjana: grid module, visibility, integration & testing, documentation
+
+Andra: documentation (design, implementation, headers etc.), visibility
 
 ## Data structures
 
