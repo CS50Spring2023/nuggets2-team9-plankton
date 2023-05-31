@@ -1,5 +1,5 @@
 # Nuggets
-### Team 9 - Plankton: Jackson Easly, Andrada Pantelimon, Sanjana Raj
+### Team 9 - Plankton: Jackson Easley, Andrada Pantelimon, Sanjana Raj
 
 This repository contains the code for the CS50 "Nuggets" game, in which players explore a set of rooms and passageways in search of gold nuggets.
 The rooms and passages are defined by a *map* loaded by the server at the start of the game. To play with our team's map, load *plankton.txt*.
@@ -13,7 +13,9 @@ Assumptions:
 Game over message doesn't include info about quit players and only gives the scores of players present when the game ends.
 
 ## Limitations
-Our code begins to lag and run slowly with large numbers of bots and despit our efforts to increase the efficiency of visibility and sending messages only when necessary, large numbers of bots begin to slow down the program. If we had more than 2 people writing code we would have had enough time to be more thorough in handling larger games without slowing down and could have tested out more potential fixes.
+Our code begins to lag and run slowly with large numbers of bots and despit our efforts to increase the efficiency of visibility and sending messages only when necessary, large numbers of bots begin to slow down the program. 
+
+If we had more time / more people writing code we would have tried to be more thorough in handling larger games without slowing down and could have tested out more potential fixes.
 
 ## Subdirectories
 
